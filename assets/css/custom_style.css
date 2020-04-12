@@ -1,0 +1,193 @@
+/* Vertical Center */
+.vertical-center-25 {
+  min-height: 25%;
+  /* Fallback for browsers that do not support vh unit */
+  min-height: 25vh;
+  display: flex;
+  align-items: center;
+}
+
+.vertical-center-30 {
+  min-height: 30%;
+  /* Fallback for browsers that do not support vh unit */
+  min-height: 30vh;
+  display: flex;
+  align-items: center;
+}
+
+.vertical-center-35 {
+  min-height: 35%;
+  /* Fallback for browsers that do not support vh unit */
+  min-height: 35vh;
+  display: flex;
+  align-items: center;
+}
+
+.vertical-center-40 {
+  min-height: 40%;
+  /* Fallback for browsers that do not support vh unit */
+  min-height: 40vh;
+  display: flex;
+  align-items: center;
+}
+
+.vertical-center-45 {
+  min-height: 45%;
+  /* Fallback for browsers that do not support vh unit */
+  min-height: 45vh;
+  display: flex;
+  align-items: center;
+}
+
+.vertical-center-50 {
+  min-height: 50%;
+  /* Fallback for browsers that do not support vh unit */
+  min-height: 50vh;
+  display: flex;
+  align-items: center;
+}
+
+.vertical-center-55 {
+  min-height: 55%;
+  /* Fallback for browsers that do not support vh unit */
+  min-height: 55vh;
+  display: flex;
+  align-items: center;
+}
+
+.vertical-center-60 {
+  min-height: 60%;
+  /* Fallback for browsers that do not support vh unit */
+  min-height: 60vh;
+  display: flex;
+  align-items: center;
+}
+
+.vertical-center-65 {
+  min-height: 65%;
+  /* Fallback for browsers that do not support vh unit */
+  min-height: 65vh;
+  display: flex;
+  align-items: center;
+}
+
+.vertical-center-70 {
+  min-height: 70%;
+  /* Fallback for browsers that do not support vh unit */
+  min-height: 70vh;
+  display: flex;
+  align-items: center;
+}
+
+.vertical-center-75 {
+  min-height: 75%;
+  /* Fallback for browsers that do not support vh unit */
+  min-height: 75vh;
+  display: flex;
+  align-items: center;
+}
+
+.vertical-center-80 {
+  min-height: 80%;
+  /* Fallback for browsers that do not support vh unit */
+  min-height: 80vh;
+  display: flex;
+  align-items: center;
+}
+
+.vertical-center-85 {
+  min-height: 85%;
+  /* Fallback for browsers that do not support vh unit */
+  min-height: 85vh;
+  display: flex;
+  align-items: center;
+}
+
+.vertical-center-90 {
+  min-height: 90%;
+  /* Fallback for browsers that do not support vh unit */
+  min-height: 90vh;
+  display: flex;
+  align-items: center;
+}
+
+.vertical-center-95 {
+  min-height: 95%;
+  /* Fallback for browsers that do not support vh unit */
+  min-height: 95vh;
+  display: flex;
+  align-items: center;
+}
+
+.vertical-center-100 {
+  min-height: 100%;
+  /* Fallback for browsers that do not support vh unit */
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+}
+
+/* Hide Content */
+.hidden {
+  display: none;
+}
+
+/* Pointer Cursor */
+.cursor-pointer {
+  cursor: pointer;
+}
+
+/* Background Overlay */
+.bg-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  height: 100%;
+  width: 100%;
+  z-index: 10;
+  background-color: rgba(255, 255, 255, 0.7);
+}
+
+/* HIDE ARROWS SPINNER NUMBER INPUT */
+/* Chrome, Safarai, Edge, Opera */
+input::-webkit-outer-spin-button,
+input::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+/* Firefox */
+input[type=number] {
+  -moz-appearance: textfield;
+}
+
+/* REQUIRED AFTER */
+.req-after::after {
+  content: " *";
+  color: red;
+  font-weight: bolder;
+}
+
+/* REQUIRED BEFORE */
+.req-before::before {
+  content: "* ";
+  color: red;
+  font-weight: bolder;
+}
+
+/* PLACEHOLDER FONT SIZE */
+::-webkit-input-placeholder {
+  font-size: 16px !important;
+}
+
+:-moz-placeholder {
+  /* Firefox 18- */
+  font-size: 16px !important;
+}
+
+::-moz-placeholder {
+  /* Firefox 19+ */
+  font-size: 16px !important;
+}
+
+/*# sourceMappingURL=custom_style.css.map */

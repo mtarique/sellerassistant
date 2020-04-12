@@ -1,0 +1,74 @@
+/* Vertical Center */
+@mixin vertical-aligner {
+    @for $i from 25 through 100 {
+        @if $i % 5 == 0 {
+            .vertical-center-#{$i} {
+                min-height: $i+0%;   /* Fallback for browsers that do not support vh unit */
+                min-height: $i+0vh;  
+                display: flex;
+                align-items: center; 
+            }
+        }
+    }
+}
+
+@include vertical-aligner; 
+
+/* Hide Content */
+.hidden {
+    display: none; 
+}
+
+/* Pointer Cursor */
+.cursor-pointer {
+    cursor: pointer; 
+}
+
+/* Background Overlay */
+.bg-overlay {
+    position: fixed;
+    top: 0; 
+    left: 0;
+    height: 100%; 
+    width: 100%;
+    z-index: 10;
+    background-color: rgba(255, 255, 255, 0.7);
+}
+
+/* HIDE ARROWS SPINNER NUMBER INPUT */
+/* Chrome, Safarai, Edge, Opera */ 
+input::-webkit-outer-spin-button, 
+input::-webkit-inner-spin-button {
+    -webkit-appearance: none; 
+    margin: 0;
+}
+/* Firefox */
+input[type=number] {
+    -moz-appearance: textfield;
+}
+
+/* REQUIRED AFTER */
+.req-after::after{
+    content: " *";
+    color: red;
+    font-weight: bolder;
+}
+
+/* REQUIRED BEFORE */
+.req-before::before{
+    content: "* ";
+    color: red;
+    font-weight: bolder;
+}
+
+/* PLACEHOLDER FONT SIZE */
+::-webkit-input-placeholder {
+   font-size: 16px !important;
+}
+
+:-moz-placeholder { /* Firefox 18- */
+      font-size: 16px !important;
+}
+::-moz-placeholder {  /* Firefox 19+ */
+      font-size: 16px !important;
+}
