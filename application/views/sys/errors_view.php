@@ -1,12 +1,14 @@
 <?php $this->load->view('templates/header'); ?>
 
-<div class="container">
-	<div class="vertical-center-85">
-		<div class="col-sm-12 text-center border border-danger bg-light py-3">
-			<h3><?php echo $title; ?></h3>
-			<p><?php echo $descr; ?></p>
+<div class="ui container">
+	<div class="ui middle aligned center aligned grid" style="height: 100vh;">
+		<div class="column">
+			<div class="ui info message br-0">
+				<h2 class="ui"><?php echo $title; ?></h2>
+				<p><?php echo $descr; ?></p>
+			</div>
 		</div>
-	</div>
+	</div>		
 </div>
 
 <?php $this->load->view('templates/footer.php'); ?>

@@ -1,0 +1,11 @@
+/* BORDER RADIUS */
+@mixin br {
+    @for $i from 0 through 10 {
+        .br-#{$i} {
+            border-radius: 0 !important; 
+        }
+    }
+}
+
+@include br; 
+
