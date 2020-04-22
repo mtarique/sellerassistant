@@ -1,14 +1,12 @@
 <?php $this->load->view('templates/header'); ?>
 
-<div class="ui container">
-	<div class="ui middle aligned center aligned grid" style="height: 100vh;">
-		<div class="column">
-			<div class="ui info message br-0">
-				<h2 class="ui"><?php echo $title; ?></h2>
-				<p><?php echo $descr; ?></p>
-			</div>
+<div class="d-flex align-items-center justify-content-center min-vh-85">
+	<div class="card bg-pink-50 text-pink-700 border-pink w-75 rounded-0">
+		<div class="card-body pt-2 pb-1 text-center">
+			<h3 class=""><?php echo $title; ?></h3>
+			<p><?php echo $descr; ?></p>
 		</div>
-	</div>		
+	</div>	
 </div>
 
-<?php $this->load->view('templates/footer.php'); ?>
+<?php $this->load->view('templates/footer'); ?>

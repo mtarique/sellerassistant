@@ -1,11 +1,30 @@
-/* BORDER RADIUS */
-@mixin br {
-    @for $i from 0 through 10 {
-        .br-#{$i} {
-            border-radius: 0 !important; 
+@import 'colors'; 
+
+@mixin gen-props($prefix, $property) {
+    @each $color-name, $color in $colors {
+        .#{$prefix}-#{$color-name} {
+            @if $property == 'border' {
+                #{$property}: 1px solid $color !important; 
+            }
+            @else {
+                #{$property}: $color !important; 
+            } 
         }
     }
 }
 
-@include br; 
+@include gen-props('bg', 'background-color');
+@include gen-props('text', 'color');
+@include gen-props('border', 'border');
 
+@mixin gen-dim($prefix, $property, $operator) {
+    @for $i from 5 through 100 {
+        @if $i % 5 == 0 {
+            .#{$prefix}-#{$i} {
+                #{$property}: #{$i}#{$operator} !important; 
+            }
+        }
+    }
+}
+
+@include gen-dim('min-vh', 'min-height', 'vh');

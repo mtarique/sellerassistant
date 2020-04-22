@@ -19,6 +19,7 @@ class Register extends CI_Controller
     {
         $page_data['title'] = "";
         $page_data['descr'] = ""; 
+        $page_data['bgcol'] = "bg-cyan-50"; 
 
         $this->load->view('users/register_view', $page_data);
     }

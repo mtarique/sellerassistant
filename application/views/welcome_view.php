@@ -1,18 +1,15 @@
 <?php $this->load->view('templates/header'); ?>
 
-<div class="ui container">
-	<div class="ui middle aligned center aligned grid" style="height: 100vh;">
-		<div class="column">
-			<div class="ui info message br-0">
-				<h2 class="ui"><?php echo $title; ?></h2>
-				<p>
-					<?php echo $descr; ?><br>
-					Developed with <i class="heart icon ui red"></i> by <a href="mailto: <?php echo $this->config->item('email_developer'); ?>">Muhammad Tarique</a>
-				</p>
-
-			</div>
+<div class="d-flex align-items-center justify-content-center min-vh-85">
+	<div class="card bg-cyan-50 text-cyan-700 border-cyan w-75 rounded-0">
+		<div class="card-body pt-2 pb-1 text-center">
+			<h3 class=""><?php echo $title; ?></h3>
+			<p>
+				<?php echo $descr; ?><br>
+				Developed with <i class="fas fa-heart text-danger"></i> by <a href="mailto: <?php echo $this->config->item('email_developer'); ?>">Muhammad Tarique</a>
+			</p>
 		</div>
-	</div>		
+	</div>	
 </div>
 
 <?php $this->load->view('templates/footer.php'); ?>
