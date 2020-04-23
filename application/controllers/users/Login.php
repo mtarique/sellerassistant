@@ -17,8 +17,8 @@ class Login extends CI_Controller
 
     public function index()
     {
-        $page_data['title'] = "";
-        $page_data['descr'] = ""; 
+        $page_data['title'] = "Login";
+        $page_data['descr'] = "Login to your ".$this->config->item('title')." account."; 
 
         $this->load->view('users/login_view', $page_data);
     }

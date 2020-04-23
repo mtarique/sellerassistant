@@ -17,9 +17,8 @@ class Register extends CI_Controller
 
     public function index()
     {
-        $page_data['title'] = "";
-        $page_data['descr'] = ""; 
-        $page_data['bgcol'] = "bg-cyan-50"; 
+        $page_data['title'] = "Register";
+        $page_data['descr'] = "Register for account."; 
 
         $this->load->view('users/register_view', $page_data);
     }
