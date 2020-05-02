@@ -11,7 +11,8 @@
         <h3 class="mt-3">Seller Assistant</h3>
         <div class="d-flex align-items-center justify-content-center min-vh-90">
             <div class="col-md-6">
-                <form>
+                <div id="resLogin"></div>
+                <form id="formLogin">
                     <h3 class="font-weight-bold">Get more things done with Loggin platform.</h3>	
                     <p>Access to the most powerfull tool in the entire design and web industry.</p>   
                     <div class="form-row">
@@ -28,7 +29,7 @@
                     </div>
                     <div class="form-row">
                         <div class="form-group col-md-3">
-                            <button type="submit" id="btnLogin" class="btn btn-sm btn-primary px-4">Login</button>
+                            <button type="submit" name="btnLogin" id="btnLogin" class="btn btn-sm btn-primary px-4">Login</button>
                         </div>
                         <div class="form-group col-md-9">
                             <a href="" class="text-dark text-nowrap text-decoration-none font-weight-bold small pt-1">Forget password?</a>
@@ -47,3 +48,44 @@
 
 </body>
 </html>
+
+<script>
+    $(document).ready(function(){
+        /**
+         * Submit user login form
+         */
+        $('#formLogin').submit(function(event){
+            event.preventDefault(); 
+
+            $.ajax({
+                type: "post", 
+                url: "<?php echo base_url('users/login/authenticate'); ?>", 
+                data: $(this).serialize(), 
+                dataType: "json", 
+                beforeSend: function()
+                {
+                    $('#loader').removeClass("d-none"); 
+                }, 
+                complete: function()
+                {
+                    $('#loader').addClass("d-none"); 
+                }, 
+                success: function(res)
+                {
+                    if(res.status)
+                    {
+                        $('#resLogin').html(res.message); 
+                    }
+                    else {
+                        $('#resLogin').html(res.message); 
+                    }
+                }, 
+                error: function(xhr)
+                {
+                    var xhr_text = xhr.status+" "+xhr.statusText;
+					swal({title: "Request error!", text: xhr_text, icon: "error"});
+                }
+            }); 
+        }); 
+    }); 
+</script>

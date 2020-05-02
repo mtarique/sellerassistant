@@ -11,15 +11,11 @@ defined('BASEPATH') or exit('No direct script access allowed');
 
 class Users_model extends CI_Model 
 {   
-    public $db_error; 
-
     public function __construct()
     {
         parent::__construct(); 
 
         $this->load->database(); 
-
-        //$this->db_error = $this->db->error(); 
     }
 
     /**
@@ -30,23 +26,9 @@ class Users_model extends CI_Model
      */
     public function add_user($user_data)
     {    
-        $query = $this->db->insert('users', $user_data); 
+        $query = $this->db->insert('user', $user_data); 
 
-        /* if(!$query)
-        {
-            
-        }
-        else return true;  */
-
-        /* if($query) return true; 
-        else {
-            $db_error = $this->db->error();
-
-            return $db_error['code'].": ".$db_error['message'];
-        } */
-
-        $this->db_error = $this->db->error(); 
-        return ($query) ? true : $this->db_error['message'];
+        return ($query) ? true : $this->db->error()['message'];
     }
 
     /**
@@ -60,6 +42,32 @@ class Users_model extends CI_Model
         $query = $this->db->get_where('users', array('email' => $email)); 
 
         return ($query->num_rows() > 0) ? true : false; 
+    }
+
+    /**
+     * Get user details by user email
+     *
+     * @param   string  $email  User email
+     * @return  void
+     */
+    public function get_user_by_email($email)
+    {
+        $query = $this->db->get_where('users', array('email' => $email));
+        
+        return ($query->num_rows() > 0) ? $query->result() : null; 
+    }
+
+    /**
+     * Get user details by user id
+     *
+     * @param   integer  $userid  User id
+     * @return  void
+     */
+    public function get_user_by_id($userid)
+    {
+        $query = $this->db->get_where('users', array('user_id' => $userid));
+        
+        return ($query->num_rows() > 0) ? $query->result() : null; 
     }
 }
 
