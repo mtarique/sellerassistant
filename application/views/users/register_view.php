@@ -11,7 +11,8 @@
         <h3 class="mt-3">Seller Assistant</h3>
         <div class="d-flex align-items-center justify-content-center min-vh-90">
             <div class="col-md-6">
-                <form id="formUserRegistration">
+                <div id="resCreateAccount"></div>
+                <form id="formCreateAccount">
                     <h3 class="font-weight-bold">Get more things done with Loggin platform.</h3>	
                     <p>Access to the most powerfull tool in the entire design and web industry.</p>   
                     <div class="form-row">
@@ -50,3 +51,41 @@
 
 </body>
 </html>
+
+<script>
+    $(document).ready(function(){
+        $('#formCreateAccount').submit(function(event){
+            event.preventDefault(); 
+
+            $.ajax({
+                type: "post", 
+                url: "<?php echo base_url('users/register/create_account'); ?>", 
+                data: $(this).serialize(), 
+                dataType: "json", 
+                beforeSend: function()
+                {
+                    $('#loader').removeClass("d-none"); 
+                }, 
+                complete: function()
+                {
+                    $('#loader').addClass("d-none"); 
+                }, 
+                success: function(res)
+                {
+                    if(res.status)
+                    {
+                        $('#resCreateAccount').html(res.message); 
+                    }
+                    else {
+                        $('#resCreateAccount').html(res.message); 
+                    }
+                }, 
+                error: function(xhr)
+                {
+                    var xhr_text = xhr.status+" "+xhr.statusText;
+					swal({title: "Request error!", text: xhr_text, icon: "error"});
+                }
+            }); 
+        }); 
+    }); 
+</script>

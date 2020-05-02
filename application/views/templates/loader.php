@@ -15,7 +15,7 @@
     }
 </style>
 
-<div id="loader" class="d-none">
+<div id="loader" class="d-none" stylee="display: none;">
     <div class="d-flex flex-column align-items-center justify-content-center bg-overlay min-vh-90">
         <div class="row">
 	       	<div class="spinner-border text-primary spinner-3" role="status"></div>

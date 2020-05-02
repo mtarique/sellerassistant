@@ -2,7 +2,8 @@
 /**
  * System errors
  * 
- * @package 	CI
+ * @package 	Codeigniter
+ * @version     3.1.11
  * @subpackage 	Controller 
  * @author 		MD TARIQUE ANWER | mtarique@outlook.com
  */

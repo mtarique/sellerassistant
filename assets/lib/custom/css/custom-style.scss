@@ -17,14 +17,13 @@
 @include gen-props('text', 'color');
 @include gen-props('border', 'border');
 
-@mixin gen-dim($prefix, $property, $operator) {
+@mixin gen-sizes($prefix, $property, $operator) {
     @for $i from 5 through 100 {
-        @if $i % 5 == 0 {
-            .#{$prefix}-#{$i} {
-                #{$property}: #{$i}#{$operator} !important; 
-            }
+        .#{$prefix}-#{$i} {
+            #{$property}: #{$i}#{$operator} !important; 
         }
     }
 }
 
-@include gen-dim('min-vh', 'min-height', 'vh');
+@include gen-sizes('min-vh', 'min-height', 'vh');
+@include gen-sizes('fs', 'font-size', 'px');

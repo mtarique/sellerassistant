@@ -76,13 +76,14 @@ $query_builder = TRUE;
 $db['default'] = array(
 	'dsn'	=> '',
 	'hostname' => 'localhost',
-	'username' => '',
+	'username' => 'root',
 	'password' => '',
-	'database' => '',
+	'database' => 'sellerassistant',
 	'dbdriver' => 'mysqli',
 	'dbprefix' => '',
 	'pconnect' => FALSE,
-	'db_debug' => (ENVIRONMENT !== 'production'),
+	/* 'db_debug' => (ENVIRONMENT !== 'production'), */
+	'db_debug' => FALSE, // To enable $this->db->error(); 
 	'cache_on' => FALSE,
 	'cachedir' => '',
 	'char_set' => 'utf8',
