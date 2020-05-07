@@ -1,10 +1,23 @@
-<?php $this->load->view('templates/header'); ?>
-<?php $this->load->view('templates/loader'); ?>
+<?php 
+$this->load->view('templates/header'); 
+$this->load->view('templates/topnav'); 
+$this->load->view('templates/wrapper'); 
+$this->load->view('templates/titlebar'); 
+$this->load->view('templates/loader'); 
+?>
 
-<div class="container">
-    <h3>Hello, <?php echo $this->session->userdata('_username'); ?></h3>
-    <p>Welcome to your brand new dashboard.</p>
-    <a href="<?php echo base_url('users/logout'); ?>" class="btn btn-sm btn-outline-primary">Log out</a>
-</div>
+<p>Lorem ipsum dolor sit amet, consectetur adipisicing elit. Velit non molestiae quibusdam repellat, voluptatibus, placeat natus aperiam totam magnam tenetur odit iusto minus numquam, similique amet eum ad a. Voluptates.</p>
+<p>Lorem ipsum dolor sit amet, consectetur adipisicing elit. Velit non molestiae quibusdam repellat, voluptatibus, placeat natus aperiam totam magnam tenetur odit iusto minus numquam, similique amet eum ad a. Voluptates.</p>
+<p>Lorem ipsum dolor sit amet, consectetur adipisicing elit. Velit non molestiae quibusdam repellat, voluptatibus, placeat natus aperiam totam magnam tenetur odit iusto minus numquam, similique amet eum ad a. Voluptates.</p>
+<p>Lorem ipsum dolor sit amet, consectetur adipisicing elit. Velit non molestiae quibusdam repellat, voluptatibus, placeat natus aperiam totam magnam tenetur odit iusto minus numquam, similique amet eum ad a. Voluptates.</p>
+<p>Lorem ipsum dolor sit amet, consectetur adipisicing elit. Velit non molestiae quibusdam repellat, voluptatibus, placeat natus aperiam totam magnam tenetur odit iusto minus numquam, similique amet eum ad a. Voluptates.</p>
+<p>Lorem ipsum dolor sit amet, consectetur adipisicing elit. Velit non molestiae quibusdam repellat, voluptatibus, placeat natus aperiam totam magnam tenetur odit iusto minus numquam, similique amet eum ad a. Voluptates.</p>
+<p>Lorem ipsum dolor sit amet, consectetur adipisicing elit. Velit non molestiae quibusdam repellat, voluptatibus, placeat natus aperiam totam magnam tenetur odit iusto minus numquam, similique amet eum ad a. Voluptates.</p>
+<p>Lorem ipsum dolor sit amet, consectetur adipisicing elit. Velit non molestiae quibusdam repellat, voluptatibus, placeat natus aperiam totam magnam tenetur odit iusto minus numquam, similique amet eum ad a. Voluptates.</p>
+<p>Lorem ipsum dolor sit amet, consectetur adipisicing elit. Velit non molestiae quibusdam repellat, voluptatibus, placeat natus aperiam totam magnam tenetur odit iusto minus numquam, similique amet eum ad a. Voluptates.</p>
+<p>Lorem ipsum dolor sit amet, consectetur adipisicing elit. Velit non molestiae quibusdam repellat, voluptatibus, placeat natus aperiam totam magnam tenetur odit iusto minus numquam, similique amet eum ad a. Voluptates.</p>
+<p>Lorem ipsum dolor sit amet, consectetur adipisicing elit. Velit non molestiae quibusdam repellat, voluptatibus, placeat natus aperiam totam magnam tenetur odit iusto minus numquam, similique amet eum ad a. Voluptates.</p>
+<p>Lorem ipsum dolor sit amet, consectetur adipisicing elit. Velit non molestiae quibusdam repellat, voluptatibus, placeat natus aperiam totam magnam tenetur odit iusto minus numquam, similique amet eum ad a. Voluptates.</p>
+<p>Lorem ipsum dolor sit amet, consectetur adipisicing elit. Velit non molestiae quibusdam repellat, voluptatibus, placeat natus aperiam totam magnam tenetur odit iusto minus numquam, similique amet eum ad a. Voluptates.</p>
 
 <?php $this->load->view('templates/footer'); ?>

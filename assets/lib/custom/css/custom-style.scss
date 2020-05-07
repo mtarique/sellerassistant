@@ -1,6 +1,8 @@
+/* IMPORT COLORS ARRAY */
 @import 'colors'; 
 
-@mixin gen-props($prefix, $property) {
+/* GENERATE COLORS */
+@mixin gen-colors($prefix, $property) {
     @each $color-name, $color in $colors {
         .#{$prefix}-#{$color-name} {
             @if $property == 'border' {
@@ -13,10 +15,11 @@
     }
 }
 
-@include gen-props('bg', 'background-color');
-@include gen-props('text', 'color');
-@include gen-props('border', 'border');
+@include gen-colors('bg', 'background-color');
+@include gen-colors('text', 'color');
+@include gen-colors('border', 'border');
 
+/* GENERATE SIZES */
 @mixin gen-sizes($prefix, $property, $operator) {
     @for $i from 5 through 100 {
         .#{$prefix}-#{$i} {
@@ -27,3 +30,14 @@
 
 @include gen-sizes('min-vh', 'min-height', 'vh');
 @include gen-sizes('fs', 'font-size', 'px');
+
+/* OVERWRITE DROPDOWN AND TABLE ROW HOVER COLOR */
+.dropdown-menu > a:hover {
+    background-color: #c6e8fb;
+    background-image: none;
+}
+
+.table-hover tbody tr:hover td, .table-hover tbody tr:hover th {
+    background-color: #ebf5fb;
+}
+

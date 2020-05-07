@@ -47,7 +47,7 @@ class Errors extends CI_Controller
     public function error_sess()
     {
         $page_data['title'] = 'Session expired!';
-        $page_data['descr'] = 'Please click <a href=\'#\'>here</a> to login again.';
+        $page_data['descr'] = 'Please click <a href=\''.base_url('users/login').'\'>here</a> to login again.';
 
         $this->load->view('sys/errors_view', $page_data); 
     }

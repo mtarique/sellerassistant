@@ -15,13 +15,13 @@ class Dashboard extends CI_Controller
     {
         parent::__construct(); 
 
-        $this->load->library('session');
+        $this->load->helper('auth_helper');
     }
 
     public function index()
     {
         $page_data['title'] = "Dashboard";
-        $page_data['descr'] = "Hello, ".$this->session->userdata('_username'); 
+        $page_data['descr'] = "Welcome to ".$this->config->item('title'); 
 
         $this->load->view('home/dashboard_view', $page_data);
     }
