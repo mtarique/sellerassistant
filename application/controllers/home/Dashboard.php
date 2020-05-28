@@ -26,3 +26,5 @@ class Dashboard extends CI_Controller
         $this->load->view('home/dashboard_view', $page_data);
     }
 }
+
+?>

@@ -10,7 +10,7 @@
                    <?php echo $this->session->userdata('_username'); ?> 
                 </a>
                 <div class="dropdown-menu dropdown-menu-right rounded-0 mt-2 shadow animated fadeInDown faster" aria-labelledby="lnkUserAccount">
-                    <a class="dropdown-item" href="<?php echo base_url('users/logout'); ?>">
+                    <a class="dropdown-item" href="<?php echo base_url('settings/home'); ?>">
                         <i class="fas fa-cog"></i> Settings
                     </a>
                     <a class="dropdown-item" href="<?php echo base_url('users/logout'); ?>">
