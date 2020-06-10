@@ -4094,4 +4094,45 @@
   background-color: #ebf5fb;
 }
 
+/* REQUIRED FIELD ASTERSTICK */
+.req-after::after {
+  content: " *";
+  color: red;
+  font-weight: bolder;
+}
+
+.req-before::before {
+  content: "* ";
+  color: red;
+  font-weight: bolder;
+}
+
+/* PLACEHOLDER FONT SIZE */
+::-webkit-input-placeholder {
+  font-size: 14px !important;
+}
+
+:-moz-placeholder {
+  /* Firefox 18- */
+  font-size: 14px !important;
+}
+
+::-moz-placeholder {
+  /* Firefox 19+ */
+  font-size: 14px !important;
+}
+
+/* HIDE ARROWS SPINNER NUMBER INPUT */
+/* Chrome, Safarai, Edge, Opera */
+input::-webkit-outer-spin-button,
+input::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+/* Firefox */
+input[type=number] {
+  -moz-appearance: textfield;
+}
+
 /*# sourceMappingURL=custom-style.css.map */

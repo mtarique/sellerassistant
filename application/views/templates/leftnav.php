@@ -39,26 +39,20 @@ ul.collapse > li.nav-item > a:hover {
 	<div class="leftnav-sticky">
     	<ul class="nav flex-column">
     		<li class="nav-item">
-        		<a class="nav-link pb-0" href="#">
+        		<a class="nav-link pb-0" href="<?php echo base_url('home/dashboard'); ?>">
                     <span><i class="far fa-home"></i></span>
                     <span class="pl-2">Dashboard</span>
         		</a>
         	</li>
         	<li class="nav-item">
-        		<a class="nav-link pb-0" href="#subPmts" data-toggle="collapse" aria-expanded="false">
+        		<a class="nav-link pb-0" href="#subPricing" data-toggle="collapse" aria-expanded="false">
                     <span class="float-left"><i class="far fa-wallet"></i></span>
-                    <span class="pl-3">Payments</span>
+                    <span class="pl-3">Pricing</span>
                     <span class="float-right"><i class="fas fa-angle-right leftnav-caret"></i></span>
         		</a>
-                <ul class="collapse flex-column list-unstyled animated fadeIn" id="subPmts">
+                <ul class="collapse flex-column list-unstyled animated fadeIn" id="subPricing">
                     <li class="nav-item">
-                        <a href="<?php echo base_url(); ?>" class="nav-link pl-5 pb-0">Payment-1</a>
-                    </li>
-                    <li class="nav-item">
-                        <a href="<?php echo base_url(); ?>" class="nav-link pl-5 pb-0">Payment-2</a>
-                    </li>
-                    <li class="nav-item">
-                        <a href="<?php echo base_url(); ?>" class="nav-link pl-5 ">Payment-3</a>
+                        <a href="<?php echo base_url('pricing/fba_fees_calc'); ?>" class="nav-link pl-5 pb-0">FBA Fees Calculator</a>
                     </li>
                 </ul>
         	</li>
