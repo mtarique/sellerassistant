@@ -26,7 +26,7 @@ class Users_model extends CI_Model
      */
     public function add_user($user_data)
     {    
-        $query = $this->db->insert('user', $user_data); 
+        $query = $this->db->insert('users', $user_data); 
 
         return ($query) ? true : $this->db->error()['message'];
     }
