@@ -227,14 +227,6 @@ CREATE TABLE `mws_developers` (
   `secret_key` varchar(255) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 
---
--- Dumping data for table `mws_developers`
---
-
-INSERT INTO `mws_developers` (`developer_id`, `developer_name`, `region`, `aws_access_key_id`, `secret_key`) VALUES
-('5189-8620-6342', NULL, 'North America', 'AKIAJBMMTVUPVRFMUO5A', 'YJbWlRdEEyo1hqXVc1SCRmWUdqPVjJx1tm2z/ntv'),
-('5963-7193-5048', NULL, 'Europe', 'AKIAJM4YPVFNDYK3FLQA', 'OtaFZBLnX8GwkQ7LXeJAuALfzGNB1wBWs64wKp0g');
-
 -- --------------------------------------------------------
 
 --
@@ -290,7 +282,7 @@ CREATE TABLE `users` (
 --
 
 INSERT INTO `users` (`user_id`, `name`, `email`, `password`, `registered_on`) VALUES
-(1, 'Tarique', 'tarique@rituraj.com', '$2y$10$YuCOcG2MKBXPoNMlzrJxCOSTvrBI643BHpxz9ZOUCCssynqxmm/9O', '2020-05-02');
+(1, 'Tarique', 'mtarique@outlook.com', '$2y$10$YuCOcG2MKBXPoNMlzrJxCOSTvrBI643BHpxz9ZOUCCssynqxmm/9O', '2020-05-02');
 
 --
 -- Indexes for dumped tables
