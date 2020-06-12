@@ -8,12 +8,11 @@
         </div>
     </div>
     <div class="col-md-7">
-        <h3 class="mt-3">Seller Assistant</h3>
         <div class="d-flex align-items-center justify-content-center min-vh-90">
             <div class="col-md-6">
                 <div id="resLogin"></div>
                 <form id="formLogin">
-                    <h3 class="font-weight-bold">Get more things done with Loggin platform.</h3>	
+                    <img src="<?php echo base_url('assets/img/logo/sa_logo_horizontal_dark.png'); ?>" alt="site-logo" class="ml-n2 mb-1 img-fluid" width="250">	
                     <p>Access to the most powerfull tool in the entire design and web industry.</p>   
                     <div class="form-row">
                         <div class="form-group col-md-12">

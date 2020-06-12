@@ -1,6 +1,8 @@
-<nav class="navbar fixed-top navbar-dark bg-dark">
-    <div class="container-fluid px-0">
-        <a href="#" class="navbar-brand font-weight-bold text-light-blue-200">Seller Assistant</a>
+<nav class="navbar fixed-top navbar-dark bgdark" style="background-color: #000000 !important;">
+    <div class="container-fluid p-0">
+        <a href="#" class="navbar-brand p-0">
+            <img src="<?php echo base_url('assets/img/logo/sa_logo_horizontal_blue.jpg'); ?>" class="img-fluid ml-n1" alt="site-logo" width="180">
+        </a>
         <div class="d-flex flex-row ml-auto">
             <!-- <div class="pr-3">
                 <a href="#" class="text-decoration-none text-nowrap text-white"><i class="fas fa-bell fa-lg"></i></a>

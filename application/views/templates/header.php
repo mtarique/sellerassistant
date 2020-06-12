@@ -8,7 +8,7 @@
 	</noscript>
     <title><?php echo isset($title_seo) ? $title_seo : $title; echo " - ".$this->config->item('title'); ?></title>
     <meta name="description" content="<?php echo isset($descr_seo) ? $descr_seo : $descr; ?>">
-    <link rel="shortcut icon" href="<?php ?>" type="image/png">
+    <link rel="shortcut icon" href="<?php echo base_url('assets/img/logo/favicon.png'); ?>" type="image/png">
     <link rel="stylesheet" type="text/css" href="<?php echo base_url('assets/lib/bootstrap/4.4.1/dist/css/bootstrap.min.css'); ?>">
     <link rel="stylesheet" type="text/css" href="<?php echo base_url('assets/lib/animate/3.7.2/animate.min.css'); ?>">
     <link rel="stylesheet" type="text/css" href="<?php echo base_url('assets/lib/fontawesome/5.13.0-pro/css/all.min.css'); ?>">
