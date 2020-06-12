@@ -8,6 +8,7 @@
 				<?php echo $descr; ?><br>
 				Developed with <i class="fas fa-heart text-danger"></i> by <a href="mailto: <?php echo $this->config->item('email_developer'); ?>">Muhammad Tarique</a>
 			</p>
+			<a href="<?php echo base_url('users/login'); ?>" class="btn btn-dark text-decoration-none shadow-sm"><i class="fad fa-sign-in-alt"></i> Login to Seller Assistant</a>
 		</div>
 	</div>	
 </div>
