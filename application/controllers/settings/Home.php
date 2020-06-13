@@ -21,7 +21,7 @@ class Home extends CI_Controller
     public function index()
     {
         $page_data['title'] = "Settings";
-        $page_data['descr'] = "Manage system settings."; 
+        $page_data['descr'] = "Manage application settings."; 
 
         $this->load->view('settings/home_view', $page_data);
     }

@@ -7,6 +7,33 @@ $this->load->view('templates/loader');
 ?>
 
 <div class="row">
+    <div class="col-md-6">
+        <div class="card rounded-0 shadowsm">
+            <div class="card-body">
+                <p>Connecting your Amazon account is easy! You just need an Amazon professional seller account to sell on Amazon.</p>
+                <form>
+                    <!-- <div class="form-group">
+                    <h5 class="card-title mb-0">Connecting your Amazon account is easy!</h5>
+                        <p class="small text-muted">You just need an Amazon professional seller account to sell on Amazon.</p>
+                    </div> -->
+                    <div class="form-group">
+                        <label for="" class="font-weight-bold small">Marketplace</label>
+                        <select name="" id="" class="custom-select custom-select-sm">
+                            <option value="ATVPDKIKX0DER">Amazon.com (United States)</option>
+                        </select>
+                    </div>
+                    <div class="form-group text-right">
+                        <button class="btn btn-sm btn-success">Connect</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<!--
+<div class="row">
     <div class="col-md-8">
         <table class="table table-sm table-hover">
             <thead>
@@ -64,7 +91,7 @@ $this->load->view('templates/loader');
         </div>
     </div>
 </div>
-
+-->
 
 
 <?php $this->load->view('templates/footer'); ?>
