@@ -39,27 +39,27 @@ class Reports {
         $url_param = array(); 
 
         foreach($request_param as $key => $val) {
-            $key   = str_replace("%7E", "~", rawurldecode($key));
-            $val   = str_replace("%7E", "~", rawurldecode($val)); 
+            $key   = str_replace("%7E", "~", rawurlencode($key));
+            $val   = str_replace("%7E", "~", rawurlencode($val)); 
             $url_param[] = "{$key}={$val}";  
         }
 
         sort($url_param); 
 
-        $url_param = implode('&', $url_param); 
+        $arr = implode('&', $url_param); 
 
         // Create signature
         $sign  = 'GET' . "\n";
 		$sign .= 'mws.amazonservices.com' . "\n";
 		$sign .= '/Reports/2009-01-01' . "\n";
-        $sign .= $url_param;
+        $sign .= $arr;
         
         $signature = hash_hmac("sha256", $sign, $secret_key, true);
 		$signature = urlencode(base64_encode($signature));
 
         // Generate request URL
 		$request_url  = "https://mws.amazonservices.com/Reports/2009-01-01?";
-		$request_url .= $url_param . "&Signature=" . $signature;
+		$request_url .= $arr."&Signature=".$signature;
 
 		return $request_url;
     }
@@ -98,32 +98,41 @@ class Reports {
      * @param [type] $param
      * @return void
      */
-    public function GetReportList($sellerid, $mwsauthtoken, $awsaccesskey, $secretkey, $reporttype = NULL)
+    public function GetReportList($sellerid, $mwsauthtoken, $awsaccesskey, $secretkey, $reporttypelist = NULL)
     {   
         
         $param = array(
-            'AWSAccessKeyId'        => $awsaccesskey, 
+            'AWSAccessKeyId'        => base64_decode($awsaccesskey), 
             'Action'                => 'GetReportList', 
-            'MWSAuthToken'          => $mwsauthtoken, 
-            'SellerId'              => $sellerid, 
+            'MWSAuthToken'          => base64_decode($mwsauthtoken), 
+            'Merchant'              => base64_decode($sellerid), 
             'SignatureMethod'       => 'HmacSHA256', 
             'SignatureVersion'      => '2', 
             'Timestamp'             => date("c", time()), 
-            'Version'               => '2009-01-01', 
-            'ReportTypeList.Type.1' => '_GET_V2_SETTLEMENT_REPORT_DATA_FLAT_FILE_V2_'
+            'Version'               => '2009-01-01'
         ); 
 
-        if(isset($reporttype)) 
-        {
-            $param['ReportTypeList.Type.1'] = $reporttype; 
+        if(isset($reporttypelist)) 
+        {   
+            if(is_array($reporttypelist)) 
+            {
+                $n = 1; 
+
+                foreach($reporttypelist as $report_type)
+                {
+                    $param['ReportTypeList.Type.'.$n] = $report_type;
+
+                    $n++; 
+                }
+            }
+            else $param['ReportTypeList.Type.1'] = $reporttypelist;
         }
 
         // Get request url
-        $request_url = $this->GenerateRequestURL($secretkey, $param); 
+        $request_url = $this->GenerateRequestURL(base64_decode($secretkey), $param); 
 
         // Make curl request
-		return $this->CurlRequest($request_url);
-
+        return $this->CurlRequest($request_url);
     }
 }
 ?>
