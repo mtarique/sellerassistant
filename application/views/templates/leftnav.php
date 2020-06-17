@@ -31,7 +31,15 @@
 }
 
 ul.collapse > li.nav-item > a:hover {
-    color: #81d4fa !important;  
+    color: #a9a9a9 !important;  
+}
+
+.nav-icon-width {
+    width: 30px !important;
+}
+
+.font-weight-bold-min {
+    -webkit-text-stroke: 0.05em rgba(50, 50, 50, .5);
 }
 </style>
 
@@ -40,19 +48,31 @@ ul.collapse > li.nav-item > a:hover {
     	<ul class="nav flex-column">
     		<li class="nav-item">
         		<a class="nav-link pb-0" href="<?php echo base_url('home/dashboard'); ?>">
-                    <span><i class="far fa-home"></i></span>
-                    <span class="pl-2">Dashboard</span>
+                    <span class="float-left nav-icon-width"><i class="far fa-tachometer-alt"></i></span>
+                    <span class="font-weight-bold fs-14">Dashboard</span>
         		</a>
         	</li>
-        	<li class="nav-item">
+            <li class="nav-item">
         		<a class="nav-link pb-0" href="#subPricing" data-toggle="collapse" aria-expanded="false">
-                    <span class="float-left"><i class="far fa-wallet"></i></span>
-                    <span class="pl-3">Pricing</span>
+                    <span class="float-left nav-icon-width"><i class="far fa-tags"></i></span>
+                    <span class="font-weight-bold fs-14">Pricing</span>
                     <span class="float-right"><i class="fas fa-angle-right leftnav-caret"></i></span>
         		</a>
                 <ul class="collapse flex-column list-unstyled animated fadeIn" id="subPricing">
                     <li class="nav-item">
-                        <a href="<?php echo base_url('pricing/fba_fees_calc'); ?>" class="nav-link pl-5 pb-0">FBA Fees Calculator</a>
+                        <a href="<?php echo base_url('pricing/fba_fees_calc'); ?>" class="nav-link fs-14 pl-5 pb-0">FBA Fees Calculator</a>
+                    </li>
+                </ul>
+        	</li>
+            <li class="nav-item">
+        		<a class="nav-link pb-0" href="#subPayments" data-toggle="collapse" aria-expanded="false">
+                    <span class="float-left nav-icon-width"><i class="fad fa-credit-card"></i></span>
+                    <span class="font-weight-bold fs-14">Payments</span>
+                    <span class="float-right"><i class="fas fa-angle-right leftnav-caret"></i></span>
+        		</a>
+                <ul class="collapse flex-column list-unstyled animated fadeIn" id="subPayments">
+                    <li class="nav-item">
+                        <a href="<?php echo base_url('pricing/fba_fees_calc'); ?>" class="nav-link fs-14 pl-5 pb-0">Payment Analyzer</a>
                     </li>
                 </ul>
         	</li>
