@@ -5,8 +5,8 @@
   height: calc(100vh - 55px);
   bottom: 0;
   left: 0;
-  max-width: 220px !important;
-  min-width: 220px !important; 
+  max-width: 230px !important;
+  min-width: 230px !important; 
   z-index: 100; /* Behind the navbar */
   padding: 0;
   box-shadow: inset -1px 0 0 rgba(0, 0, 0, .1);
@@ -33,7 +33,9 @@
 ul.collapse > li.nav-item > a:hover {
     color: #a9a9a9 !important;  
 }
-
+ul.collapse-not-in-use {
+    border-left: 4px solid #f48024; 
+}
 .nav-icon-width {
     width: 30px !important;
 }
@@ -41,6 +43,7 @@ ul.collapse > li.nav-item > a:hover {
 .font-weight-bold-min {
     -webkit-text-stroke: 0.05em rgba(50, 50, 50, .5);
 }
+
 </style>
 
 <nav class="leftnav bg-light">
@@ -72,7 +75,7 @@ ul.collapse > li.nav-item > a:hover {
         		</a>
                 <ul class="collapse flex-column list-unstyled animated fadeIn" id="subPayments">
                     <li class="nav-item">
-                        <a href="<?php echo base_url('pricing/fba_fees_calc'); ?>" class="nav-link fs-14 pl-5 pb-0">Payment Analyzer</a>
+                        <a href="<?php echo base_url('pricing/fba_fees_calc'); ?>" class="nav-link fs-14 pl-5 pb-0">Amazon Payment Analyzer</a>
                     </li>
                 </ul>
         	</li>
