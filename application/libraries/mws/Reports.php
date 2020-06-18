@@ -54,7 +54,7 @@ class Reports {
 		$sign .= '/Reports/2009-01-01' . "\n";
         $sign .= $arr;
         
-        $signature = hash_hmac("sha256", $sign, $secret_key, true);
+        $signature = hash_hmac("sha256", $sign, base64_decode($secret_key), true);
 		$signature = urlencode(base64_encode($signature));
 
         // Generate request URL
@@ -95,10 +95,14 @@ class Reports {
     /**
      * Get report list
      *
-     * @param [type] $param
+     * @param [type] $sellerid
+     * @param [type] $mwsauthtoken
+     * @param [type] $awsaccesskey
+     * @param [type] $secretkey
+     * @param [type] $reporttypelist
      * @return void
      */
-    public function GetReportList($sellerid, $mwsauthtoken, $awsaccesskey, $secretkey, $reporttypelist = NULL)
+    public function GetReportList($sellerid, $mwsauthtoken, $awsaccesskey, $secretkey, $maxcount = NULL, $reporttypelist = NULL)
     {   
         
         $param = array(
@@ -112,6 +116,13 @@ class Reports {
             'Version'               => '2009-01-01'
         ); 
 
+        // Max count parameter
+        if(isset($maxcount))
+        {
+            $param['MaxCount'] = $maxcount;
+        }
+
+        // Report type list array parameter
         if(isset($reporttypelist)) 
         {   
             if(is_array($reporttypelist)) 
@@ -128,8 +139,72 @@ class Reports {
             else $param['ReportTypeList.Type.1'] = $reporttypelist;
         }
 
+        
+
         // Get request url
-        $request_url = $this->GenerateRequestURL(base64_decode($secretkey), $param); 
+        $request_url = $this->GenerateRequestURL($secretkey, $param); 
+
+        // Make curl request
+        return $this->CurlRequest($request_url);
+    }
+
+    /**
+     * Get report list by next token
+     *
+     * @param [type] $sellerid
+     * @param [type] $mwsauthtoken
+     * @param [type] $awsaccesskey
+     * @param [type] $secretkey
+     * @param [type] $nexttoken
+     * @return void
+     */
+    public function GetReportListByNextToken($sellerid, $mwsauthtoken, $awsaccesskey, $secretkey, $nexttoken)
+    {
+        $param = array(
+            'AWSAccessKeyId'        => base64_decode($awsaccesskey), 
+            'Action'                => 'GetReportListByNextToken', 
+            'MWSAuthToken'          => base64_decode($mwsauthtoken), 
+            'Merchant'              => base64_decode($sellerid), 
+            'SignatureMethod'       => 'HmacSHA256', 
+            'SignatureVersion'      => '2', 
+            'Timestamp'             => date("c", time()), 
+            'Version'               => '2009-01-01', 
+            'NextToken'             => $nexttoken
+        ); 
+
+        // Get request url
+        $request_url = $this->GenerateRequestURL($secretkey, $param); 
+
+        // Make curl request
+        return $this->CurlRequest($request_url);
+    }
+
+    /**
+     * Undocumented function
+     *
+     * @param [type] $sellerid
+     * @param [type] $mwsauthtoken
+     * @param [type] $awsaccesskey
+     * @param [type] $secretkey
+     * @param [type] $reportid
+     * @return void
+     */
+    public function GetReport($sellerid, $mwsauthtoken, $awsaccesskey, $secretkey, $reportid)
+    {
+        $param = array(
+            'AWSAccessKeyId'        => base64_decode($awsaccesskey), 
+            'Action'                => 'GetReport', 
+            'MWSAuthToken'          => base64_decode($mwsauthtoken), 
+            'Merchant'              => base64_decode($sellerid), 
+            'SignatureMethod'       => 'HmacSHA256', 
+            'SignatureVersion'      => '2', 
+            'Timestamp'             => date("c", time()), 
+            'Version'               => '2009-01-01', 
+            'ReportId'             => $reportid
+        ); 
+
+        // Get request url
+        $request_url = $this->GenerateRequestURL($secretkey, $param); 
 
         // Make curl request
         return $this->CurlRequest($request_url);
