@@ -6,13 +6,24 @@ $this->load->view('templates/titlebar');
 $this->load->view('templates/loader'); 
 ?>
 
+<?php 
+
+/* echo "Seller Id: ".base64_encode('A1PJK0RAI70UQ3')."<br>";
+echo "MWS Auth Token: ".base64_encode('amzn.mws.fcb93c61-1834-913e-5c61-496506f997f0')."<br>";
+echo "AWS Access Key Id: ".base64_encode('AKIAIO4MZJHCNCI5GBZA')."<br>";
+echo "Secret Key: ".base64_encode('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')."<br>";
+echo "Developer Id: ".base64_encode('8131-4011-9602')."<br>"; */
+
+?>
+
 <table class="table table-sm" id="tblAmzPmts">
     <thead>
         <tr>
-            <th>Settlement Period</th>
-            <th>Deposit Total</th>
-            <th>Report Type</th>
-            <th>Report Id</th>
+            <th class="align-middle text-left">Settlement Period</th>
+            <th class="align-middle text-center">Deposit Total</th>
+            <th class="align-middle text-center">Processing Status</th>
+            <th class="align-middle text-center">Fund Transfer Date</th>
+            <th class="align-middle text-center"></th>
         </tr>
     </thead>
     <tbody></tbody>
@@ -54,7 +65,7 @@ $this->load->view('templates/loader');
                 var xhr_text = xhr.status+" "+xhr.statusText;
                 swal({title: "Request error!", text: xhr_text, icon: "error"});
             }
-        }); 
+        });
 
         /**
          * Load more amazon payments

@@ -17,7 +17,7 @@ class Payment_analyzer extends CI_Controller
 
         $this->load->helper('auth_helper');
 
-        $this->load->library('mws/reports'); 
+        $this->load->library(array('mws/reports', 'mws/finances')); 
     }
 
     /**
@@ -33,12 +33,56 @@ class Payment_analyzer extends CI_Controller
         $this->load->view('payments/amazon/payment_analyzer_view', $page_data);
     }
 
+    public function get_payments_list()
+    {   
+        // ORG
+        //$response = $this->finances->ListFinancialEventGroups('QTFYV0dRQ1VTOTVEOTY=', 'YW16bi5td3MuOTZhNjljMDUtZWQyNy0xMjkzLTllZTktMmY0NjBmMzdhNmIy', 'QUtJQUpCTU1UVlVQVlJGTVVPNUE=', 'WUpiV2xSZEVFeW8xaHFYVmMxU0NSbVdVZHFQVmpKeDF0bTJ6L250dg==', '2020-06-01');
+        // ALPHA LIVING
+        $response = $this->finances->ListFinancialEventGroups('QTFQSkswUkFJNzBVUTM=', 'YW16bi5td3MuZmNiOTNjNjEtMTgzNC05MTNlLTVjNjEtNDk2NTA2Zjk5N2Yw', 'QUtJQUlPNE1aSkhDTkNJNUdCWkE=', 'ZTI1MFh1RnhsNTBQcG5LRDl5czN4ei9TSEJGMzN6NGsvTmtCQ0piZQ==', '2020-06-01');
+
+        $xml = new SimpleXMLElement($response); 
+
+        if(isset($xml->ListFinancialEventGroupsResult->FinancialEventGroupList->FinancialEventGroup))
+        {   
+            $report_list = ''; 
+
+            foreach($xml->ListFinancialEventGroupsResult->FinancialEventGroupList->FinancialEventGroup as $report)
+            {
+                if($report->ProcessingStatus == "Open")
+                {
+                    $settlement_period = date('M d, Y', strtotime($report->FinancialEventGroupStart)).' - '.date('M d, Y'); 
+                } 
+                else $settlement_period = date('M d, Y', strtotime($report->FinancialEventGroupStart)).' - '.date('M d, Y', strtotime($report->FinancialEventGroupEnd)); 
+
+                $fund_transfer_date = (isset($report->FundTransferDate)) ? date('M d, Y', strtotime($report->FundTransferDate)) : ""; 
+                $report_list .= '
+                    <tr>
+                        <td class="align-middle text-left">'.$settlement_period.'</td>
+                        <td class="text-right text-right">'.$report->OriginalTotal->CurrencyCode.' '.$report->OriginalTotal->CurrencyAmount.'</td>
+                        <td class="align-middle text-center">'.$report->ProcessingStatus.'</td>
+                        <td class="align-middle text-center">'.$fund_transfer_date.'</td>
+                        <td class="align-middle text-center"><a href="#" class="btn btn-sm btn-outline-primary">View Summary</a></td>
+                    </tr>
+                ';
+            }
+
+            $ajax['status'] = true; 
+            $ajax['report_list'] = $report_list; 
+        }
+        else {
+            $ajax['status'] = false; 
+            $ajax['message'] = '<tr><td colspan="3" class="text-center">No payments found!</td></tr>';
+            //$ajax['message'] = $xml;
+        }
+
+        echo json_encode($ajax); 
+    }
     /**
      * Get paymwent list
      *
      * @return void
      */
-    public function get_payments_list()
+    public function get_payments_list_v1()
     {   
         $report_type_list = array('_GET_V2_SETTLEMENT_REPORT_DATA_FLAT_FILE_V2_'); 
         

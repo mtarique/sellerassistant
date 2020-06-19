@@ -139,8 +139,6 @@ class Reports {
             else $param['ReportTypeList.Type.1'] = $reporttypelist;
         }
 
-        
-
         // Get request url
         $request_url = $this->GenerateRequestURL($secretkey, $param); 
 
