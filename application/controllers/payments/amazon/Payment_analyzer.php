@@ -33,11 +33,16 @@ class Payment_analyzer extends CI_Controller
         $this->load->view('payments/amazon/payment_analyzer_view', $page_data);
     }
 
+    /**
+     * Undocumented function
+     *
+     * @return void
+     */
     public function get_payments_list()
     {   
         // ORG
         //$response = $this->finances->ListFinancialEventGroups('QTFYV0dRQ1VTOTVEOTY=', 'YW16bi5td3MuOTZhNjljMDUtZWQyNy0xMjkzLTllZTktMmY0NjBmMzdhNmIy', 'QUtJQUpCTU1UVlVQVlJGTVVPNUE=', 'WUpiV2xSZEVFeW8xaHFYVmMxU0NSbVdVZHFQVmpKeDF0bTJ6L250dg==', '2020-06-01');
-        // ALPHA LIVING
+        // AL
         $response = $this->finances->ListFinancialEventGroups('QTFQSkswUkFJNzBVUTM=', 'YW16bi5td3MuZmNiOTNjNjEtMTgzNC05MTNlLTVjNjEtNDk2NTA2Zjk5N2Yw', 'QUtJQUlPNE1aSkhDTkNJNUdCWkE=', 'ZTI1MFh1RnhsNTBQcG5LRDl5czN4ei9TSEJGMzN6NGsvTmtCQ0piZQ==', '2020-06-01');
 
         $xml = new SimpleXMLElement($response); 
@@ -61,7 +66,7 @@ class Payment_analyzer extends CI_Controller
                         <td class="text-right text-right">'.$report->OriginalTotal->CurrencyCode.' '.$report->OriginalTotal->CurrencyAmount.'</td>
                         <td class="align-middle text-center">'.$report->ProcessingStatus.'</td>
                         <td class="align-middle text-center">'.$fund_transfer_date.'</td>
-                        <td class="align-middle text-center"><a href="#" class="btn btn-sm btn-outline-primary">View Summary</a></td>
+                        <td class="align-middle text-center"><a href="'.base_url('payments/amazon/payment_analyzer/view_transactions?fingroupeventid='.$report->FinancialEventGroupId).'" target="_blank" class="btn btn-sm btn-outline-primary">View Transactions</a></td>
                     </tr>
                 ';
             }
@@ -77,6 +82,97 @@ class Payment_analyzer extends CI_Controller
 
         echo json_encode($ajax); 
     }
+
+    /**
+     * Undocumented function
+     *
+     * @return void
+     */
+    public function view_transactions()
+    {
+        $page_data['title'] = "Payment Transactions";
+        $page_data['descr'] = "Transactional details for your Amazon payment ".$this->input->get('fingroupeventid'); 
+        $page_data['fin_group_id'] = $this->input->get('fingroupeventid'); 
+
+        $this->load->view('payments/amazon/payment_transactions', $page_data);
+    }
+
+    /**
+     * Undocumented function
+     *
+     * @return void
+     */
+    public function get_transactions()
+    {   
+        $fin_group_id = $this->input->get('fingroupid');
+
+        $response = $this->finances->ListFinancialEvents('QTFQSkswUkFJNzBVUTM=', 'YW16bi5td3MuZmNiOTNjNjEtMTgzNC05MTNlLTVjNjEtNDk2NTA2Zjk5N2Yw', 'QUtJQUlPNE1aSkhDTkNJNUdCWkE=', 'ZTI1MFh1RnhsNTBQcG5LRDl5czN4ei9TSEJGMzN6NGsvTmtCQ0piZQ==', null, null, $fin_group_id, null, null);
+
+        $xml = new SimpleXMLElement($response); 
+
+        if(isset($xml->ListFinancialEventsResult->FinancialEvents->ShipmentEventList->ShipmentEvent))
+        {   
+            $transactions = ''; 
+
+            foreach($xml->ListFinancialEventsResult->FinancialEvents->ShipmentEventList->ShipmentEvent as $shipment_event)
+            {   
+                foreach($shipment_event->ShipmentItemList->ShipmentItem as $shipment_item)
+                {   
+                    $amount = array(); 
+
+                    // Item withheld taxes
+                    if(isset($shipment_item->ItemTaxWithheldList->TaxWithheldComponent->TaxesWithheld->ChargeComponent)){
+                        foreach($shipment_item->ItemTaxWithheldList->TaxWithheldComponent->TaxesWithheld->ChargeComponent as $tax_charge_component)
+                        {   
+                            // Use asXML() or trim() to convert XML object to string
+                            $amount[$tax_charge_component->ChargeType->asXML()] = $tax_charge_component->ChargeAmount->CurrencyAmount; 
+                        }
+                    }
+
+                    // Item charges
+                    foreach($shipment_item->ItemChargeList->ChargeComponent as $charge_component)
+                    {   
+                        // Use asXML() or trim() to convert XML object to string
+                        $amount[$charge_component->ChargeType->asXML()] = $charge_component->ChargeAmount->CurrencyAmount; 
+                    }
+
+                    // Item fees
+                    foreach($shipment_item->ItemFeeList->FeeComponent as $fee_component)
+                    {   
+                        $amount[trim($fee_component->FeeType)] = $fee_component->FeeAmount->CurrencyAmount; 
+                    }
+
+                    foreach($amount as $key => $val)
+                    {
+                        $transactions .= '
+                            <tr>
+                                <td class="align-middle">'.$shipment_event->AmazonOrderId.'</td>
+                                <td class="align-middle">'.$shipment_event->PostedDate.'</td>
+                                <td class="align-middle">'.$shipment_event->MarketplaceName.'</td>
+                                <td class="align-middle">'.$shipment_item->SellerSKU.'</td>
+                                <td class="align-middle">'.$shipment_item->QuantityShipped.'</td>
+                                <td class="align-middle">'.$key.'</td>
+                                <td class="align-middle">'.$val.'</td>
+                            </tr>
+                        ';
+                    }
+                }
+            }
+
+            $ajax['status'] = true; 
+            $ajax['transactions'] = $transactions; 
+        }
+        else {
+            $ajax['status'] = false; 
+            //$ajax['message'] = '<tr><td colspan="3" class="text-center">No payments found!</td></tr>';
+            $ajax['message'] = $xml;
+        }
+
+        //$ajax['status'] = false; 
+        //$ajax['message'] = $response; 
+        echo json_encode($ajax); 
+    }
+
     /**
      * Get paymwent list
      *

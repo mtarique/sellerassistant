@@ -114,4 +114,46 @@ class Finances {
         // Make curl request
         return $this->CurlRequest($request_url);
     }
+
+    /**
+     * Undocumented function
+     *
+     * @param [type] $sellerid
+     * @param [type] $mwsauthtoken
+     * @param [type] $awsaccesskey
+     * @param [type] $secretkey
+     * @param [type] $postedafter
+     * @param [type] $postedbefore
+     * @param [type] $financialgroupid
+     * @param [type] $amazonorderid
+     * @param [type] $maxresult
+     * @return void
+     */
+    public function ListFinancialEvents($sellerid, $mwsauthtoken, $awsaccesskey, $secretkey, $postedafter = NULL, $postedbefore = NULL, $financialeventgroupid = NULL, $amazonorderid = NULL, $maxresultperpage = NULL)
+    {
+        $param = array(
+            'AWSAccessKeyId'                  => base64_decode($awsaccesskey), 
+            'Action'                          => 'ListFinancialEvents', 
+            'MWSAuthToken'                    => base64_decode($mwsauthtoken), 
+            'SellerId'                        => base64_decode($sellerid), 
+            'SignatureMethod'                 => 'HmacSHA256', 
+            'SignatureVersion'                => '2', 
+            'Timestamp'                       => date("c", time()), 
+            'Version'                         => '2015-05-01'
+        ); 
+
+        // Optional parameters
+        if(isset($postedafter)) $param['PostedAfter'] = $postedafter;
+        if(isset($postedbefore)) $param['PostedBefore'] = $postedbefore;
+        if(isset($financialeventgroupid)) $param['FinancialEventGroupId'] = $financialeventgroupid;
+        if(isset($amazonorderid)) $param['AmazonOrderId'] = $amazonorderid;
+        if(isset($maxresultperpage)) $param['MaxResultsPerPage'] = $maxresultperpage;
+
+        // Get request url
+        $request_url = $this->GenerateRequestURL($secretkey, $param); 
+
+        // Make curl request
+        return $this->CurlRequest($request_url);
+        //return $request_url; 
+    }
 }

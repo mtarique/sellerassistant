@@ -6,16 +6,6 @@ $this->load->view('templates/titlebar');
 $this->load->view('templates/loader'); 
 ?>
 
-<?php 
-
-/* echo "Seller Id: ".base64_encode('A1PJK0RAI70UQ3')."<br>";
-echo "MWS Auth Token: ".base64_encode('amzn.mws.fcb93c61-1834-913e-5c61-496506f997f0')."<br>";
-echo "AWS Access Key Id: ".base64_encode('AKIAIO4MZJHCNCI5GBZA')."<br>";
-echo "Secret Key: ".base64_encode('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')."<br>";
-echo "Developer Id: ".base64_encode('8131-4011-9602')."<br>"; */
-
-?>
-
 <table class="table table-sm" id="tblAmzPmts">
     <thead>
         <tr>
@@ -88,7 +78,7 @@ echo "Developer Id: ".base64_encode('8131-4011-9602')."<br>"; */
                     }, 
                     success: function(res)
                     {
-                    if(res.status)
+                        if(res.status)
                         {   
                             $('#tblAmzPmts > tbody').append(res.report_list); 
                             $('#resLoadMore').html(res.load_more);
@@ -103,6 +93,47 @@ echo "Developer Id: ".base64_encode('8131-4011-9602')."<br>"; */
                         var xhr_text = xhr.status+" "+xhr.statusText;
                         swal({title: "Request error!", text: xhr_text, icon: "error"});
                     }
+                }); 
+            }); 
+        }
+
+        function view_payment_summary()
+        {
+            $('.btn-view-summary').each(function(){
+                $(this).click(function(){
+                    //var fin_grp_id = $(this).attr('financial-group-id'); 
+
+                    $.ajax({
+                        type: "get", 
+                        url: "<?php echo base_url('payments/amazon/payment_analyzer/view_payment_summary'); ?>",
+                        data: "fingrpid="+encodeURIComponent($(this).attr('financial-group-id')),  
+                        dataType: "json", 
+                        beforeSend: function()
+                        {
+                            $('#loader').removeClass("d-none");
+                        }, 
+                        complete: function()
+                        {
+                            $('#loader').addClass("d-none");
+                        }, 
+                        success: function(res)
+                        {
+                        if(res.status)
+                            {   
+                                $('#tblAmzPmts > tbody').append(res.report_list); 
+                                $('#resLoadMore').html(res.load_more);
+                                load_more_payments(); 
+                            }
+                            else {
+                                $('#tblAmzPmts > tbody').append(res.message); 
+                            }
+                        }, 
+                        error: function(xhr)
+                        {
+                            var xhr_text = xhr.status+" "+xhr.statusText;
+                            swal({title: "Request error!", text: xhr_text, icon: "error"});
+                        }
+                    }); 
                 }); 
             }); 
         }
