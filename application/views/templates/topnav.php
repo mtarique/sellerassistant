@@ -1,4 +1,4 @@
-<nav class="navbar fixed-top navbar-dark" style="background-color: #000000 !important;">
+<nav class="navbar fixed-top navbar-dark" id="topnav" style="background-color: #000000 !important;">
     <div class="container-fluid px-0">
         <a href="#" class="navbar-brand py-0">
             <img src="<?php echo base_url('assets/img/logo/sa_logo_horizontal_blue.jpg'); ?>" class="img-fluid ml-n1" alt="site-logo" width="190">

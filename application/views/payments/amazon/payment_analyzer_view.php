@@ -6,13 +6,13 @@ $this->load->view('templates/titlebar');
 $this->load->view('templates/loader'); 
 ?>
 
-<table class="table table-sm" id="tblAmzPmts">
+<table class="table table-hover table-sm border small" id="tblAmzPmts">
     <thead>
-        <tr>
+        <tr class="bg-grey-100">
             <th class="align-middle text-left">Settlement Period</th>
             <th class="align-middle text-center">Deposit Total</th>
-            <th class="align-middle text-center">Processing Status</th>
             <th class="align-middle text-center">Fund Transfer Date</th>
+            <th class="align-middle text-left">Processing Status</th>
             <th class="align-middle text-center"></th>
         </tr>
     </thead>
