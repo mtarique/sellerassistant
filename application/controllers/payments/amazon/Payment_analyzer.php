@@ -66,7 +66,7 @@ class Payment_analyzer extends CI_Controller
                         <td class="align-middle text-right">'.$report->OriginalTotal->CurrencyCode.' '.$report->OriginalTotal->CurrencyAmount.'</td>
                         <td class="align-middle text-center">'.$fund_transfer_date.'</td>
                         <td class="align-middle text-left">'.$report->ProcessingStatus.'</td>
-                        <td class="align-middle text-center"><a href="'.base_url('payments/amazon/payment_analyzer/view_transactions?fingroupeventid='.$report->FinancialEventGroupId).'" target="_blank" class="btn btn-sm btn-outline-primary">View Transactions</a></td>
+                        <td class="align-middle text-center"><a href="'.base_url('payments/amazon/payment_analyzer/view_transactions?fingroupeventid='.$report->FinancialEventGroupId).'" target="_blank" class="btn btn-xs btn-outline-primary">View Transactions</a></td>
                     </tr>
                 ';
             }

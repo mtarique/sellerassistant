@@ -46,6 +46,14 @@
     background-color: #ebf5fb;
 }
 
+/* BOOTSTRAP 4 EXTRA SMALL BUTTON */
+.btn-group-xs >  .btn, .btn-xs {
+    padding: 0.5rem; 
+    font-size: .875rem;
+    line-height: .5;
+    border-radius: .2rem;
+}
+
 /* REQUIRED FIELD ASTERSTICK */
 .req-after::after{
     content: " *";
