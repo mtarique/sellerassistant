@@ -18,7 +18,9 @@ $this->load->view('templates/loader');
     </thead>
     <tbody></tbody>
 </table>
+
 <div id="resLoadMore"></div>
+
 <?php $this->load->view('templates/footer'); ?>
 
 <script>
@@ -28,7 +30,7 @@ $this->load->view('templates/loader');
          */
         $.ajax({
             type: "get", 
-            url: "<?php echo base_url('payments/amazon/payment_analyzer/get_payments_list'); ?>",
+            url: "<?php echo base_url('payments/amazon/payment_analyzer/get_payments'); ?>",
             dataType: "json", 
             beforeSend: function()
             {
@@ -44,7 +46,7 @@ $this->load->view('templates/loader');
                 {   
                     $('#tblAmzPmts > tbody').html(res.report_list); 
                     $('#resLoadMore').html(res.load_more);
-                    load_more_payments(); 
+                    //load_more_payments(); 
                 }
                 else {
                     $('#tblAmzPmts > tbody').html(res.message); 
@@ -65,7 +67,7 @@ $this->load->view('templates/loader');
             $('#btnLoadMore').click(function(){
                 $.ajax({
                     type: "get", 
-                    url: "<?php echo base_url('payments/amazon/payment_analyzer/get_payment_list_by_next_token'); ?>",
+                    url: "<?php echo base_url('payments/amazon/payment_analyzer/get_payments_by_next_token'); ?>",
                     data: "nexttoken="+encodeURIComponent($(this).attr('next-token')),  
                     dataType: "json", 
                     beforeSend: function()
@@ -93,47 +95,6 @@ $this->load->view('templates/loader');
                         var xhr_text = xhr.status+" "+xhr.statusText;
                         swal({title: "Request error!", text: xhr_text, icon: "error"});
                     }
-                }); 
-            }); 
-        }
-
-        function view_payment_summary()
-        {
-            $('.btn-view-summary').each(function(){
-                $(this).click(function(){
-                    //var fin_grp_id = $(this).attr('financial-group-id'); 
-
-                    $.ajax({
-                        type: "get", 
-                        url: "<?php echo base_url('payments/amazon/payment_analyzer/view_payment_summary'); ?>",
-                        data: "fingrpid="+encodeURIComponent($(this).attr('financial-group-id')),  
-                        dataType: "json", 
-                        beforeSend: function()
-                        {
-                            $('#loader').removeClass("d-none");
-                        }, 
-                        complete: function()
-                        {
-                            $('#loader').addClass("d-none");
-                        }, 
-                        success: function(res)
-                        {
-                        if(res.status)
-                            {   
-                                $('#tblAmzPmts > tbody').append(res.report_list); 
-                                $('#resLoadMore').html(res.load_more);
-                                load_more_payments(); 
-                            }
-                            else {
-                                $('#tblAmzPmts > tbody').append(res.message); 
-                            }
-                        }, 
-                        error: function(xhr)
-                        {
-                            var xhr_text = xhr.status+" "+xhr.statusText;
-                            swal({title: "Request error!", text: xhr_text, icon: "error"});
-                        }
-                    }); 
                 }); 
             }); 
         }

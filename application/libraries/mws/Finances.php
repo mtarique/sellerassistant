@@ -78,15 +78,15 @@ class Finances {
     }
 
     /**
-     * Undocumented function
+     * List Financial Event Groups
      *
-     * @param [type] $sellerid
-     * @param [type] $mwsauthtoken
-     * @param [type] $awsaccesskey
-     * @param [type] $secretkey
-     * @param [type] $dateafter
-     * @param [type] $datebefore
-     * @param [type] $maxresult
+     * @param string    $sellerid
+     * @param string    $mwsauthtoken
+     * @param string    $awsaccesskey
+     * @param string    $secretkey
+     * @param date      $dateafter
+     * @param date      $datebefore
+     * @param integer   $maxresult
      * @return void
      */
     public function ListFinancialEventGroups($sellerid, $mwsauthtoken, $awsaccesskey, $secretkey, $dateafter, $datebefore = NULL, $maxresult = NULL)
@@ -106,7 +106,6 @@ class Finances {
         // Optional parameters
         if(isset($datebefore)) $param['FinancialEventGroupStartedBefore'] = $datebefore;
         if(isset($maxresult)) $param['MaxResultsPerPage'] = $maxresult;
-        //strtotime('today - 30 days')
 
         // Get request url
         $request_url = $this->GenerateRequestURL($secretkey, $param); 
@@ -116,18 +115,18 @@ class Finances {
     }
 
     /**
-     * Undocumented function
+     * List Financial Event
      *
-     * @param [type] $sellerid
-     * @param [type] $mwsauthtoken
-     * @param [type] $awsaccesskey
-     * @param [type] $secretkey
-     * @param [type] $postedafter
-     * @param [type] $postedbefore
-     * @param [type] $financialgroupid
-     * @param [type] $amazonorderid
-     * @param [type] $maxresult
-     * @return void
+     * @param   string    $sellerid
+     * @param   string    $mwsauthtoken       
+     * @param   string    $awsaccesskey       
+     * @param   string    $secretkey          
+     * @param   date      $postedafter        Optional
+     * @param   date      $postedbefore       Optional
+     * @param   string    $financialgroupid   Optional
+     * @param   string    $amazonorderid      Optional
+     * @param   integer   $maxresult          Optional
+     * @return  void
      */
     public function ListFinancialEvents($sellerid, $mwsauthtoken, $awsaccesskey, $secretkey, $postedafter = NULL, $postedbefore = NULL, $financialeventgroupid = NULL, $amazonorderid = NULL, $maxresultperpage = NULL)
     {
@@ -154,6 +153,36 @@ class Finances {
 
         // Make curl request
         return $this->CurlRequest($request_url);
-        //return $request_url; 
+    }
+
+    /**
+     * List Financial Event By Next Token
+     *
+     * @param   string    $sellerid
+     * @param   string    $mwsauthtoken
+     * @param   string    $awsaccesskey
+     * @param   string    $secretkey
+     * @param   string    $nexttoken
+     * @return  void
+     */
+    public function ListFinancialEventsByNextToken($sellerid, $mwsauthtoken, $awsaccesskey, $secretkey, $nexttoken)
+    {
+        $param = array(
+            'AWSAccessKeyId'                  => base64_decode($awsaccesskey), 
+            'Action'                          => 'ListFinancialEventsByNextToken', 
+            'MWSAuthToken'                    => base64_decode($mwsauthtoken), 
+            'SellerId'                        => base64_decode($sellerid), 
+            'SignatureMethod'                 => 'HmacSHA256', 
+            'SignatureVersion'                => '2', 
+            'Timestamp'                       => date("c", time()), 
+            'Version'                         => '2015-05-01', 
+            'NextToken'                       => $nexttoken   
+        ); 
+
+        // Get request url
+        $request_url = $this->GenerateRequestURL($secretkey, $param); 
+
+        // Make curl request
+        return $this->CurlRequest($request_url);
     }
 }
