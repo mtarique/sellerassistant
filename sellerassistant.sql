@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: Jun 10, 2020 at 02:17 PM
+-- Generation Time: Jun 25, 2020 at 03:56 PM
 -- Server version: 10.1.25-MariaDB
 -- PHP Version: 7.1.7
 
@@ -21,6 +21,24 @@ SET time_zone = "+00:00";
 --
 -- Database: `sellerassistant`
 --
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `fba_fees`
+--
+
+CREATE TABLE `fba_fees` (
+  `amz_ord_id` varchar(19) NOT NULL,
+  `posted_date` datetime NOT NULL,
+  `mp_name` varchar(15) NOT NULL,
+  `ord_item_id` varchar(15) NOT NULL,
+  `seller_sku` varchar(10) NOT NULL,
+  `qty_shp` int(11) NOT NULL,
+  `fee_type` varchar(35) NOT NULL,
+  `fee_curr` varchar(3) NOT NULL,
+  `fee_amt` double NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 
 -- --------------------------------------------------------
 
@@ -204,64 +222,64 @@ INSERT INTO `fba_stg_fees_usa` (`storage_fees_id`, `prod_size_type`, `storage_fe
 -- --------------------------------------------------------
 
 --
--- Table structure for table `mws_auth_keys`
---
-
-CREATE TABLE `mws_auth_keys` (
-  `seller_id` varchar(14) NOT NULL,
-  `mws_auth_token` varchar(45) NOT NULL,
-  `region` varchar(15) NOT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=latin1;
-
--- --------------------------------------------------------
-
---
 -- Table structure for table `mws_developers`
 --
 
 CREATE TABLE `mws_developers` (
   `developer_id` varchar(14) NOT NULL,
   `developer_name` varchar(255) DEFAULT NULL,
-  `region` varchar(50) NOT NULL,
   `aws_access_key_id` varchar(255) NOT NULL,
-  `secret_key` varchar(255) NOT NULL
+  `secret_key` varchar(255) NOT NULL,
+  `mp_region` varchar(50) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 
 -- --------------------------------------------------------
 
 --
--- Table structure for table `mws_endpoints`
+-- Table structure for table `mws_marketplaces`
 --
 
-CREATE TABLE `mws_endpoints` (
-  `marketplace_id` varchar(15) NOT NULL,
-  `marketplace_name` varchar(15) NOT NULL,
-  `sales_channel` varchar(255) NOT NULL,
+CREATE TABLE `mws_marketplaces` (
+  `mp_id` varchar(15) NOT NULL,
+  `mp_name` varchar(15) NOT NULL,
   `country_code` varchar(2) NOT NULL,
-  `region` varchar(15) NOT NULL,
+  `mp_region` varchar(15) NOT NULL,
+  `sales_channel` varchar(255) NOT NULL,
   `currency` varchar(35) NOT NULL,
   `curr_code` varchar(3) NOT NULL,
   `endpoint` varchar(255) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='Amazon marketplaces';
 
 --
--- Dumping data for table `mws_endpoints`
+-- Dumping data for table `mws_marketplaces`
 --
 
-INSERT INTO `mws_endpoints` (`marketplace_id`, `marketplace_name`, `sales_channel`, `country_code`, `region`, `currency`, `curr_code`, `endpoint`) VALUES
-('A13V1IB3VIYZZH', 'France', 'Amazon.fr', 'FR', 'Europe', 'European Euro', 'EUR', 'https://mws-eu.amazonservices.com'),
-('A1AM78C64UM0Y8', 'Mexico', 'Amazon.com.mx', 'MX', 'North America', 'Mexican Peso', 'MXN', 'https://mws.amazonservices.com'),
-('A1F83G8C2ARO7P', 'UK', 'Amazon.co.uk', 'UK', 'Europe', 'Pound Sterling', 'GBP', 'https://mws-eu.amazonservices.com'),
-('A1PA6795UKMFR9', 'Germany', 'Amazon.de', 'DE', 'Europe', 'European Euro', 'EUR', 'https://mws-eu.amazonservices.com'),
-('A1RKKUPIHCS9HS', 'Spain', 'Amazon.es', 'ES', 'Europe', 'European Euro', 'EUR', 'https://mws-eu.amazonservices.com'),
-('A1VC38T7YXB528', 'Japan', 'Amazon.co.jp', 'JP', 'Others', 'Japanese Yen', 'JPY', 'https://mws.amazonservices.jp'),
-('A21TJRUUN4KGV', 'India', 'Amazon.in', 'IN', 'Others', 'Indian Ruppes', 'INR', 'https://mws.amazonservices.in'),
-('A2EUQ1WTGCTBG2', 'Canada', 'Amazon.ca', 'CA', 'North America', 'Canadian Dollars', 'CAD', 'https://mws.amazonservices.com'),
-('A2Q3Y263D00KWC', 'Brazil', 'Amazon.com.br', 'BR', 'Others', 'Brazilian Real', 'BRL', 'https://mws.amazonservices.com'),
-('A39IBJ37TRP1C6', 'Australia', 'Amazon.com.au', 'AU', 'Others', 'Australian Dollars', 'AUD', 'https://mws.amazonservices.com.au'),
-('AAHKV2X7AFYLW', 'China', 'Amazon.cn', 'CN', 'Others', 'Chinese Yuan Renminbi', 'CNY', 'https://mws.amazonservices.com.cn'),
-('APJ6JRA9NG5V4', 'Italy', 'Amazon.it', 'IT', 'Europe', 'European Euro', 'EUR', 'https://mws-eu.amazonservices.com'),
-('ATVPDKIKX0DER', 'US', 'Amazon.com', 'US', 'North America', 'US Dollars', 'USD', 'https://mws.amazonservices.com');
+INSERT INTO `mws_marketplaces` (`mp_id`, `mp_name`, `country_code`, `mp_region`, `sales_channel`, `currency`, `curr_code`, `endpoint`) VALUES
+('A13V1IB3VIYZZH', 'France', 'FR', 'Europe', 'Amazon.fr', 'European Euro', 'EUR', 'https://mws-eu.amazonservices.com'),
+('A1AM78C64UM0Y8', 'Mexico', 'MX', 'North America', 'Amazon.com.mx', 'Mexican Peso', 'MXN', 'https://mws.amazonservices.com'),
+('A1F83G8C2ARO7P', 'United Kingdom', 'UK', 'Europe', 'Amazon.co.uk', 'Pound Sterling', 'GBP', 'https://mws-eu.amazonservices.com'),
+('A1PA6795UKMFR9', 'Germany', 'DE', 'Europe', 'Amazon.de', 'European Euro', 'EUR', 'https://mws-eu.amazonservices.com'),
+('A1RKKUPIHCS9HS', 'Spain', 'ES', 'Europe', 'Amazon.es', 'European Euro', 'EUR', 'https://mws-eu.amazonservices.com'),
+('A1VC38T7YXB528', 'Japan', 'JP', 'Others', 'Amazon.co.jp', 'Japanese Yen', 'JPY', 'https://mws.amazonservices.jp'),
+('A21TJRUUN4KGV', 'India', 'IN', 'Others', 'Amazon.in', 'Indian Ruppes', 'INR', 'https://mws.amazonservices.in'),
+('A2EUQ1WTGCTBG2', 'Canada', 'CA', 'North America', 'Amazon.ca', 'Canadian Dollars', 'CAD', 'https://mws.amazonservices.com'),
+('A2Q3Y263D00KWC', 'Brazil', 'BR', 'Others', 'Amazon.com.br', 'Brazilian Real', 'BRL', 'https://mws.amazonservices.com'),
+('A39IBJ37TRP1C6', 'Australia', 'AU', 'Others', 'Amazon.com.au', 'Australian Dollars', 'AUD', 'https://mws.amazonservices.com.au'),
+('AAHKV2X7AFYLW', 'China', 'CN', 'Others', 'Amazon.cn', 'Chinese Yuan Renminbi', 'CNY', 'https://mws.amazonservices.com.cn'),
+('APJ6JRA9NG5V4', 'Italy', 'IT', 'Europe', 'Amazon.it', 'European Euro', 'EUR', 'https://mws-eu.amazonservices.com'),
+('ATVPDKIKX0DER', 'United States', 'US', 'North America', 'Amazon.com', 'US Dollars', 'USD', 'https://mws.amazonservices.com');
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `mws_sellers`
+--
+
+CREATE TABLE `mws_sellers` (
+  `seller_id` varchar(14) NOT NULL,
+  `mp_id` varchar(15) NOT NULL,
+  `mws_auth_token` varchar(45) NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 
 -- --------------------------------------------------------
 
@@ -282,7 +300,7 @@ CREATE TABLE `users` (
 --
 
 INSERT INTO `users` (`user_id`, `name`, `email`, `password`, `registered_on`) VALUES
-(1, 'Tarique', 'mtarique@outlook.com', '$2y$10$YuCOcG2MKBXPoNMlzrJxCOSTvrBI643BHpxz9ZOUCCssynqxmm/9O', '2020-05-02');
+(1, 'Tarique', 'tarique@rituraj.com', '$2y$10$YuCOcG2MKBXPoNMlzrJxCOSTvrBI643BHpxz9ZOUCCssynqxmm/9O', '2020-05-02');
 
 --
 -- Indexes for dumped tables
@@ -307,24 +325,25 @@ ALTER TABLE `fba_stg_fees_usa`
   ADD PRIMARY KEY (`storage_fees_id`);
 
 --
--- Indexes for table `mws_auth_keys`
---
-ALTER TABLE `mws_auth_keys`
-  ADD PRIMARY KEY (`seller_id`);
-
---
 -- Indexes for table `mws_developers`
 --
 ALTER TABLE `mws_developers`
   ADD PRIMARY KEY (`developer_id`),
   ADD UNIQUE KEY `aws_access_key_id` (`aws_access_key_id`),
-  ADD UNIQUE KEY `secret_key` (`secret_key`);
+  ADD UNIQUE KEY `secret_key` (`secret_key`),
+  ADD UNIQUE KEY `mp_region` (`mp_region`);
 
 --
--- Indexes for table `mws_endpoints`
+-- Indexes for table `mws_marketplaces`
 --
-ALTER TABLE `mws_endpoints`
-  ADD PRIMARY KEY (`marketplace_id`);
+ALTER TABLE `mws_marketplaces`
+  ADD PRIMARY KEY (`mp_id`);
+
+--
+-- Indexes for table `mws_sellers`
+--
+ALTER TABLE `mws_sellers`
+  ADD PRIMARY KEY (`seller_id`);
 
 --
 -- Indexes for table `users`

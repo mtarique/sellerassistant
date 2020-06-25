@@ -6,6 +6,8 @@ $this->load->view('templates/titlebar');
 $this->load->view('templates/loader'); 
 ?>
 
+<div id="resAmzPmts"></div>
+
 <table class="table table-hover table-sm border small" id="tblAmzPmts">
     <thead>
         <tr class="bg-grey-100">
@@ -47,6 +49,7 @@ $this->load->view('templates/loader');
                     $('#tblAmzPmts > tbody').html(res.report_list); 
                     $('#resLoadMore').html(res.load_more);
                     //load_more_payments(); 
+                    comp_fba_fees(); 
                 }
                 else {
                     $('#tblAmzPmts > tbody').html(res.message); 
@@ -95,6 +98,48 @@ $this->load->view('templates/loader');
                         var xhr_text = xhr.status+" "+xhr.statusText;
                         swal({title: "Request error!", text: xhr_text, icon: "error"});
                     }
+                }); 
+            }); 
+        }
+
+        /**
+         * Compare FBA Fees
+         *
+         * @return void
+         */
+        function comp_fba_fees()
+        {
+            $('.btn-comp-fba-fees').each(function(){
+                $(this).click(function(){
+                    $.ajax({
+                        type: "get", 
+                        url: "<?php echo base_url('payments/amazon/payment_analyzer/save_fba_fees'); ?>", 
+                        data: "fineventgrpid="+$(this).attr('fin-event-grp-id'), 
+                        dataType: "json", 
+                        beforeSend: function()
+                        {
+                            $('#loader').removeClass("d-none");
+                        }, 
+                        complete: function() 
+                        {
+                            $('#loader').addClass("d-none");
+                        }, 
+                        success: function(res)
+                        {
+                            if(res.status)
+                            {   
+                                $('#resAmzPmts').html(res.message); 
+                            }
+                            else {
+                                $('#resAmzPmts').html(res.message);
+                            }
+                        }, 
+                        error: function(xhr)
+                        {
+                            var xhr_text = xhr.status+" "+xhr.statusText;
+                            swal({title: "Request error!", text: xhr_text, icon: "error"});
+                        }
+                    });
                 }); 
             }); 
         }

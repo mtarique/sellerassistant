@@ -12,6 +12,7 @@ $this->load->view('templates/loader');
             <th class="align-middle text-center">Amazon Order Id</th>
             <th class="align-middle text-center">Order Date</th>
             <th class="align-middle text-left">Marketplace</th>
+            <th class="align-middle text-center">Order Item Id</th>
             <th class="align-middle text-center">SKU</th>
             <th class="align-middle text-center">Quantity Shipped</th>
             <th class="align-middle text-left">Amount Description</th>
@@ -59,21 +60,25 @@ $this->load->view('templates/loader');
                         fixedHeader: {
                             headerOffset: $('#topnav').outerHeight()
                         },
-                        rowGroup: {
+                        /* rowGroup: {
                             startRender: null, 
                             endRender: function(rows, group) 
                             {
                                 return 'Order Id: '+ group;
                             }, 
                             dataSrc: 0
-                        }, 
+                        }, */ 
                         "drawCallback": function(settings, json)
                         {
                             $('#resLoadMore').html(res.load_more); 
 
                             load_more_pmts_trans();
+
+
                         }
                     }); 
+
+                    
                 }
                 else {
                     $('#tblPmtsTrans > tbody').html(res.message); 
