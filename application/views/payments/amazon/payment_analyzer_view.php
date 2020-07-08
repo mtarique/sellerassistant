@@ -6,7 +6,11 @@ $this->load->view('templates/titlebar');
 $this->load->view('templates/loader'); 
 ?>
 
+
+<div id="res1"></div>
+
 <div id="resAmzPmts"></div>
+
 
 <table class="table table-hover table-sm border small" id="tblAmzPmts">
     <thead>
@@ -50,6 +54,11 @@ $this->load->view('templates/loader');
                     $('#resLoadMore').html(res.load_more);
                     //load_more_payments(); 
                     comp_fba_fees(); 
+                    /* $.when(comp_fba_fees()).done(function(){
+                        $.each(json_res, function(key, value){
+                            $('#resAmzPmts').text(JSON.stringify(value), null, ''); 
+                        });
+                    }); */ 
                 }
                 else {
                     $('#tblAmzPmts > tbody').html(res.message); 
@@ -113,7 +122,7 @@ $this->load->view('templates/loader');
                 $(this).click(function(){
                     $.ajax({
                         type: "get", 
-                        url: "<?php echo base_url('payments/amazon/payment_analyzer/save_fba_fees'); ?>", 
+                        url: "<?php echo base_url('payments/amazon/payment_analyzer/fetch_fba_fees'); ?>", 
                         data: "fineventgrpid="+$(this).attr('fin-event-grp-id'), 
                         dataType: "json", 
                         beforeSend: function()
@@ -122,17 +131,23 @@ $this->load->view('templates/loader');
                         }, 
                         complete: function() 
                         {
-                            $('#loader').addClass("d-none");
+                            //$('#loader').addClass("d-none");
                         }, 
                         success: function(res)
                         {
                             if(res.status)
-                            {   
-                                $('#resAmzPmts').html(res.message); 
+                            {      
+                                // Request FBA fees by Next Token
+                                if("next_token" in res)
+                                {   
+                                    req_fba_fees_by_next_token(res.next_token[0]); 
+                                } 
+                                else {
+                                    $('#loader').addClass("d-none");
+                                    swal({title: "Saved!", text: "FBA Fees Data saved.", icon: "success"}); 
+                                }
                             }
-                            else {
-                                $('#resAmzPmts').html(res.message);
-                            }
+                            else $('#resAmzPmts').html(res.message);
                         }, 
                         error: function(xhr)
                         {
@@ -142,6 +157,49 @@ $this->load->view('templates/loader');
                     });
                 }); 
             }); 
+        }
+
+        /**
+         * Request FBA Fees by Next Token 
+         */
+        function req_fba_fees_by_next_token(NextToken)
+        {   
+            $.ajax({
+                type: "get", 
+                url: "<?php echo base_url('payments/amazon/payment_analyzer/fetch_fba_fees_by_next_token'); ?>", 
+                //data: "nexttoken="+encodeURIComponent(NextToken),   
+                data: "nexttoken="+NextToken,   
+                dataType: "json", 
+               /*  beforeSend: function()
+                {
+                    $('#loader').removeClass("d-none");
+                }, 
+                complete: function() 
+                {
+                    $('#loader').addClass("d-none");
+                },  */
+                success: function(res)
+                {
+                    if(res.status)
+                    {  
+                       // Request FBA Fees by Next Token
+                        if("next_token" in res)
+                        {
+                            req_fba_fees_by_next_token(res.next_token[0]);                       
+                        }
+                        else {
+                            $('#loader').addClass("d-none");
+                            swal({title: "Saved!", text: "FBA Fees Data saved.", icon: "success"}); 
+                        }
+                    }
+                    else $('#resAmzPmts').html(res.message);
+                }, 
+                error: function(xhr)
+                {
+                    var xhr_text = xhr.status+" "+xhr.statusText;
+                    swal({title: "Request error!", text: xhr_text, icon: "error"});
+                }
+            });
         }
     }); 
 </script>

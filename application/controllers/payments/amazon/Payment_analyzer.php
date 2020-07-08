@@ -48,7 +48,7 @@ class Payment_analyzer extends CI_Controller
         // ORG
         //$response = $this->finances->ListFinancialEventGroups('QTFYV0dRQ1VTOTVEOTY=', 'YW16bi5td3MuOTZhNjljMDUtZWQyNy0xMjkzLTllZTktMmY0NjBmMzdhNmIy', 'QUtJQUpCTU1UVlVQVlJGTVVPNUE=', 'WUpiV2xSZEVFeW8xaHFYVmMxU0NSbVdVZHFQVmpKeDF0bTJ6L250dg==', '2020-06-01');
         // AL
-        $response = $this->finances->ListFinancialEventGroups('QTFQSkswUkFJNzBVUTM=', 'YW16bi5td3MuZmNiOTNjNjEtMTgzNC05MTNlLTVjNjEtNDk2NTA2Zjk5N2Yw', 'QUtJQUlPNE1aSkhDTkNJNUdCWkE=', 'ZTI1MFh1RnhsNTBQcG5LRDl5czN4ei9TSEJGMzN6NGsvTmtCQ0piZQ==', '2020-06-01');
+        $response = $this->finances->ListFinancialEventGroups('QTFQSkswUkFJNzBVUTM=', 'YW16bi5td3MuZmNiOTNjNjEtMTgzNC05MTNlLTVjNjEtNDk2NTA2Zjk5N2Yw', 'QUtJQUpaRlNTVDJRVDVJWExRVFE=', 'UXFJbE5yN3ZUT0JzMklQWEtiajBUWGY1V1E3UnY2Ukd1OFVvdzNZRQ==', '2020-06-01');
 
         $xml = new SimpleXMLElement($response); 
 
@@ -116,7 +116,7 @@ class Payment_analyzer extends CI_Controller
         $fin_event_grp_id = $this->input->get('fineventgrpid');
 
         // MWS request to ListFinancialEvents
-        $response = $this->finances->ListFinancialEvents('QTFQSkswUkFJNzBVUTM=', 'YW16bi5td3MuZmNiOTNjNjEtMTgzNC05MTNlLTVjNjEtNDk2NTA2Zjk5N2Yw', 'QUtJQUlPNE1aSkhDTkNJNUdCWkE=', 'ZTI1MFh1RnhsNTBQcG5LRDl5czN4ei9TSEJGMzN6NGsvTmtCQ0piZQ==', null, null, $fin_event_grp_id, null, null);
+        $response = $this->finances->ListFinancialEvents('QTFQSkswUkFJNzBVUTM=', 'YW16bi5td3MuZmNiOTNjNjEtMTgzNC05MTNlLTVjNjEtNDk2NTA2Zjk5N2Yw', 'QUtJQUpaRlNTVDJRVDVJWExRVFE=', 'UXFJbE5yN3ZUT0JzMklQWEtiajBUWGY1V1E3UnY2Ukd1OFVvdzNZRQ==', null, null, $fin_event_grp_id, null, null);
 
         $xml = new SimpleXMLElement($response); 
 
@@ -209,7 +209,7 @@ class Payment_analyzer extends CI_Controller
         $next_token = $this->input->get('nexttoken'); 
 
         // MWS request to ListFinancialEventsByNextToken
-        $response = $this->finances->ListFinancialEventsByNextToken('QTFQSkswUkFJNzBVUTM=', 'YW16bi5td3MuZmNiOTNjNjEtMTgzNC05MTNlLTVjNjEtNDk2NTA2Zjk5N2Yw', 'QUtJQUlPNE1aSkhDTkNJNUdCWkE=', 'ZTI1MFh1RnhsNTBQcG5LRDl5czN4ei9TSEJGMzN6NGsvTmtCQ0piZQ==', $next_token);
+        $response = $this->finances->ListFinancialEventsByNextToken('QTFQSkswUkFJNzBVUTM=', 'YW16bi5td3MuZmNiOTNjNjEtMTgzNC05MTNlLTVjNjEtNDk2NTA2Zjk5N2Yw', 'QUtJQUpaRlNTVDJRVDVJWExRVFE=', 'UXFJbE5yN3ZUT0JzMklQWEtiajBUWGY1V1E3UnY2Ukd1OFVvdzNZRQ==', $next_token);
 
         $xml = new SimpleXMLElement($response); 
 
@@ -298,13 +298,13 @@ class Payment_analyzer extends CI_Controller
      *
      * @return void
      */
-    public function save_fba_fees()
+    public function fetch_fba_fees()
     {   
         // Financial event group id
         $fin_event_grp_id = $this->input->get('fineventgrpid');
 
         // MWS request to ListFinancialEvents
-        $response = $this->finances->ListFinancialEvents('QTFQSkswUkFJNzBVUTM=', 'YW16bi5td3MuZmNiOTNjNjEtMTgzNC05MTNlLTVjNjEtNDk2NTA2Zjk5N2Yw', 'QUtJQUlPNE1aSkhDTkNJNUdCWkE=', 'ZTI1MFh1RnhsNTBQcG5LRDl5czN4ei9TSEJGMzN6NGsvTmtCQ0piZQ==', null, null, $fin_event_grp_id, null, null);
+        $response = $this->finances->ListFinancialEvents('QTFQSkswUkFJNzBVUTM=', 'YW16bi5td3MuZmNiOTNjNjEtMTgzNC05MTNlLTVjNjEtNDk2NTA2Zjk5N2Yw', 'QUtJQUpaRlNTVDJRVDVJWExRVFE=', 'UXFJbE5yN3ZUT0JzMklQWEtiajBUWGY1V1E3UnY2Ukd1OFVvdzNZRQ==', null, null, $fin_event_grp_id, null, null);
 
         $xml = new SimpleXMLElement($response); 
 
@@ -356,13 +356,113 @@ class Payment_analyzer extends CI_Controller
             if($result == 1)
             {
                 $ajax['status'] = true; 
-                $ajax['message'] = show_alert('success', 'Done'); 
+            
+                // If response has next token
+                if(isset($xml->ListFinancialEventsResult->NextToken)) 
+                {   
+                    $ajax['next_token']= $xml->ListFinancialEventsResult->NextToken;
+                }
             }
             else {
-                $ajax['status'] = false; 
-                $ajax['message'] = show_alert('danger', print_r($fees_data, true)); 
-                $ajax['message'] = show_alert('danger', "Your request could not be processed please try again."); 
+                $ajax['status'] = false;  
+                $ajax['message'] = show_alert('danger', "FBA Fees data could not be saved.");
             }
+        }
+        else {
+            $ajax['status'] = false; 
+            $ajax['message'] = show_alert('danger', $xml->Error->Message);
+        }
+
+        echo json_encode($ajax); 
+    }
+
+    /**
+     * Get and save FBA Fees data by Next Token
+     * 
+     * The saved fees data wiill be used later to compare fba fees
+     * 
+     * @return void
+     */
+    public function fetch_fba_fees_by_next_token()
+    {
+        // Next token 
+        $next_token = $this->input->get('nexttoken');
+
+        // MWS request to ListFinancialEventsByNextToken
+        $response = $this->finances->ListFinancialEventsByNextToken('QTFQSkswUkFJNzBVUTM=', 'YW16bi5td3MuZmNiOTNjNjEtMTgzNC05MTNlLTVjNjEtNDk2NTA2Zjk5N2Yw', 'QUtJQUpaRlNTVDJRVDVJWExRVFE=', 'UXFJbE5yN3ZUT0JzMklQWEtiajBUWGY1V1E3UnY2Ukd1OFVvdzNZRQ==', $next_token);
+
+        $xml = new SimpleXMLElement($response); 
+
+        if(isset($xml->ListFinancialEventsByNextTokenResult->FinancialEvents->ShipmentEventList->ShipmentEvent))
+        {   
+            // Empty 2D array to hold FBA Fees Data
+            $fees_data = array(); 
+
+            // Initialize loop counter
+            $i = 0; 
+
+            // Loop through each financial events
+            foreach($xml->ListFinancialEventsByNextTokenResult->FinancialEvents->ShipmentEventList->ShipmentEvent as $shipment_event)
+            {   
+                foreach($shipment_event->ShipmentItemList->ShipmentItem as $shipment_item)
+                {      
+                    // Item fees - Add to amount array
+                    if(isset($shipment_item->ItemFeeList->FeeComponent))
+                    {
+                        foreach($shipment_item->ItemFeeList->FeeComponent as $fee_component)
+                        {   
+                            // Insert only if FeeType is FBAPerUnitFulfillmentFee
+                            if($fee_component->FeeType == 'FBAPerUnitFulfillmentFee')
+                            {
+                                // Add fees data to array rows
+                                $fees_data[$i]['amz_ord_id']  = $shipment_event->AmazonOrderId; 
+                                $fees_data[$i]['posted_date'] = date('Y-m-d H: m: i', strtotime($shipment_event->PostedDate)); 
+                                $fees_data[$i]['mp_name']     = $shipment_event->MarketplaceName; 
+                                $fees_data[$i]['ord_item_id'] = $shipment_item->OrderItemId; 
+                                $fees_data[$i]['seller_sku']  = $shipment_item->SellerSKU; 
+                                $fees_data[$i]['qty_shp']     = $shipment_item->QuantityShipped; 
+                                $fees_data[$i]['fee_type']    = $fee_component->FeeType; 
+                                $fees_data[$i]['fee_curr']    = $fee_component->FeeAmount->CurrencyCode; 
+                                $fees_data[$i]['fee_amt']     = $fee_component->FeeAmount->CurrencyAmount; 
+
+                                // Increment the loop counter
+                                $i++; 
+                            }
+                        }
+                    }
+                }
+            }
+
+            // Query to insert FBA fees data
+            $result = $this->payments_model->insert_fba_fees($fees_data);
+            
+            // Validate the query response
+            if($result == 1)
+            {
+                $ajax['status'] = true; 
+                //$ajax['message'] = show_alert('success', 'Done'); 
+                //$ajax['message'] = $fees_data; 
+
+                
+                // Show load more button if it has next token 
+                if(isset($xml->ListFinancialEventsByNextTokenResult->NextToken)) 
+                {   
+                    $ajax['next_token']= $xml->ListFinancialEventsByNextTokenResult->NextToken; 
+                }
+            }
+            else {
+                $ajax['status'] = false;  
+                $ajax['message'] = show_alert('danger', "FBA Fees data by Next Token could not be saved.");
+            }
+
+            /* $ajax['status'] = true; 
+            $ajax['message'] = $fees_data; 
+
+            // Show load more button if it has next token 
+            if(isset($xml->ListFinancialEventsByNextTokenResult->NextToken)) 
+            {   
+                $ajax['next_token']= $xml->ListFinancialEventsByNextTokenResult->NextToken; 
+            } */
         }
         else {
             $ajax['status'] = false; 

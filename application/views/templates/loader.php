@@ -15,7 +15,7 @@
     }
 </style>
 
-<div id="loader" class="d-none" stylee="display: none;">
+<div id="loader" class="d-none">
     <div class="d-flex flex-column align-items-center justify-content-center bg-overlay min-vh-90">
         <div class="row">
 	       	<div class="spinner-border text-primary spinner-3" role="status"></div>
@@ -25,3 +25,21 @@
 	    </div>
     </div>
 </div>
+
+<!-- <div id="progress-loader" class="dnone bgoverlay min-vh-90">
+    <div class="d-flex-flex-column align-items-center justify-content-center  ">
+        <div class="progress">
+       
+            <div class="progress-bar progress-bar-striped bg-success" role="progressbar" style="width: 25%" aria-valuenow="25" aria-valuemin="0" aria-valuemax="100"></div>
+        
+	    </div>
+    </div>
+</div> -->
+
+<!-- <div class="bg-overlay">
+    <div class="progress">
+        <div class="progress-bar progress-bar-striped bg-success" role="progressbar" style="width: 25%" aria-valuenow="25" aria-valuemin="0" aria-valuemax="100"></div>
+    </div>
+</div> -->
+
+
