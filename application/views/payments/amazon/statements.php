@@ -36,7 +36,7 @@ $this->load->view('templates/loader');
          */
         $.ajax({
             type: "get", 
-            url: "<?php echo base_url('payments/amazon/payment_analyzer/get_payments'); ?>",
+            url: "<?php echo base_url('payments/amazon_payments/get_payments'); ?>",
             dataType: "json", 
             beforeSend: function()
             {
@@ -79,7 +79,7 @@ $this->load->view('templates/loader');
             $('#btnLoadMore').click(function(){
                 $.ajax({
                     type: "get", 
-                    url: "<?php echo base_url('payments/amazon/payment_analyzer/get_payments_by_next_token'); ?>",
+                    url: "<?php echo base_url('payments/amazon_payments/get_payments_by_next_token'); ?>",
                     data: "nexttoken="+encodeURIComponent($(this).attr('next-token')),  
                     dataType: "json", 
                     beforeSend: function()
@@ -122,7 +122,7 @@ $this->load->view('templates/loader');
                 $(this).click(function(){
                     $.ajax({
                         type: "get", 
-                        url: "<?php echo base_url('payments/amazon/payment_analyzer/fetch_fba_fees'); ?>", 
+                        url: "<?php echo base_url('payments/amazon_payments/fetch_fba_fees'); ?>", 
                         data: "fineventgrpid="+$(this).attr('fin-event-grp-id'), 
                         dataType: "json", 
                         beforeSend: function()
@@ -166,7 +166,7 @@ $this->load->view('templates/loader');
         {   
             $.ajax({
                 type: "get", 
-                url: "<?php echo base_url('payments/amazon/payment_analyzer/fetch_fba_fees_by_next_token'); ?>", 
+                url: "<?php echo base_url('payments/amazon_payments/fetch_fba_fees_by_next_token'); ?>", 
                 //data: "nexttoken="+encodeURIComponent(NextToken),   
                 data: "nexttoken="+NextToken,   
                 dataType: "json", 

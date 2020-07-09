@@ -11,7 +11,7 @@ defined('BASEPATH') or exit('No direct script access allowed.');
 
 date_default_timezone_set('UTC');
 
-class Payment_analyzer extends CI_Controller 
+class Amazon_payments extends CI_Controller 
 {
     public function __construct()
     {
@@ -31,10 +31,10 @@ class Payment_analyzer extends CI_Controller
      */
     public function index()
     {
-        $page_data['title'] = "Payment Analyzer";
-        $page_data['descr'] = "Let you anazlyze your Amazon payments."; 
+        $page_data['title'] = "Amazon Payments";
+        $page_data['descr'] = "View and do analysis for your Amazon payments."; 
 
-        $this->load->view('payments/amazon/payment_analyzer_view', $page_data);
+        $this->load->view('payments/amazon/statements', $page_data);
     }
 
     /**
@@ -73,7 +73,7 @@ class Payment_analyzer extends CI_Controller
                         <td class="align-middle text-center">'.$fund_transfer_date.'</td>
                         <td class="align-middle text-left">'.$event_group->ProcessingStatus.'</td>
                         <td class="align-middle text-center">
-                            <a href="'.base_url('payments/amazon/payment_analyzer/view_transactions?fineventgrpid='.$event_group->FinancialEventGroupId).'" target="_blank" class="btn btn-xs btn-warning shadow-sm">View Transactions</a>
+                            <a href="'.base_url('payments/amazon_payments/view_transactions?fineventgrpid='.$event_group->FinancialEventGroupId).'" target="_blank" class="btn btn-xs btn-warning shadow-sm">View Transactions</a>
                             <a href="#" class="btn btn-xs btn-warning shadow-sm btn-comp-fba-fees" fin-event-grp-id="'.$event_group->FinancialEventGroupId.'">Compare FBA Fees</a>
                         </td>
                     </tr>
@@ -102,7 +102,7 @@ class Payment_analyzer extends CI_Controller
         $page_data['descr'] = "Transactional details for your Amazon payment."; 
         $page_data['fin_event_grp_id'] = $this->input->get('fineventgrpid'); 
 
-        $this->load->view('payments/amazon/payment_transactions', $page_data);
+        $this->load->view('payments/amazon/transactions', $page_data);
     }
 
     /**
