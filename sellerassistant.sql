@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: Jun 25, 2020 at 03:56 PM
+-- Generation Time: Jul 11, 2020 at 12:17 PM
 -- Server version: 10.1.25-MariaDB
 -- PHP Version: 7.1.7
 
@@ -25,10 +25,11 @@ SET time_zone = "+00:00";
 -- --------------------------------------------------------
 
 --
--- Table structure for table `fba_fees`
+-- Table structure for table `fba_fees_comp_details`
 --
 
-CREATE TABLE `fba_fees` (
+CREATE TABLE `fba_fees_comp_details` (
+  `fin_event_grp_id` varchar(255) NOT NULL,
   `amz_ord_id` varchar(19) NOT NULL,
   `posted_date` datetime NOT NULL,
   `mp_name` varchar(15) NOT NULL,
@@ -38,6 +39,18 @@ CREATE TABLE `fba_fees` (
   `fee_type` varchar(35) NOT NULL,
   `fee_curr` varchar(3) NOT NULL,
   `fee_amt` double NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=latin1;
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `fba_fees_comp_header`
+--
+
+CREATE TABLE `fba_fees_comp_header` (
+  `fin_event_grp_id` varchar(255) NOT NULL,
+  `fin_event_grp_start` date NOT NULL,
+  `fin_event_grp_end` date NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 
 -- --------------------------------------------------------
@@ -296,15 +309,20 @@ CREATE TABLE `users` (
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 
 --
--- Dumping data for table `users`
---
-
-INSERT INTO `users` (`user_id`, `name`, `email`, `password`, `registered_on`) VALUES
-(1, 'Tarique', 'tarique@rituraj.com', '$2y$10$YuCOcG2MKBXPoNMlzrJxCOSTvrBI643BHpxz9ZOUCCssynqxmm/9O', '2020-05-02');
-
---
 -- Indexes for dumped tables
 --
+
+--
+-- Indexes for table `fba_fees_comp_details`
+--
+ALTER TABLE `fba_fees_comp_details`
+  ADD KEY `fk_fba_fees_comp_details_header` (`fin_event_grp_id`);
+
+--
+-- Indexes for table `fba_fees_comp_header`
+--
+ALTER TABLE `fba_fees_comp_header`
+  ADD PRIMARY KEY (`fin_event_grp_id`);
 
 --
 -- Indexes for table `fba_ful_fees_usa`
@@ -375,7 +393,17 @@ ALTER TABLE `fba_stg_fees_usa`
 -- AUTO_INCREMENT for table `users`
 --
 ALTER TABLE `users`
-  MODIFY `user_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;COMMIT;
+  MODIFY `user_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
+--
+-- Constraints for dumped tables
+--
+
+--
+-- Constraints for table `fba_fees_comp_details`
+--
+ALTER TABLE `fba_fees_comp_details`
+  ADD CONSTRAINT `fk_fba_fees_comp_details_header` FOREIGN KEY (`fin_event_grp_id`) REFERENCES `fba_fees_comp_header` (`fin_event_grp_id`) ON DELETE CASCADE ON UPDATE CASCADE;
+COMMIT;
 
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
 /*!40101 SET CHARACTER_SET_RESULTS=@OLD_CHARACTER_SET_RESULTS */;

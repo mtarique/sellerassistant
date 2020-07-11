@@ -74,7 +74,12 @@ class Amazon_payments extends CI_Controller
                         <td class="align-middle text-left">'.$event_group->ProcessingStatus.'</td>
                         <td class="align-middle text-center">
                             <a href="'.base_url('payments/amazon_payments/view_transactions?fineventgrpid='.$event_group->FinancialEventGroupId).'" target="_blank" class="btn btn-xs btn-warning shadow-sm">View Transactions</a>
-                            <a href="#" class="btn btn-xs btn-warning shadow-sm btn-comp-fba-fees" fin-event-grp-id="'.$event_group->FinancialEventGroupId.'">Compare FBA Fees</a>
+                            <a href="#" 
+                                class="btn btn-xs btn-warning shadow-sm btn-comp-fba-fees" 
+                                fin-event-grp-start="'.date('M d, Y', strtotime($event_group->FinancialEventGroupStart)).'" 
+                                fin-event-grp-end="'.date('M d, Y', strtotime($event_group->FinancialEventGroupEnd)).'" 
+                                fin-event-grp-id="'.$event_group->FinancialEventGroupId.'">
+                            Compare FBA Fees</a>
                         </td>
                     </tr>
                 ';
@@ -301,7 +306,9 @@ class Amazon_payments extends CI_Controller
     public function fetch_fba_fees()
     {   
         // Financial event group id
-        $fin_event_grp_id = $this->input->get('fineventgrpid');
+        $fin_event_grp_id    = $this->input->get('fineventgrpid');
+        $fin_event_grp_start = $this->input->get('fineventgrpstart');  
+        $fin_event_grp_end   = $this->input->get('fineventgrpend');  
 
         // MWS request to ListFinancialEvents
         $response = $this->finances->ListFinancialEvents('QTFQSkswUkFJNzBVUTM=', 'YW16bi5td3MuZmNiOTNjNjEtMTgzNC05MTNlLTVjNjEtNDk2NTA2Zjk5N2Yw', 'QUtJQUpaRlNTVDJRVDVJWExRVFE=', 'UXFJbE5yN3ZUT0JzMklQWEtiajBUWGY1V1E3UnY2Ukd1OFVvdzNZRQ==', null, null, $fin_event_grp_id, null, null);
@@ -309,63 +316,73 @@ class Amazon_payments extends CI_Controller
         $xml = new SimpleXMLElement($response); 
 
         if(isset($xml->ListFinancialEventsResult->FinancialEvents->ShipmentEventList->ShipmentEvent))
-        {   
-            // Empty 2D array to hold FBA Fees Data
-            $fees_data = array(); 
+        {  
+            // Query to insert comp header
+            $result = $this->payments_model->insert_fba_fees_comp_header($fin_event_grp_id, $fin_event_grp_start, $fin_event_grp_end); 
 
-            // Initialize loop counter
-            $i = 0; 
+            if($result == 1)
+            {
+                $fees_data = array();   // Empty 2D array to hold FBA Fees Data
 
-            // Loop through each shipment event
-            foreach($xml->ListFinancialEventsResult->FinancialEvents->ShipmentEventList->ShipmentEvent as $shipment_event)
-            {   
-                foreach($shipment_event->ShipmentItemList->ShipmentItem as $shipment_item)
+                $i = 0; // Initialize loop counter
+                 
+                // Loop through each shipment event
+                foreach($xml->ListFinancialEventsResult->FinancialEvents->ShipmentEventList->ShipmentEvent as $shipment_event)
                 {   
-                    // Item fees - Add to amount array
-                    if(isset($shipment_item->ItemFeeList->FeeComponent))
-                    {
-                        // Loop through each amount description 
-                        foreach($shipment_item->ItemFeeList->FeeComponent as $fee_component)
-                        {   
-                            // Insert only if FeeType is FBAPerUnitFulfillmentFee
-                            if($fee_component->FeeType == 'FBAPerUnitFulfillmentFee')
-                            {
-                                // Add fees data to array rows
-                                $fees_data[$i]['amz_ord_id']  = $shipment_event->AmazonOrderId; 
-                                $fees_data[$i]['posted_date'] = date('Y-m-d H: m: i', strtotime($shipment_event->PostedDate)); 
-                                $fees_data[$i]['mp_name']     = $shipment_event->MarketplaceName; 
-                                $fees_data[$i]['ord_item_id'] = $shipment_item->OrderItemId; 
-                                $fees_data[$i]['seller_sku']  = $shipment_item->SellerSKU; 
-                                $fees_data[$i]['qty_shp']     = $shipment_item->QuantityShipped; 
-                                $fees_data[$i]['fee_type']    = $fee_component->FeeType; 
-                                $fees_data[$i]['fee_curr']    = $fee_component->FeeAmount->CurrencyCode; 
-                                $fees_data[$i]['fee_amt']     = $fee_component->FeeAmount->CurrencyAmount; 
+                    foreach($shipment_event->ShipmentItemList->ShipmentItem as $shipment_item)
+                    {   
+                        // Item fees - Add to amount array
+                        if(isset($shipment_item->ItemFeeList->FeeComponent))
+                        {
+                            // Loop through each amount description 
+                            foreach($shipment_item->ItemFeeList->FeeComponent as $fee_component)
+                            {   
+                                // Insert only if FeeType is FBAPerUnitFulfillmentFee
+                                if($fee_component->FeeType == 'FBAPerUnitFulfillmentFee')
+                                {
+                                    // Add fees data to array rows
+                                    $fees_data[$i]['fin_event_grp_id']    = $fin_event_grp_id; 
+                                    $fees_data[$i]['amz_ord_id']          = $shipment_event->AmazonOrderId; 
+                                    $fees_data[$i]['posted_date']         = date('Y-m-d H: m: i', strtotime($shipment_event->PostedDate)); 
+                                    $fees_data[$i]['mp_name']             = $shipment_event->MarketplaceName; 
+                                    $fees_data[$i]['ord_item_id']         = $shipment_item->OrderItemId; 
+                                    $fees_data[$i]['seller_sku']          = $shipment_item->SellerSKU; 
+                                    $fees_data[$i]['qty_shp']             = $shipment_item->QuantityShipped; 
+                                    $fees_data[$i]['fee_type']            = $fee_component->FeeType; 
+                                    $fees_data[$i]['fee_curr']            = $fee_component->FeeAmount->CurrencyCode; 
+                                    $fees_data[$i]['fee_amt']             = $fee_component->FeeAmount->CurrencyAmount; 
 
-                                // Increment the loop counter
-                                $i++; 
+                                    $i++; // Increment the loop counter
+                                }
                             }
                         }
                     }
                 }
-            }
 
-            // Query to insert FBA fees data
-            $result = $this->payments_model->insert_fba_fees($fees_data);
-            
-            // Validate the query response
-            if($result == 1)
-            {
-                $ajax['status'] = true; 
-            
-                // If response has next token
-                if(isset($xml->ListFinancialEventsResult->NextToken)) 
-                {   
-                    $ajax['next_token']= $xml->ListFinancialEventsResult->NextToken;
+                // Query to insert FBA fees data
+                $result = $this->payments_model->insert_fba_fees_comp_details($fees_data);
+                
+                // Validate the query response
+                if($result == 1)
+                {
+                    $ajax['status'] = true; 
+
+                    // If response has next token
+                    if(isset($xml->ListFinancialEventsResult->NextToken)) 
+                    {   
+                        $ajax['next_token']= $xml->ListFinancialEventsResult->NextToken;
+                    }                
+                    
+                    $ajax['message'] = show_alert('success', "Comparison completed! Your report is ready to download."); 
+                }
+                else {
+                    $ajax['status'] = false;  
+                    $ajax['message'] = show_alert('danger', "FBA Fees data could not be saved.");
                 }
             }
             else {
                 $ajax['status'] = false;  
-                $ajax['message'] = show_alert('danger', "FBA Fees data could not be saved.");
+                $ajax['message'] = show_alert('danger', "FBA fees comparison data could not be saved.");
             }
         }
         else {
@@ -385,8 +402,9 @@ class Amazon_payments extends CI_Controller
      */
     public function fetch_fba_fees_by_next_token()
     {
-        // Next token 
+        // URl parameters
         $next_token = $this->input->get('nexttoken');
+        $fin_event_grp_id    = $this->input->get('fineventgrpid');
 
         // MWS request to ListFinancialEventsByNextToken
         $response = $this->finances->ListFinancialEventsByNextToken('QTFQSkswUkFJNzBVUTM=', 'YW16bi5td3MuZmNiOTNjNjEtMTgzNC05MTNlLTVjNjEtNDk2NTA2Zjk5N2Yw', 'QUtJQUpaRlNTVDJRVDVJWExRVFE=', 'UXFJbE5yN3ZUT0JzMklQWEtiajBUWGY1V1E3UnY2Ukd1OFVvdzNZRQ==', $next_token);
@@ -395,11 +413,9 @@ class Amazon_payments extends CI_Controller
 
         if(isset($xml->ListFinancialEventsByNextTokenResult->FinancialEvents->ShipmentEventList->ShipmentEvent))
         {   
-            // Empty 2D array to hold FBA Fees Data
-            $fees_data = array(); 
-
-            // Initialize loop counter
-            $i = 0; 
+            $fees_data = array(); // Empty 2D array to hold FBA Fees Data
+            
+            $i = 0; // Initialize loop counter
 
             // Loop through each financial events
             foreach($xml->ListFinancialEventsByNextTokenResult->FinancialEvents->ShipmentEventList->ShipmentEvent as $shipment_event)
@@ -415,18 +431,18 @@ class Amazon_payments extends CI_Controller
                             if($fee_component->FeeType == 'FBAPerUnitFulfillmentFee')
                             {
                                 // Add fees data to array rows
-                                $fees_data[$i]['amz_ord_id']  = $shipment_event->AmazonOrderId; 
-                                $fees_data[$i]['posted_date'] = date('Y-m-d H: m: i', strtotime($shipment_event->PostedDate)); 
-                                $fees_data[$i]['mp_name']     = $shipment_event->MarketplaceName; 
-                                $fees_data[$i]['ord_item_id'] = $shipment_item->OrderItemId; 
-                                $fees_data[$i]['seller_sku']  = $shipment_item->SellerSKU; 
-                                $fees_data[$i]['qty_shp']     = $shipment_item->QuantityShipped; 
-                                $fees_data[$i]['fee_type']    = $fee_component->FeeType; 
-                                $fees_data[$i]['fee_curr']    = $fee_component->FeeAmount->CurrencyCode; 
-                                $fees_data[$i]['fee_amt']     = $fee_component->FeeAmount->CurrencyAmount; 
+                                $fees_data[$i]['fin_event_grp_id']    = $fin_event_grp_id; 
+                                $fees_data[$i]['amz_ord_id']          = $shipment_event->AmazonOrderId; 
+                                $fees_data[$i]['posted_date']         = date('Y-m-d H: m: i', strtotime($shipment_event->PostedDate)); 
+                                $fees_data[$i]['mp_name']             = $shipment_event->MarketplaceName; 
+                                $fees_data[$i]['ord_item_id']         = $shipment_item->OrderItemId; 
+                                $fees_data[$i]['seller_sku']          = $shipment_item->SellerSKU; 
+                                $fees_data[$i]['qty_shp']             = $shipment_item->QuantityShipped; 
+                                $fees_data[$i]['fee_type']            = $fee_component->FeeType; 
+                                $fees_data[$i]['fee_curr']            = $fee_component->FeeAmount->CurrencyCode; 
+                                $fees_data[$i]['fee_amt']             = $fee_component->FeeAmount->CurrencyAmount; 
 
-                                // Increment the loop counter
-                                $i++; 
+                                $i++; // Increment the loop counter
                             }
                         }
                     }
@@ -434,35 +450,25 @@ class Amazon_payments extends CI_Controller
             }
 
             // Query to insert FBA fees data
-            $result = $this->payments_model->insert_fba_fees($fees_data);
+            $result = $this->payments_model->insert_fba_fees_comp_details($fees_data);
             
             // Validate the query response
             if($result == 1)
             {
                 $ajax['status'] = true; 
-                //$ajax['message'] = show_alert('success', 'Done'); 
-                //$ajax['message'] = $fees_data; 
-
                 
                 // Show load more button if it has next token 
                 if(isset($xml->ListFinancialEventsByNextTokenResult->NextToken)) 
                 {   
                     $ajax['next_token']= $xml->ListFinancialEventsByNextTokenResult->NextToken; 
                 }
+
+                $ajax['message'] = show_alert('success', "Comparison completed! Your report is ready to download."); 
             }
             else {
                 $ajax['status'] = false;  
                 $ajax['message'] = show_alert('danger', "FBA Fees data by Next Token could not be saved.");
             }
-
-            /* $ajax['status'] = true; 
-            $ajax['message'] = $fees_data; 
-
-            // Show load more button if it has next token 
-            if(isset($xml->ListFinancialEventsByNextTokenResult->NextToken)) 
-            {   
-                $ajax['next_token']= $xml->ListFinancialEventsByNextTokenResult->NextToken; 
-            } */
         }
         else {
             $ajax['status'] = false; 
