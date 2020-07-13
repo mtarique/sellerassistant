@@ -17,6 +17,8 @@ class Integrations extends CI_Controller
 
         $this->load->helper('auth_helper');
 
+        $this->load->library('encryption');
+
         $this->load->model('settings/integrations_model'); 
     }
 
@@ -43,22 +45,35 @@ class Integrations extends CI_Controller
 
     /**
      * Connect to MWS or add seller MWS credentials
+     *
+     * @return void
      */
     public function connect_mws()
     {
         // Set form validation rules 
+        $this->form_validation->set_rules('inputMWSAcctName', 'Account Name', 'required'); 
         $this->form_validation->set_rules('inputMpId', 'Marketplace', 'required');
         $this->form_validation->set_rules('inputSellerId', 'Seller Id', 'required');
         $this->form_validation->set_rules('inputMwsAuthToken', 'Seller Id', 'required');
+        $this->form_validation->set_rules('inputAWSAccessKeyId', 'AWS Access Key ID', 'required');
+        $this->form_validation->set_rules('inputSecretKey', 'Secret Key', 'required');  
 
+        // Validate user input
         if($this->form_validation->run() == true)
         {   
-            $seller_data['seller_id']      = $this->input->post('inputSellerId'); 
-            $seller_data['mp_id']          = $this->input->post('inputMpId'); 
-            $seller_data['mws_auth_token'] = $this->input->post('inputMwsAuthToken');
+            // Amazon seller MWS account data array
+            $seller_data['user_id']           = $this->session->userdata('_userid');  
+            $seller_data['account_name']      = $this->input->post('inputMWSAcctName'); 
+            $seller_data['marketplace_id']    = $this->input->post('inputMpId'); 
+            $seller_data['seller_id']         = $this->encryption->encrypt($this->input->post('inputSellerId')); 
+            $seller_data['mws_auth_token']    = $this->encryption->encrypt($this->input->post('inputMwsAuthToken'));
+            $seller_data['aws_access_key_id'] = $this->encryption->encrypt($this->input->post('inputAWSAccessKeyId')); 
+            $seller_data['secret_key']        = $this->encryption->encrypt($this->input->post('inputSecretKey')); 
 
-            $result = $this->integrations_model->add_seller($seller_data);
+            // Query to add MWS Account
+            $result = $this->integrations_model->insert_mws_account($seller_data);
             
+            // Validate query response
             if($result == 1)
             {
                 $ajax['status']  = true; 

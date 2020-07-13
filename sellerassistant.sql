@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: Jul 11, 2020 at 12:17 PM
+-- Generation Time: Jul 13, 2020 at 12:38 PM
 -- Server version: 10.1.25-MariaDB
 -- PHP Version: 7.1.7
 
@@ -235,15 +235,18 @@ INSERT INTO `fba_stg_fees_usa` (`storage_fees_id`, `prod_size_type`, `storage_fe
 -- --------------------------------------------------------
 
 --
--- Table structure for table `mws_developers`
+-- Table structure for table `mws_accounts`
 --
 
-CREATE TABLE `mws_developers` (
-  `developer_id` varchar(14) NOT NULL,
-  `developer_name` varchar(255) DEFAULT NULL,
+CREATE TABLE `mws_accounts` (
+  `account_id` int(11) NOT NULL,
+  `user_id` int(11) NOT NULL,
+  `account_name` varchar(50) NOT NULL,
+  `marketplace_id` varchar(15) NOT NULL,
+  `seller_id` varchar(255) NOT NULL,
+  `mws_auth_token` varchar(255) NOT NULL,
   `aws_access_key_id` varchar(255) NOT NULL,
-  `secret_key` varchar(255) NOT NULL,
-  `mp_region` varchar(50) NOT NULL
+  `secret_key` varchar(255) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 
 -- --------------------------------------------------------
@@ -253,46 +256,15 @@ CREATE TABLE `mws_developers` (
 --
 
 CREATE TABLE `mws_marketplaces` (
-  `mp_id` varchar(15) NOT NULL,
-  `mp_name` varchar(15) NOT NULL,
+  `marketplace_id` varchar(15) NOT NULL,
+  `marketplace_name` varchar(15) NOT NULL,
   `country_code` varchar(2) NOT NULL,
-  `mp_region` varchar(15) NOT NULL,
+  `marketplace_region` varchar(15) NOT NULL,
   `sales_channel` varchar(255) NOT NULL,
   `currency` varchar(35) NOT NULL,
   `curr_code` varchar(3) NOT NULL,
   `endpoint` varchar(255) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='Amazon marketplaces';
-
---
--- Dumping data for table `mws_marketplaces`
---
-
-INSERT INTO `mws_marketplaces` (`mp_id`, `mp_name`, `country_code`, `mp_region`, `sales_channel`, `currency`, `curr_code`, `endpoint`) VALUES
-('A13V1IB3VIYZZH', 'France', 'FR', 'Europe', 'Amazon.fr', 'European Euro', 'EUR', 'https://mws-eu.amazonservices.com'),
-('A1AM78C64UM0Y8', 'Mexico', 'MX', 'North America', 'Amazon.com.mx', 'Mexican Peso', 'MXN', 'https://mws.amazonservices.com'),
-('A1F83G8C2ARO7P', 'United Kingdom', 'UK', 'Europe', 'Amazon.co.uk', 'Pound Sterling', 'GBP', 'https://mws-eu.amazonservices.com'),
-('A1PA6795UKMFR9', 'Germany', 'DE', 'Europe', 'Amazon.de', 'European Euro', 'EUR', 'https://mws-eu.amazonservices.com'),
-('A1RKKUPIHCS9HS', 'Spain', 'ES', 'Europe', 'Amazon.es', 'European Euro', 'EUR', 'https://mws-eu.amazonservices.com'),
-('A1VC38T7YXB528', 'Japan', 'JP', 'Others', 'Amazon.co.jp', 'Japanese Yen', 'JPY', 'https://mws.amazonservices.jp'),
-('A21TJRUUN4KGV', 'India', 'IN', 'Others', 'Amazon.in', 'Indian Ruppes', 'INR', 'https://mws.amazonservices.in'),
-('A2EUQ1WTGCTBG2', 'Canada', 'CA', 'North America', 'Amazon.ca', 'Canadian Dollars', 'CAD', 'https://mws.amazonservices.com'),
-('A2Q3Y263D00KWC', 'Brazil', 'BR', 'Others', 'Amazon.com.br', 'Brazilian Real', 'BRL', 'https://mws.amazonservices.com'),
-('A39IBJ37TRP1C6', 'Australia', 'AU', 'Others', 'Amazon.com.au', 'Australian Dollars', 'AUD', 'https://mws.amazonservices.com.au'),
-('AAHKV2X7AFYLW', 'China', 'CN', 'Others', 'Amazon.cn', 'Chinese Yuan Renminbi', 'CNY', 'https://mws.amazonservices.com.cn'),
-('APJ6JRA9NG5V4', 'Italy', 'IT', 'Europe', 'Amazon.it', 'European Euro', 'EUR', 'https://mws-eu.amazonservices.com'),
-('ATVPDKIKX0DER', 'United States', 'US', 'North America', 'Amazon.com', 'US Dollars', 'USD', 'https://mws.amazonservices.com');
-
--- --------------------------------------------------------
-
---
--- Table structure for table `mws_sellers`
---
-
-CREATE TABLE `mws_sellers` (
-  `seller_id` varchar(14) NOT NULL,
-  `mp_id` varchar(15) NOT NULL,
-  `mws_auth_token` varchar(45) NOT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 
 -- --------------------------------------------------------
 
@@ -343,25 +315,18 @@ ALTER TABLE `fba_stg_fees_usa`
   ADD PRIMARY KEY (`storage_fees_id`);
 
 --
--- Indexes for table `mws_developers`
+-- Indexes for table `mws_accounts`
 --
-ALTER TABLE `mws_developers`
-  ADD PRIMARY KEY (`developer_id`),
-  ADD UNIQUE KEY `aws_access_key_id` (`aws_access_key_id`),
-  ADD UNIQUE KEY `secret_key` (`secret_key`),
-  ADD UNIQUE KEY `mp_region` (`mp_region`);
+ALTER TABLE `mws_accounts`
+  ADD PRIMARY KEY (`account_id`),
+  ADD UNIQUE KEY `seller_mp_id` (`seller_id`,`marketplace_id`) USING BTREE,
+  ADD KEY `fk_mws_accts_users` (`user_id`);
 
 --
 -- Indexes for table `mws_marketplaces`
 --
 ALTER TABLE `mws_marketplaces`
-  ADD PRIMARY KEY (`mp_id`);
-
---
--- Indexes for table `mws_sellers`
---
-ALTER TABLE `mws_sellers`
-  ADD PRIMARY KEY (`seller_id`);
+  ADD PRIMARY KEY (`marketplace_id`);
 
 --
 -- Indexes for table `users`
@@ -390,6 +355,11 @@ ALTER TABLE `fba_prod_size_usa`
 ALTER TABLE `fba_stg_fees_usa`
   MODIFY `storage_fees_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=20;
 --
+-- AUTO_INCREMENT for table `mws_accounts`
+--
+ALTER TABLE `mws_accounts`
+  MODIFY `account_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
+--
 -- AUTO_INCREMENT for table `users`
 --
 ALTER TABLE `users`
@@ -403,6 +373,12 @@ ALTER TABLE `users`
 --
 ALTER TABLE `fba_fees_comp_details`
   ADD CONSTRAINT `fk_fba_fees_comp_details_header` FOREIGN KEY (`fin_event_grp_id`) REFERENCES `fba_fees_comp_header` (`fin_event_grp_id`) ON DELETE CASCADE ON UPDATE CASCADE;
+
+--
+-- Constraints for table `mws_accounts`
+--
+ALTER TABLE `mws_accounts`
+  ADD CONSTRAINT `fk_mws_accts_users` FOREIGN KEY (`user_id`) REFERENCES `users` (`user_id`) ON DELETE CASCADE ON UPDATE CASCADE;
 COMMIT;
 
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;

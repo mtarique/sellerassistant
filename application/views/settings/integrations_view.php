@@ -18,18 +18,30 @@ https://help.godatafeed.com/hc/en-us/articles/360016189091-Connecting-Amazon-Aut
                 <p>Connecting your Amazon account is easy! You just need an Amazon professional seller account to sell on Amazon.</p>
                 <form id="formConnectMWS">
                     <div class="form-group">
-                        <label for="inputMpId" class="font-weight-bold small">Marketplace</label>
-                        <select name="inputMpId" id="inputMpId" class="custom-select custom-select-sm">
+                        <label for="inputMWSAcctName" class="font-weight-bold small req-after">Account Name</label>
+                        <input type="text" name="inputMWSAcctName" id="inputMWSAcctName" class="form-control form-control-sm" placeholder="Name your account (example &ldquo;US Account&rdquo;)" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="inputMpId" class="font-weight-bold small req-after">Marketplace</label>
+                        <select name="inputMpId" id="inputMpId" class="custom-select custom-select-sm" required>
                             <option value="ATVPDKIKX0DER">Amazon.com (United States)</option>
                         </select>
                     </div>
                     <div class="form-group">
-                        <label for="inputSellerId" class="font-weight-bold small">Seller Id</label>
-                        <input type="text" name="inputSellerId" id="inputSellerId" class="form-control form-control-sm">
+                        <label for="inputSellerId" class="font-weight-bold small req-after">Seller Id</label>
+                        <input type="text" name="inputSellerId" id="inputSellerId" class="form-control form-control-sm" required>
                     </div>
                     <div class="form-group">
-                        <label for="inputMwsAuthToken" class="font-weight-bold small">MWS Auth Token</label>
-                        <input type="text" name="inputMwsAuthToken" id="inputMwsAuthToken" class="form-control form-control-sm">
+                        <label for="inputMwsAuthToken" class="font-weight-bold small req-after">MWS Auth Token</label>
+                        <input type="text" name="inputMwsAuthToken" id="inputMwsAuthToken" class="form-control form-control-sm" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="inputAWSAccessKeyId" class="font-weight-bold small req-after">AWS Access Key Id</label>
+                        <input type="text" name="inputAWSAccessKeyId" id="inputAWSAccessKeyId" class="form-control form-control-sm" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="inputSecretKey" class="font-weight-bold small req-after">Secret Key</label>
+                        <input type="text" name="inputSecretKey" id="inputSecretKey" class="form-control form-control-sm" required>
                     </div>
                     <div class="form-group text-right">
                         <button type="submit" name="btnConnectMWS" id="btnConnectMWS" class="btn btn-sm btn-success">Connect</button>
