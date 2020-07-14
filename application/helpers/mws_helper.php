@@ -24,10 +24,31 @@ $CI->load->library(array('session', 'user_agent'));
 
 $CI->load->helper('url');
 
-//$CI->load->model('mws_model'); 
 
-// Check active session 
-if(!$CI->session->userdata('_username'))
+
+/**
+ * Amazon accounts in select options
+ *
+ * @return void
+ */
+function amz_accounts_options()
 {
-    redirect('sys/errors/error_sess'); 
-}
+    $CI = & get_instance(); 
+
+    $CI->load->model('settings/channels/amazon_model');
+    
+    $result = $CI->amazon_model->get_amz_accounts(); 
+
+    if(!empty($result)) 
+    {   
+        $options = ''; 
+
+        foreach($result as $row)
+        {
+            $options .= '<option value="'.$row->account_id.'">'.$row->account_name.'</options>';
+        }
+
+        return $options; 
+    }
+    else return '<option>Oops!</option>'; 
+} 

@@ -21,7 +21,8 @@
             <ul class="navbar-nav ml-auto">
                 <li class="nav-item pr-3">
                     <select name="inputMpIdTop" id="inputMpIdTop" class="custom-select-sm border-secondary rounded-0 bg-dark text-white" required>
-                        <option value="ATVPDKIKX0DER">Amazon.com (United States)</option>
+                        <!-- <option value="ATVPDKIKX0DER">Amazon.com (United States)</option> -->
+                        <?php echo amz_accounts_options(); ?>
                     </select>
                 </li>
                 <li class="nav-item pt-1 pr-3">

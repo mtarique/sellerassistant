@@ -30,5 +30,17 @@ class Amazon_model extends CI_Model
 
         return ($query) ? true : $this->db->error()['message'];
     }
+    
+    /**
+     * Get Amazon Accounts
+     *
+     * @return void
+     */
+    public function get_amz_accounts()
+    {
+        $query = $this->db->get('amz_accounts'); 
+
+        return ($query->num_rows() > 0) ? $query->result() : null;
+    }
 }
 ?>
