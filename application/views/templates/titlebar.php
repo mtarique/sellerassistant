@@ -1,6 +1,6 @@
 <?php 
     echo '
-        <h4 class="mb-0">'.$title.'</h4>
+        <h5 class="mb-0">'.$title.'</h5>
         <p class="text-muted small">'.$descr.'</p>
     '; 
 ?>

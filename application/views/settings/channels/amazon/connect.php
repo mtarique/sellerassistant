@@ -2,6 +2,7 @@
 $this->load->view('templates/header'); 
 $this->load->view('templates/topnav'); 
 $this->load->view('templates/wrapper'); 
+$this->load->view('templates/settings-nav'); 
 $this->load->view('templates/titlebar'); 
 $this->load->view('templates/loader'); 
 ?>
@@ -11,11 +12,11 @@ https://help.godatafeed.com/hc/en-us/articles/360016189091-Connecting-Amazon-Aut
 -->
 
 <div class="row">
-    <div class="col-md-6">
-        <div class="card rounded-0 shadowsm">
-            <div class="card-body">
+    <div class="col-md-4">
+        <div class="card border-0 rounded-0">
+            <div class="card-body p-0">
                 <div id="resConnectMWS"></div>
-                <p>Connecting your Amazon account is easy! You just need an Amazon professional seller account to sell on Amazon.</p>
+                <!-- <p>Connecting your Amazon account is easy! You just need an Amazon professional seller account to sell on Amazon.</p> -->
                 <form id="formConnectMWS">
                     <div class="form-group">
                         <label for="inputMWSAcctName" class="font-weight-bold small req-after">Account Name</label>
@@ -65,7 +66,7 @@ https://help.godatafeed.com/hc/en-us/articles/360016189091-Connecting-Amazon-Aut
 
             $.ajax({
                 type: "post", 
-                url: "<?php echo base_url('settings/integrations/connect_mws'); ?>", 
+                url: "<?php echo base_url('settings/channels/amazon/connect'); ?>", 
                 data: $(this).serialize(), 
                 dataType: "json", 
                 beforeSend: function()

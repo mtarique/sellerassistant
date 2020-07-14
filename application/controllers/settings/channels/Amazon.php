@@ -1,6 +1,6 @@
 <?php 
 /**
- * Marketplace Integrations
+ * Amazon Sales Channel Integrations
  * 
  * @package 	Codeigniter
  * @version     3.1.11
@@ -9,7 +9,7 @@
  */
 defined('BASEPATH') or exit('No direct script access allowed.'); 
 
-class Integrations extends CI_Controller 
+class Amazon extends CI_Controller 
 {
     public function __construct()
     {
@@ -19,36 +19,31 @@ class Integrations extends CI_Controller
 
         $this->load->library('encryption');
 
-        $this->load->model('settings/integrations_model'); 
+        $this->load->model('settings/channels/amazon_model'); 
     }
 
     public function index()
     {
-        $page_data['title'] = "Amazon Integrations";
-        $page_data['descr'] = "Connect your amazon seller central account using MWS."; 
+        $page_data['title'] = "Amazon Account";
+        $page_data['descr'] = "Manage your connected Amazon seller central account and connect a new one."; 
 
-        $this->load->view('settings/integrations_view', $page_data);
+        $this->load->view('settings/channels/amazon/accounts', $page_data);
     }
 
-    /**
-     * View Amazon MWS developers settings page
-     *
-     * @return void
-     */
-    public function mws_developers()
+    public function new()
     {
-        $page_data['title'] = "Amazon MWS Developers";
-        $page_data['descr'] = "Manage your Amazon MWS developer credentials."; 
+        $page_data['title'] = "Connect Amazon Account";
+        $page_data['descr'] = "Connect your amazon seller central account using MWS API Keys."; 
 
-        $this->load->view('settings/mws_developers', $page_data);
+        $this->load->view('settings/channels/amazon/connect', $page_data);
     }
-
+   
     /**
      * Connect to MWS or add seller MWS credentials
      *
      * @return void
      */
-    public function connect_mws()
+    public function connect()
     {
         // Set form validation rules 
         $this->form_validation->set_rules('inputMWSAcctName', 'Account Name', 'required'); 
@@ -71,7 +66,7 @@ class Integrations extends CI_Controller
             $seller_data['secret_key']        = $this->encryption->encrypt($this->input->post('inputSecretKey')); 
 
             // Query to add MWS Account
-            $result = $this->integrations_model->insert_mws_account($seller_data);
+            $result = $this->amazon_model->insert_mws_account($seller_data);
             
             // Validate query response
             if($result == 1)
