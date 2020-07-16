@@ -8,5 +8,6 @@ $this->load->view('templates/loader');
 ?>
 
 <a href="<?php echo base_url('settings/channels/amazon/new'); ?>" class="btn btn-sm btn-success shadow-sm"><i class="fas fa-plus"></i> Connect New Account</a>
+
 <?php $this->load->view('templates/footer'); ?>
 

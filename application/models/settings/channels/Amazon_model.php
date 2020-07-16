@@ -32,13 +32,13 @@ class Amazon_model extends CI_Model
     }
     
     /**
-     * Get Amazon Accounts
+     * Get Amazon Accounts by user id
      *
      * @return void
      */
-    public function get_amz_accounts()
+    public function get_amz_accts($userid)
     {
-        $query = $this->db->get('amz_accounts'); 
+        $query = $this->db->get_where('amz_accounts', array('user_id' => $userid)); 
 
         return ($query->num_rows() > 0) ? $query->result() : null;
     }
