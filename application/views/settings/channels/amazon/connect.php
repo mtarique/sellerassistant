@@ -19,8 +19,8 @@ https://help.godatafeed.com/hc/en-us/articles/360016189091-Connecting-Amazon-Aut
                 <!-- <p>Connecting your Amazon account is easy! You just need an Amazon professional seller account to sell on Amazon.</p> -->
                 <form id="formConnectMWS">
                     <div class="form-group">
-                        <label for="inputMWSAcctName" class="font-weight-bold small req-after">Account Name</label>
-                        <input type="text" name="inputMWSAcctName" id="inputMWSAcctName" class="form-control form-control-sm" placeholder="Name your account (example &ldquo;US Account&rdquo;)" required>
+                        <label for="inputAmzAcctName" class="font-weight-bold small req-after">Account Name</label>
+                        <input type="text" name="inputAmzAcctName" id="inputAmzAcctName" class="form-control form-control-sm" placeholder="Name your account (example &ldquo;US Account&rdquo;)" required>
                     </div>
                     <div class="form-group">
                         <label for="inputMpId" class="font-weight-bold small req-after">Marketplace</label>

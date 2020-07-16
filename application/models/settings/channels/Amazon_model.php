@@ -24,21 +24,35 @@ class Amazon_model extends CI_Model
      * @param   array   $seller_data    Contains sellers MWS credentials
      * @return  void
      */
-    public function insert_mws_account($seller_data)
+    public function add_amz_acct($seller_data)
     {
         $query = $this->db->insert('amz_accounts', $seller_data); 
 
         return ($query) ? true : $this->db->error()['message'];
     }
-    
+
     /**
      * Get Amazon Accounts by user id
      *
-     * @return void
+     * @param   integer   $userid     
+     * @return  array
      */
     public function get_amz_accts($userid)
     {
         $query = $this->db->get_where('amz_accounts', array('user_id' => $userid)); 
+
+        return ($query->num_rows() > 0) ? $query->result() : null;
+    }
+
+    /**
+     * Get Amazon MWS access keys
+     *
+     * @param   integer   $acctid   Sales channel account id
+     * @return  void
+     */
+    public function get_mws_keys($acctid)
+    {
+        $query = $this->db->get_where('amz_accounts', array('account_id' => $acctid)); 
 
         return ($query->num_rows() > 0) ? $query->result() : null;
     }

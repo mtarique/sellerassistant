@@ -46,7 +46,7 @@ class Amazon extends CI_Controller
     public function connect()
     {
         // Set form validation rules 
-        $this->form_validation->set_rules('inputMWSAcctName', 'Account Name', 'required'); 
+        $this->form_validation->set_rules('inputAmzAcctName', 'Account Name', 'required'); 
         $this->form_validation->set_rules('inputMpId', 'Marketplace', 'required');
         $this->form_validation->set_rules('inputSellerId', 'Seller Id', 'required');
         $this->form_validation->set_rules('inputMwsAuthToken', 'Seller Id', 'required');
@@ -58,7 +58,7 @@ class Amazon extends CI_Controller
         {   
             // Amazon seller MWS account data array
             $seller_data['user_id']           = $this->session->userdata('_userid');  
-            $seller_data['account_name']      = $this->input->post('inputMWSAcctName'); 
+            $seller_data['amz_acct_name']     = $this->input->post('inputAmzAcctName'); 
             $seller_data['marketplace_id']    = $this->input->post('inputMpId'); 
             $seller_data['seller_id']         = $this->encryption->encrypt($this->input->post('inputSellerId')); 
             $seller_data['mws_auth_token']    = $this->encryption->encrypt($this->input->post('inputMwsAuthToken'));
@@ -66,7 +66,7 @@ class Amazon extends CI_Controller
             $seller_data['secret_key']        = $this->encryption->encrypt($this->input->post('inputSecretKey')); 
 
             // Query to add MWS Account
-            $result = $this->amazon_model->insert_mws_account($seller_data);
+            $result = $this->amazon_model->add_amz_acct($seller_data);
             
             // Validate query response
             if($result == 1)

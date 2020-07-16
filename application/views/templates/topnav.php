@@ -19,15 +19,17 @@
 
         <div class="collapse navbar-collapse" id="navbarText">
             <ul class="navbar-nav ml-auto">
+                <!-- Removed on 16th Jul 2020 as it would be very complex and complicated structure. 
                 <li class="nav-item pr-3">
                     <select name="inputMpIdTop" id="inputMpIdTop" class="custom-select-sm border-secondary rounded-0 bg-dark text-white" required>
-                        <?php echo _options(get_amz_accts($this->session->userdata('_userid'))); ?>
+                        <?php //echo _options(get_amz_accts($this->session->userdata('_userid'))); ?>
                     </select>
                 </li>
-                <li class="nav-item pt-1 pr-3">
+                -->
+                <li class="nav-item pt1 pr-3"><!-- Enable pt-1 to middle along with other html elements if used -->
                     <a href="<?php echo base_url('settings/channels/amazon'); ?>" class="text-decoration-none text-nowrap text-white"><i class="fad fa-cog fa-lg"></i> Settings</a>
                 </li>
-                <li class="nav-item pt-1">
+                <li class="nav-item pt1"><!-- Enable pt-1 to middle along with other html elements if used -->
                     <div class="dropdown">
                         <a href="#" id="lnkUserAccount" class="dropdown-toggle text-decoration-none text-nowrap text-white" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
                             <i class="fad fa-user-circle fa-lg"></i> <?php echo $this->session->userdata('_username'); ?> 
