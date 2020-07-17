@@ -52,7 +52,15 @@ class Amazon_model extends CI_Model
      */
     public function get_mws_keys($acctid)
     {
-        $query = $this->db->get_where('amz_accounts', array('account_id' => $acctid)); 
+        //$query = $this->db->get_where('amz_accounts', array('account_id' => $acctid)); 
+
+        
+
+        $query = $this->db
+                        ->select('amz_accounts.*', 'amz_marketplaces.*')
+                        ->join('amz_marketplaces', 'amz_accounts.marketplace_id = amz_marketplaces.marketplace_id', 'left')
+                        ->where('amz_accounts.amz_acct_id', $acctid)
+                        ->get('amz_accounts'); 
 
         return ($query->num_rows() > 0) ? $query->result() : null;
     }

@@ -21,9 +21,9 @@ class Amazon_payments extends CI_Controller
 
         $this->load->helper('auth_helper');
 
-        $this->load->library(array('mws/finances')); 
+        $this->load->library(array('mws/finances', 'encryption')); 
 
-        $this->load->model('payments/amazon/payments_model'); 
+        $this->load->model(array('payments/amazon/payments_model', 'settings/channels/amazon_model')); 
 
         $this->my_var = "HelloWorld"; 
     }
@@ -39,6 +39,88 @@ class Amazon_payments extends CI_Controller
         $page_data['descr'] = "View and do analysis for your Amazon payments.".$this->my_var; 
 
         $this->load->view('payments/amazon/statements', $page_data);
+    }
+
+    /**
+     * View payments or settlement reports
+     */
+    public function view_payments()
+    {
+        $this->form_validation->set_rules('inputAmzAcctId', 'Amazon Account ID', 'required'); 
+        $this->form_validation->set_rules('inputPmtDateFm', 'From Date', 'required');
+        
+        if($this->form_validation->run() == true)
+        {   
+            $amz_acct_id = $this->input->post('inputAmzAcctId'); 
+            $pmt_date_fm = date("Y-m-d", strtotime($this->input->post('inputPmtDateFm')));
+            $pmt_date_to = ($this->input->post('inputPmtDateTo') != '') ? date("Y-m-d", strtotime($this->input->post('inputPmtDateTo'))) : null;
+
+            $result = $this->amazon_model->get_mws_keys($amz_acct_id);
+
+            if(!empty($result)) 
+            {
+                $row = $result[0]; 
+
+                $seller_id         = $this->encryption->decrypt($row->seller_id); 
+                $mws_auth_token    = $this->encryption->decrypt($row->mws_auth_token); 
+                $aws_access_key_id = $this->encryption->decrypt($row->aws_access_key_id); 
+                $secret_key        = $this->encryption->decrypt($row->secret_key); 
+            }
+
+            //$response = $this->finances->ListFinancialEventGroups('QTFQSkswUkFJNzBVUTM=', 'YW16bi5td3MuZmNiOTNjNjEtMTgzNC05MTNlLTVjNjEtNDk2NTA2Zjk5N2Yw', 'QUtJQUpaRlNTVDJRVDVJWExRVFE=', 'UXFJbE5yN3ZUT0JzMklQWEtiajBUWGY1V1E3UnY2Ukd1OFVvdzNZRQ==', $pmt_date_fm, $pmt_date_to);
+            $response = $this->finances->ListFinancialEventGroups($seller_id, $mws_auth_token, $aws_access_key_id, $secret_key, $pmt_date_fm, $pmt_date_to);
+
+            $xml = new SimpleXMLElement($response); 
+
+            if(isset($xml->ListFinancialEventGroupsResult->FinancialEventGroupList->FinancialEventGroup))
+            {   
+                // Html payment rows
+                $pmt_rows = ''; 
+
+                foreach($xml->ListFinancialEventGroupsResult->FinancialEventGroupList->FinancialEventGroup as $event_group)
+                {
+                    if($event_group->ProcessingStatus == "Open")
+                    {
+                        $settlement_period = date('M d, Y', strtotime($event_group->FinancialEventGroupStart)).' - '.date('M d, Y'); 
+                    } 
+                    else $settlement_period = date('M d, Y', strtotime($event_group->FinancialEventGroupStart)).' - '.date('M d, Y', strtotime($event_group->FinancialEventGroupEnd)); 
+
+                    $fund_transfer_date = (isset($event_group->FundTransferDate)) ? date('M d, Y', strtotime($event_group->FundTransferDate)) : ""; 
+                    $pmt_rows .= '
+                        <tr>
+                            <td class="align-middle text-left">'.$settlement_period.'</td>
+                            <td class="align-middle text-right">'.$event_group->OriginalTotal->CurrencyCode.' '.$event_group->OriginalTotal->CurrencyAmount.'</td>
+                            <td class="align-middle text-center">'.$fund_transfer_date.'</td>
+                            <td class="align-middle text-left">'.$event_group->ProcessingStatus.'</td>
+                            <td class="align-middle text-center">
+                                <a href="'.base_url('payments/amazon_payments/view_transactions?fineventgrpid='.$event_group->FinancialEventGroupId).'" target="_blank" class="btn btn-xs btn-warning shadow-sm">View Transactions</a>
+                                <a href="#" 
+                                    class="btn btn-xs btn-warning shadow-sm btn-comp-fba-fees" 
+                                    fin-event-grp-start="'.date('M d, Y', strtotime($event_group->FinancialEventGroupStart)).'" 
+                                    fin-event-grp-end="'.date('M d, Y', strtotime($event_group->FinancialEventGroupEnd)).'" 
+                                    fin-event-grp-id="'.$event_group->FinancialEventGroupId.'">
+                                Compare FBA Fees</a>
+                            </td>
+                        </tr>
+                    ';
+                }
+
+                $ajax['status'] = true; 
+                $ajax['report_list'] = $pmt_rows; 
+            }
+            else {
+                $ajax['status'] = false; 
+                $ajax['message'] = '<tr><th colspan="5" class="text-center text-red">'.$xml->Error->Message.'</th></tr>';
+            } 
+            
+             
+        }
+        else {
+            $ajax['status'] = false;
+            $ajax['message'] = '<tr><th colspan="5" class="text-center text-red">'.validation_errors().'</th></tr>';
+        }
+
+        echo json_encode($ajax);
     }
 
     /**

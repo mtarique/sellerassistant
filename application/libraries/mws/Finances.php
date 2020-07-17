@@ -39,7 +39,7 @@ class Finances {
 		$sign .= '/Finances/2015-05-01' . "\n";
         $sign .= $arr;
         
-        $signature = hash_hmac("sha256", $sign, base64_decode($secret_key), true);
+        $signature = hash_hmac("sha256", $sign, $secret_key, true);
 		$signature = urlencode(base64_encode($signature));
 
         // Generate request URL
@@ -92,10 +92,10 @@ class Finances {
     public function ListFinancialEventGroups($sellerid, $mwsauthtoken, $awsaccesskey, $secretkey, $dateafter, $datebefore = NULL, $maxresult = NULL)
     {   
         $param = array(
-            'AWSAccessKeyId'                  => base64_decode($awsaccesskey), 
+            'AWSAccessKeyId'                  => $awsaccesskey, 
             'Action'                          => 'ListFinancialEventGroups', 
-            'MWSAuthToken'                    => base64_decode($mwsauthtoken), 
-            'SellerId'                        => base64_decode($sellerid), 
+            'MWSAuthToken'                    => $mwsauthtoken, 
+            'SellerId'                        => $sellerid, 
             'SignatureMethod'                 => 'HmacSHA256', 
             'SignatureVersion'                => '2', 
             'Timestamp'                       => date("c", time()), 

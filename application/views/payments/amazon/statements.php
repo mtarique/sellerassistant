@@ -9,6 +9,35 @@ $this->load->view('templates/loader');
 
 <div id="res1"></div>
 
+<style>
+      .form-control-xs, .custom-select-xs {
+            height: calc(1em + .375rem + 2px) !important;
+            padding: .125rem .125rem !important;
+            font-size: .75rem !important;
+            line-height: 0.5;
+            border-radius: .2rem;
+        }
+</style>
+
+<div class="card bg-light rounded-0 mb-3">
+    <div class="card-body py-2">
+        <form class="form-inline" id="formViewPmts">
+            <label class="mr-2" for="inputAmzAcctId">Amazon Account: </label>
+            <select name="inputAmzAcctId" id="inputAmzAcctId" class="custom-select custom-select-sm rounded-0 mr-2" required>
+                <?php echo _options(get_amz_accts($this->session->userdata('_userid'))); ?>
+            </select>
+
+            <label for="inputPmtDateFm" class="mr-2">From: </label>
+            <input type="text" name="inputPmtDateFm" id="inputPmtDateFm" class="form-control form-control-sm rounded-0 flatpickr-datepicker mr-2" placeholder="Select from date..." required>
+
+            <label for="inputPmtDateTo" class="mr-2">To: </label>
+            <input type="text" name="inputPmtDateTo" id="inputPmtDateTo" class="form-control form-control-sm rounded-0 flatpickr-datepicker mr-2" placeholder="Select to date..." required>
+
+            <button type="submit" name="btnViewPmts" id="btnViewPmts"class="btn btn-sm btn-primary shadow-sm">View Payments</button>
+        </form>
+    </div>
+</div>
+
 <div id="resAmzPmts"></div>
 
 <table class="table table-hover table-sm border small" id="tblAmzPmts">
@@ -30,12 +59,59 @@ $this->load->view('templates/loader');
 
 <script>
     $(document).ready(function(){
+
+        /**
+         * Get list of Amazon settlement report or payments
+         */
+        $('#formViewPmts').submit(function(event){
+            event.preventDefault(); 
+
+            $.ajax({
+                type: "post",
+                url:  "<?php echo base_url('payments/amazon_payments/view_payments'); ?>", 
+                data: $(this).serialize(), 
+                dataType: "json", 
+                beforeSend: function()
+                {
+                    $('#loader').removeClass("d-none");
+                }, 
+                complete: function()
+                {
+                    $('#loader').addClass("d-none");
+                }, 
+                success: function(res)
+                {
+                if(res.status)
+                    {   
+                        $('#tblAmzPmts > tbody').html(res.report_list); 
+                        $('#resLoadMore').html(res.load_more);
+                        //load_more_payments(); 
+                        comp_fba_fees(); 
+                        /* $.when(comp_fba_fees()).done(function(){
+                            $.each(json_res, function(key, value){
+                                $('#resAmzPmts').text(JSON.stringify(value), null, ''); 
+                            });
+                        }); */ 
+                    }
+                    else {
+                        $('#tblAmzPmts > tbody').html(res.message); 
+                    }
+                }, 
+                error: function(xhr)
+                {
+                    var xhr_text = xhr.status+" "+xhr.statusText;
+                    swal({title: "Request error!", text: xhr_text, icon: "error"});
+                }
+            });
+        });
+        
+        
         /**
          * Get list of Amazon payments 
          */
-        $.ajax({
+        /* $.ajax({
             type: "get", 
-            url: "<?php echo base_url('payments/amazon_payments/get_payments'); ?>",
+            url: "<?php echo base_url('payments/amazon_payments/get_payments'); ?>", 
             dataType: "json", 
             beforeSend: function()
             {
@@ -51,13 +127,9 @@ $this->load->view('templates/loader');
                 {   
                     $('#tblAmzPmts > tbody').html(res.report_list); 
                     $('#resLoadMore').html(res.load_more);
-                    //load_more_payments(); 
+                    
                     comp_fba_fees(); 
-                    /* $.when(comp_fba_fees()).done(function(){
-                        $.each(json_res, function(key, value){
-                            $('#resAmzPmts').text(JSON.stringify(value), null, ''); 
-                        });
-                    }); */ 
+                    
                 }
                 else {
                     $('#tblAmzPmts > tbody').html(res.message); 
@@ -68,7 +140,7 @@ $this->load->view('templates/loader');
                 var xhr_text = xhr.status+" "+xhr.statusText;
                 swal({title: "Request error!", text: xhr_text, icon: "error"});
             }
-        });
+        }); */
 
         /**
          * Load more amazon payments
