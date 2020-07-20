@@ -104,43 +104,6 @@ $this->load->view('templates/loader');
                 }
             });
         });
-        
-        
-        /**
-         * Get list of Amazon payments 
-         */
-        /* $.ajax({
-            type: "get", 
-            url: "<?php echo base_url('payments/amazon_payments/get_payments'); ?>", 
-            dataType: "json", 
-            beforeSend: function()
-            {
-                $('#loader').removeClass("d-none");
-            }, 
-            complete: function()
-            {
-                $('#loader').addClass("d-none");
-            }, 
-            success: function(res)
-            {
-               if(res.status)
-                {   
-                    $('#tblAmzPmts > tbody').html(res.report_list); 
-                    $('#resLoadMore').html(res.load_more);
-                    
-                    comp_fba_fees(); 
-                    
-                }
-                else {
-                    $('#tblAmzPmts > tbody').html(res.message); 
-                }
-            }, 
-            error: function(xhr)
-            {
-                var xhr_text = xhr.status+" "+xhr.statusText;
-                swal({title: "Request error!", text: xhr_text, icon: "error"});
-            }
-        }); */
 
         /**
          * Load more amazon payments
@@ -205,11 +168,12 @@ $this->load->view('templates/loader');
                     const fin_event_grp_id    = $(this).attr('fin-event-grp-id'); 
                     const fin_event_grp_start = $(this).attr('fin-event-grp-start'); 
                     const fin_event_grp_end   = $(this).attr('fin-event-grp-end');
+                    const amz_acct_id         = $(this).attr('amz-acct-id'); 
 
                     $.ajax({
                         type: "get", 
                         url: "<?php echo base_url('payments/amazon_payments/fetch_fba_fees'); ?>", 
-                        data: "fineventgrpid="+fin_event_grp_id+"&fineventgrpstart="+fin_event_grp_start+"&fineventgrpend="+fin_event_grp_end, 
+                        data: "fineventgrpid="+fin_event_grp_id+"&fineventgrpstart="+fin_event_grp_start+"&fineventgrpend="+fin_event_grp_end+"&amzacctid="+amz_acct_id, 
                         dataType: "json", 
                         beforeSend: function()
                         {
@@ -222,7 +186,7 @@ $this->load->view('templates/loader');
                                 // Request FBA fees by Next Token
                                 if("next_token" in res)
                                 {   
-                                    req_fba_fees_by_next_token(res.next_token[0], fin_event_grp_id, fin_event_grp_start, fin_event_grp_end); 
+                                    req_fba_fees_by_next_token(res.next_token[0], fin_event_grp_id, fin_event_grp_start, fin_event_grp_end, amz_acct_id); 
                                 } 
                                 else {
                                     $('#loader').addClass("d-none");
@@ -252,12 +216,12 @@ $this->load->view('templates/loader');
          * @param date      FinEventGrpStart    Financial Event Group Start Date
          * @param date      FinEventGrpEnd      Financial Event Group End Date
          */
-        function req_fba_fees_by_next_token(NextToken, FinEventGrpId, FinEventGrpStart, FinEventGrpEnd)
+        function req_fba_fees_by_next_token(NextToken, FinEventGrpId, FinEventGrpStart, FinEventGrpEnd, AmzAcctId)
         {   
             $.ajax({
                 type: "get", 
                 url: "<?php echo base_url('payments/amazon_payments/fetch_fba_fees_by_next_token'); ?>", 
-                data: "nexttoken="+NextToken+"&fineventgrpid="+FinEventGrpId+"&fineventgrpstart="+FinEventGrpStart+"&fineventgrpend="+FinEventGrpEnd,   
+                data: "nexttoken="+NextToken+"&fineventgrpid="+FinEventGrpId+"&fineventgrpstart="+FinEventGrpStart+"&fineventgrpend="+FinEventGrpEnd+"&amzacctid="+AmzAcctId,   
                 dataType: "json", 
         
                 success: function(res)
@@ -267,7 +231,7 @@ $this->load->view('templates/loader');
                        // Request FBA Fees by Next Token
                         if("next_token" in res)
                         {
-                            req_fba_fees_by_next_token(res.next_token[0], FinEventGrpId, FinEventGrpStart, FinEventGrpEnd);                       
+                            req_fba_fees_by_next_token(res.next_token[0], FinEventGrpId, FinEventGrpStart, FinEventGrpEnd, AmzAcctId);                       
                         }
                         else {
                             $('#loader').addClass("d-none");

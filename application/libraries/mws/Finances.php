@@ -131,10 +131,10 @@ class Finances {
     public function ListFinancialEvents($sellerid, $mwsauthtoken, $awsaccesskey, $secretkey, $postedafter = NULL, $postedbefore = NULL, $financialeventgroupid = NULL, $amazonorderid = NULL, $maxresultperpage = NULL)
     {
         $param = array(
-            'AWSAccessKeyId'                  => base64_decode($awsaccesskey), 
+            'AWSAccessKeyId'                  => $awsaccesskey, 
             'Action'                          => 'ListFinancialEvents', 
-            'MWSAuthToken'                    => base64_decode($mwsauthtoken), 
-            'SellerId'                        => base64_decode($sellerid), 
+            'MWSAuthToken'                    => $mwsauthtoken, 
+            'SellerId'                        => $sellerid, 
             'SignatureMethod'                 => 'HmacSHA256', 
             'SignatureVersion'                => '2', 
             'Timestamp'                       => date("c", time()), 
@@ -168,10 +168,10 @@ class Finances {
     public function ListFinancialEventsByNextToken($sellerid, $mwsauthtoken, $awsaccesskey, $secretkey, $nexttoken)
     {
         $param = array(
-            'AWSAccessKeyId'                  => base64_decode($awsaccesskey), 
+            'AWSAccessKeyId'                  => $awsaccesskey, 
             'Action'                          => 'ListFinancialEventsByNextToken', 
-            'MWSAuthToken'                    => base64_decode($mwsauthtoken), 
-            'SellerId'                        => base64_decode($sellerid), 
+            'MWSAuthToken'                    => $mwsauthtoken, 
+            'SellerId'                        => $sellerid, 
             'SignatureMethod'                 => 'HmacSHA256', 
             'SignatureVersion'                => '2', 
             'Timestamp'                       => date("c", time()), 

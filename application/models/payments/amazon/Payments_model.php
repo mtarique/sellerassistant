@@ -26,12 +26,13 @@ class Payments_model extends CI_Model
      * @param Date      $fin_event_grp_end      Financial Event Group End
      * @return void
      */
-    public function insert_fba_fees_comp_header($fin_event_grp_id, $fin_event_grp_start, $fin_event_grp_end)
+    public function insert_fba_fees_comp_header($fin_event_grp_id, $fin_event_grp_start, $fin_event_grp_end, $amz_acct_id)
     {   
         $header_data = array(
             'fin_event_grp_id'    => $fin_event_grp_id, 
             'fin_event_grp_start' => date('Y-m-d', strtotime($fin_event_grp_start)),  
-            'fin_event_grp_end'   => date('Y-m-d', strtotime($fin_event_grp_end))
+            'fin_event_grp_end'   => date('Y-m-d', strtotime($fin_event_grp_end)), 
+            'amz_acct_id'         => $amz_acct_id
         ); 
 
         $query = $this->db->insert('fba_fees_comp_header', $header_data);

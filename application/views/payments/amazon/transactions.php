@@ -35,8 +35,8 @@ $this->load->view('templates/loader');
          */
         $.ajax({
             type: "get", 
-            url: "<?php echo base_url('payments/amazon/payment_analyzer/get_pmts_trans'); ?>", 
-            data: "fineventgrpid=<?php echo $fin_event_grp_id; ?>", 
+            url: "<?php echo base_url('payments/amazon_payments/get_pmt_trans'); ?>", 
+            data: "fineventgrpid=<?php echo $fin_event_grp_id; ?>&amzacctid=<?php echo $amz_acct_id; ?>", 
             dataType: "json", 
             beforeSend: function()
             {
@@ -56,6 +56,7 @@ $this->load->view('templates/loader');
                     const dt_Pmts_trans = $('#tblPmtsTrans').DataTable({
                         /* scrollY: "200px", 
                         "scrollCollapse": true,  */
+                        info: false, 
                         paging: false, 
                         fixedHeader: {
                             headerOffset: $('#topnav').outerHeight()
@@ -69,12 +70,14 @@ $this->load->view('templates/loader');
                             dataSrc: 0
                         }, */ 
                         "drawCallback": function(settings, json)
-                        {
-                            $('#resLoadMore').html(res.load_more); 
-
-                            load_more_pmts_trans();
-
-
+                        {   
+                            
+                            if("load_more" in res)
+                            {
+                                $('#resLoadMore').html(res.load_more);
+                                
+                                req_pmt_trans_by_next_token();
+                            }
                         }
                     }); 
 
@@ -98,13 +101,13 @@ $this->load->view('templates/loader');
          *
          * @return void
          */
-        function load_more_pmts_trans()
+        function req_pmt_trans_by_next_token()
         {   
             $('#btnLoadMore').click(function(){
                 $.ajax({
                     type: "get", 
-                    url: "<?php echo base_url('payments/amazon/payment_analyzer/get_pmts_trans_by_next_token'); ?>", 
-                    data: "nexttoken="+encodeURIComponent($(this).attr('next-token')), 
+                    url: "<?php echo base_url('payments/amazon_payments/get_pmt_trans_by_next_token'); ?>", 
+                    data: "nexttoken="+encodeURIComponent($(this).attr('next-token'))+"&amzacctid=<?php echo $amz_acct_id; ?>", 
                     dataType: "json", 
                     beforeSend: function()
                     {
@@ -119,8 +122,13 @@ $this->load->view('templates/loader');
                         if(res.status)
                         {   
                             $('#tblPmtsTrans > tbody').append(res.transactions); 
-                            $('#resLoadMore').html(res.load_more);
-                            load_more_pmts_trans(); 
+
+                            if("load_more" in res)
+                            {
+                                $('#resLoadMore').html(res.load_more); 
+
+                                req_pmt_trans_by_next_token(); 
+                            }                    
                         }
                         else {
                             $('#tblPmtsTrans > tbody').append(res.message); 

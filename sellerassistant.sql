@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: Jul 16, 2020 at 02:30 PM
+-- Generation Time: Jul 20, 2020 at 08:47 AM
 -- Server version: 10.1.25-MariaDB
 -- PHP Version: 7.1.7
 
@@ -103,7 +103,8 @@ CREATE TABLE `fba_fees_comp_details` (
 CREATE TABLE `fba_fees_comp_header` (
   `fin_event_grp_id` varchar(255) NOT NULL,
   `fin_event_grp_start` date NOT NULL,
-  `fin_event_grp_end` date NOT NULL
+  `fin_event_grp_end` date NOT NULL,
+  `amz_acct_id` int(11) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 
 -- --------------------------------------------------------
@@ -327,7 +328,8 @@ ALTER TABLE `fba_fees_comp_details`
 -- Indexes for table `fba_fees_comp_header`
 --
 ALTER TABLE `fba_fees_comp_header`
-  ADD PRIMARY KEY (`fin_event_grp_id`);
+  ADD PRIMARY KEY (`fin_event_grp_id`),
+  ADD KEY `fk_fba_fees_comp_header_amz_account` (`amz_acct_id`);
 
 --
 -- Indexes for table `fba_ful_fees_usa`
@@ -362,7 +364,7 @@ ALTER TABLE `users`
 -- AUTO_INCREMENT for table `amz_accounts`
 --
 ALTER TABLE `amz_accounts`
-  MODIFY `amz_acct_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=5;
+  MODIFY `amz_acct_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
 --
 -- AUTO_INCREMENT for table `fba_ful_fees_usa`
 --
@@ -398,6 +400,12 @@ ALTER TABLE `amz_accounts`
 --
 ALTER TABLE `fba_fees_comp_details`
   ADD CONSTRAINT `fk_fba_fees_comp_details_header` FOREIGN KEY (`fin_event_grp_id`) REFERENCES `fba_fees_comp_header` (`fin_event_grp_id`) ON DELETE CASCADE ON UPDATE CASCADE;
+
+--
+-- Constraints for table `fba_fees_comp_header`
+--
+ALTER TABLE `fba_fees_comp_header`
+  ADD CONSTRAINT `fk_fba_fees_comp_header_amz_account` FOREIGN KEY (`amz_acct_id`) REFERENCES `amz_accounts` (`amz_acct_id`) ON DELETE CASCADE ON UPDATE CASCADE;
 COMMIT;
 
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;

@@ -55,6 +55,7 @@ class Amazon_payments extends CI_Controller
             $pmt_date_fm = date("Y-m-d", strtotime($this->input->post('inputPmtDateFm')));
             $pmt_date_to = ($this->input->post('inputPmtDateTo') != '') ? date("Y-m-d", strtotime($this->input->post('inputPmtDateTo'))) : null;
 
+            // Get Amazon MWS Access keys by amazon account id
             $result = $this->amazon_model->get_mws_keys($amz_acct_id);
 
             if(!empty($result)) 
@@ -67,7 +68,7 @@ class Amazon_payments extends CI_Controller
                 $secret_key        = $this->encryption->decrypt($row->secret_key); 
             }
 
-            //$response = $this->finances->ListFinancialEventGroups('QTFQSkswUkFJNzBVUTM=', 'YW16bi5td3MuZmNiOTNjNjEtMTgzNC05MTNlLTVjNjEtNDk2NTA2Zjk5N2Yw', 'QUtJQUpaRlNTVDJRVDVJWExRVFE=', 'UXFJbE5yN3ZUT0JzMklQWEtiajBUWGY1V1E3UnY2Ukd1OFVvdzNZRQ==', $pmt_date_fm, $pmt_date_to);
+            // MWS request to ListFinancialEventGroups
             $response = $this->finances->ListFinancialEventGroups($seller_id, $mws_auth_token, $aws_access_key_id, $secret_key, $pmt_date_fm, $pmt_date_to);
 
             $xml = new SimpleXMLElement($response); 
@@ -93,12 +94,13 @@ class Amazon_payments extends CI_Controller
                             <td class="align-middle text-center">'.$fund_transfer_date.'</td>
                             <td class="align-middle text-left">'.$event_group->ProcessingStatus.'</td>
                             <td class="align-middle text-center">
-                                <a href="'.base_url('payments/amazon_payments/view_transactions?fineventgrpid='.$event_group->FinancialEventGroupId).'" target="_blank" class="btn btn-xs btn-warning shadow-sm">View Transactions</a>
+                                <a href="'.base_url('payments/amazon_payments/view_transactions?fineventgrpid='.$event_group->FinancialEventGroupId.'&amzacctid='.$amz_acct_id).'" target="_blank" class="btn btn-xs btn-warning shadow-sm">View Transactions</a>
                                 <a href="#" 
                                     class="btn btn-xs btn-warning shadow-sm btn-comp-fba-fees" 
                                     fin-event-grp-start="'.date('M d, Y', strtotime($event_group->FinancialEventGroupStart)).'" 
                                     fin-event-grp-end="'.date('M d, Y', strtotime($event_group->FinancialEventGroupEnd)).'" 
-                                    fin-event-grp-id="'.$event_group->FinancialEventGroupId.'">
+                                    fin-event-grp-id="'.$event_group->FinancialEventGroupId.'" 
+                                    amz-acct-id="'.$amz_acct_id.'">
                                 Compare FBA Fees</a>
                             </td>
                         </tr>
@@ -112,8 +114,6 @@ class Amazon_payments extends CI_Controller
                 $ajax['status'] = false; 
                 $ajax['message'] = '<tr><th colspan="5" class="text-center text-red">'.$xml->Error->Message.'</th></tr>';
             } 
-            
-             
         }
         else {
             $ajax['status'] = false;
@@ -124,74 +124,16 @@ class Amazon_payments extends CI_Controller
     }
 
     /**
-     * Get list of Amazon payments
-     *
-     * @return void
-     */
-    public function get_payments()
-    {   
-        // MWS request to ListFinancialEventGroups that contains all payments 
-        // ORG
-        //$response = $this->finances->ListFinancialEventGroups('QTFYV0dRQ1VTOTVEOTY=', 'YW16bi5td3MuOTZhNjljMDUtZWQyNy0xMjkzLTllZTktMmY0NjBmMzdhNmIy', 'QUtJQUpCTU1UVlVQVlJGTVVPNUE=', 'WUpiV2xSZEVFeW8xaHFYVmMxU0NSbVdVZHFQVmpKeDF0bTJ6L250dg==', '2020-06-01');
-        // AL
-        $response = $this->finances->ListFinancialEventGroups('QTFQSkswUkFJNzBVUTM=', 'YW16bi5td3MuZmNiOTNjNjEtMTgzNC05MTNlLTVjNjEtNDk2NTA2Zjk5N2Yw', 'QUtJQUpaRlNTVDJRVDVJWExRVFE=', 'UXFJbE5yN3ZUT0JzMklQWEtiajBUWGY1V1E3UnY2Ukd1OFVvdzNZRQ==', '2020-06-01');
-
-        $xml = new SimpleXMLElement($response); 
-
-        if(isset($xml->ListFinancialEventGroupsResult->FinancialEventGroupList->FinancialEventGroup))
-        {   
-            // Html payment rows
-            $pmt_rows = ''; 
-
-            foreach($xml->ListFinancialEventGroupsResult->FinancialEventGroupList->FinancialEventGroup as $event_group)
-            {
-                if($event_group->ProcessingStatus == "Open")
-                {
-                    $settlement_period = date('M d, Y', strtotime($event_group->FinancialEventGroupStart)).' - '.date('M d, Y'); 
-                } 
-                else $settlement_period = date('M d, Y', strtotime($event_group->FinancialEventGroupStart)).' - '.date('M d, Y', strtotime($event_group->FinancialEventGroupEnd)); 
-
-                $fund_transfer_date = (isset($event_group->FundTransferDate)) ? date('M d, Y', strtotime($event_group->FundTransferDate)) : ""; 
-                $pmt_rows .= '
-                    <tr>
-                        <td class="align-middle text-left">'.$settlement_period.'</td>
-                        <td class="align-middle text-right">'.$event_group->OriginalTotal->CurrencyCode.' '.$event_group->OriginalTotal->CurrencyAmount.'</td>
-                        <td class="align-middle text-center">'.$fund_transfer_date.'</td>
-                        <td class="align-middle text-left">'.$event_group->ProcessingStatus.'</td>
-                        <td class="align-middle text-center">
-                            <a href="'.base_url('payments/amazon_payments/view_transactions?fineventgrpid='.$event_group->FinancialEventGroupId).'" target="_blank" class="btn btn-xs btn-warning shadow-sm">View Transactions</a>
-                            <a href="#" 
-                                class="btn btn-xs btn-warning shadow-sm btn-comp-fba-fees" 
-                                fin-event-grp-start="'.date('M d, Y', strtotime($event_group->FinancialEventGroupStart)).'" 
-                                fin-event-grp-end="'.date('M d, Y', strtotime($event_group->FinancialEventGroupEnd)).'" 
-                                fin-event-grp-id="'.$event_group->FinancialEventGroupId.'">
-                            Compare FBA Fees</a>
-                        </td>
-                    </tr>
-                ';
-            }
-
-            $ajax['status'] = true; 
-            $ajax['report_list'] = $pmt_rows; 
-        }
-        else {
-            $ajax['status'] = false; 
-            $ajax['message'] = '<tr><th colspan="5" class="text-center text-red">'.$xml->Error->Message.'</th></tr>';
-        } 
-        
-        echo json_encode($ajax); 
-    }
-
-    /**
      * View payment transactions page
      *
      * @return void
      */
     public function view_transactions()
     {
-        $page_data['title'] = "Payment Transactions";
-        $page_data['descr'] = "Transactional details for your Amazon payment."; 
+        $page_data['title']            = "Payment Transactions";
+        $page_data['descr']            = "Transactional details for your Amazon payment."; 
         $page_data['fin_event_grp_id'] = $this->input->get('fineventgrpid'); 
+        $page_data['amz_acct_id']      = $this->input->get('amzacctid'); 
 
         $this->load->view('payments/amazon/transactions', $page_data);
     }
@@ -201,13 +143,27 @@ class Amazon_payments extends CI_Controller
      *
      * @return void
      */
-    public function get_pmts_trans()
+    public function get_pmt_trans()
     {   
         // Financial event group id
         $fin_event_grp_id = $this->input->get('fineventgrpid');
+        $amz_acct_id      = $this->input->get('amzacctid'); 
+
+        // Get Amazon MWS Access keys by amazon account id
+        $result = $this->amazon_model->get_mws_keys($amz_acct_id);
+
+        if(!empty($result)) 
+        {
+            $row = $result[0]; 
+
+            $seller_id         = $this->encryption->decrypt($row->seller_id); 
+            $mws_auth_token    = $this->encryption->decrypt($row->mws_auth_token); 
+            $aws_access_key_id = $this->encryption->decrypt($row->aws_access_key_id); 
+            $secret_key        = $this->encryption->decrypt($row->secret_key); 
+        }
 
         // MWS request to ListFinancialEvents
-        $response = $this->finances->ListFinancialEvents('QTFQSkswUkFJNzBVUTM=', 'YW16bi5td3MuZmNiOTNjNjEtMTgzNC05MTNlLTVjNjEtNDk2NTA2Zjk5N2Yw', 'QUtJQUpaRlNTVDJRVDVJWExRVFE=', 'UXFJbE5yN3ZUT0JzMklQWEtiajBUWGY1V1E3UnY2Ukd1OFVvdzNZRQ==', null, null, $fin_event_grp_id, null, null);
+        $response = $this->finances->ListFinancialEvents($seller_id, $mws_auth_token, $aws_access_key_id, $secret_key, null, null, $fin_event_grp_id, null, null);
 
         $xml = new SimpleXMLElement($response); 
 
@@ -277,9 +233,8 @@ class Amazon_payments extends CI_Controller
             // Show load more button if it has next token 
             if(isset($xml->ListFinancialEventsResult->NextToken)) 
             {   
-                $ajax['load_more']= '<button id="btnLoadMore" next-token="'.$xml->ListFinancialEventsResult->NextToken.'" class="btn btn-sm btn-dark">Load more...</button>'; 
+                $ajax['load_more']= '<button id="btnLoadMore" next-token="'.$xml->ListFinancialEventsResult->NextToken.'" class="btn btn-sm btn-link mb-3">Load more payment transactions...</button>'; 
             }
-            else $ajax['load_more']; 
         }
         else {
             $ajax['status'] = false; 
@@ -294,13 +249,27 @@ class Amazon_payments extends CI_Controller
      *
      * @return void
      */
-    public function get_pmts_trans_by_next_token()
+    public function get_pmt_trans_by_next_token()
     {   
         // Next token 
-        $next_token = $this->input->get('nexttoken'); 
+        $next_token  = $this->input->get('nexttoken'); 
+        $amz_acct_id = $this->input->get('amzacctid'); 
+
+        // Get Amazon MWS Access keys by amazon account id
+        $result = $this->amazon_model->get_mws_keys($amz_acct_id);
+
+        if(!empty($result)) 
+        {
+            $row = $result[0]; 
+
+            $seller_id         = $this->encryption->decrypt($row->seller_id); 
+            $mws_auth_token    = $this->encryption->decrypt($row->mws_auth_token); 
+            $aws_access_key_id = $this->encryption->decrypt($row->aws_access_key_id); 
+            $secret_key        = $this->encryption->decrypt($row->secret_key); 
+        }
 
         // MWS request to ListFinancialEventsByNextToken
-        $response = $this->finances->ListFinancialEventsByNextToken('QTFQSkswUkFJNzBVUTM=', 'YW16bi5td3MuZmNiOTNjNjEtMTgzNC05MTNlLTVjNjEtNDk2NTA2Zjk5N2Yw', 'QUtJQUpaRlNTVDJRVDVJWExRVFE=', 'UXFJbE5yN3ZUT0JzMklQWEtiajBUWGY1V1E3UnY2Ukd1OFVvdzNZRQ==', $next_token);
+        $response = $this->finances->ListFinancialEventsByNextToken($seller_id, $mws_auth_token, $aws_access_key_id, $secret_key, $next_token);
 
         $xml = new SimpleXMLElement($response); 
 
@@ -370,9 +339,8 @@ class Amazon_payments extends CI_Controller
             // Show load more button if it has next token 
             if(isset($xml->ListFinancialEventsByNextTokenResult->NextToken)) 
             {   
-                $ajax['load_more']= '<button id="btnLoadMore" next-token="'.$xml->ListFinancialEventsByNextTokenResult->NextToken.'" class="btn btn-sm btn-dark">Load more...</button>'; 
+                $ajax['load_more']= '<button id="btnLoadMore" next-token="'.$xml->ListFinancialEventsByNextTokenResult->NextToken.'" class="btn btn-sm btn-link mb-3">Load more payment transactions...</button>'; 
             }
-            else $ajax['load_more'] = null; 
         }
         else {
             $ajax['status'] = false; 
@@ -395,16 +363,30 @@ class Amazon_payments extends CI_Controller
         $fin_event_grp_id    = $this->input->get('fineventgrpid');
         $fin_event_grp_start = $this->input->get('fineventgrpstart');  
         $fin_event_grp_end   = $this->input->get('fineventgrpend');  
+        $amz_acct_id         = $this->input->get('amzacctid'); 
+
+        // Get MWS Access Keys for selecte amazon account
+        $result = $this->amazon_model->get_mws_keys($amz_acct_id);
+
+        if(!empty($result)) 
+        {
+            $row = $result[0]; 
+
+            $seller_id         = $this->encryption->decrypt($row->seller_id); 
+            $mws_auth_token    = $this->encryption->decrypt($row->mws_auth_token); 
+            $aws_access_key_id = $this->encryption->decrypt($row->aws_access_key_id); 
+            $secret_key        = $this->encryption->decrypt($row->secret_key); 
+        }
 
         // MWS request to ListFinancialEvents
-        $response = $this->finances->ListFinancialEvents('QTFQSkswUkFJNzBVUTM=', 'YW16bi5td3MuZmNiOTNjNjEtMTgzNC05MTNlLTVjNjEtNDk2NTA2Zjk5N2Yw', 'QUtJQUpaRlNTVDJRVDVJWExRVFE=', 'UXFJbE5yN3ZUT0JzMklQWEtiajBUWGY1V1E3UnY2Ukd1OFVvdzNZRQ==', null, null, $fin_event_grp_id, null, null);
+        $response = $this->finances->ListFinancialEvents($seller_id, $mws_auth_token, $aws_access_key_id, $secret_key, null, null, $fin_event_grp_id, null, null);
 
         $xml = new SimpleXMLElement($response); 
 
         if(isset($xml->ListFinancialEventsResult->FinancialEvents->ShipmentEventList->ShipmentEvent))
         {  
             // Query to insert comp header
-            $result = $this->payments_model->insert_fba_fees_comp_header($fin_event_grp_id, $fin_event_grp_start, $fin_event_grp_end); 
+            $result = $this->payments_model->insert_fba_fees_comp_header($fin_event_grp_id, $fin_event_grp_start, $fin_event_grp_end, $amz_acct_id); 
 
             if($result == 1)
             {
@@ -489,11 +471,25 @@ class Amazon_payments extends CI_Controller
     public function fetch_fba_fees_by_next_token()
     {
         // URl parameters
-        $next_token = $this->input->get('nexttoken');
-        $fin_event_grp_id    = $this->input->get('fineventgrpid');
+        $next_token       = $this->input->get('nexttoken');
+        $fin_event_grp_id = $this->input->get('fineventgrpid');
+        $amz_acct_id      = $this->input->get('amzacctid'); 
+
+        // Get MWS Access Keys for selecte amazon account
+        $result = $this->amazon_model->get_mws_keys($amz_acct_id);
+
+        if(!empty($result)) 
+        {
+            $row = $result[0]; 
+
+            $seller_id         = $this->encryption->decrypt($row->seller_id); 
+            $mws_auth_token    = $this->encryption->decrypt($row->mws_auth_token); 
+            $aws_access_key_id = $this->encryption->decrypt($row->aws_access_key_id); 
+            $secret_key        = $this->encryption->decrypt($row->secret_key); 
+        }
 
         // MWS request to ListFinancialEventsByNextToken
-        $response = $this->finances->ListFinancialEventsByNextToken('QTFQSkswUkFJNzBVUTM=', 'YW16bi5td3MuZmNiOTNjNjEtMTgzNC05MTNlLTVjNjEtNDk2NTA2Zjk5N2Yw', 'QUtJQUpaRlNTVDJRVDVJWExRVFE=', 'UXFJbE5yN3ZUT0JzMklQWEtiajBUWGY1V1E3UnY2Ukd1OFVvdzNZRQ==', $next_token);
+        $response = $this->finances->ListFinancialEventsByNextToken($seller_id, $mws_auth_token, $aws_access_key_id, $secret_key, $next_token);
 
         $xml = new SimpleXMLElement($response); 
 
@@ -558,7 +554,8 @@ class Amazon_payments extends CI_Controller
         }
         else {
             $ajax['status'] = false; 
-            $ajax['message'] = show_alert('danger', $xml->Error->Message);
+            //$ajax['message'] = show_alert('danger', $xml->Error->Message);
+            $ajax['message'] = show_alert('danger', "XML Response error");
         }
 
         echo json_encode($ajax); 
