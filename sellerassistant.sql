@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: Jul 20, 2020 at 08:47 AM
+-- Generation Time: Jul 20, 2020 at 11:02 AM
 -- Server version: 10.1.25-MariaDB
 -- PHP Version: 7.1.7
 
@@ -91,7 +91,9 @@ CREATE TABLE `fba_fees_comp_details` (
   `qty_shp` int(11) NOT NULL,
   `fee_type` varchar(35) NOT NULL,
   `fee_curr` varchar(3) NOT NULL,
-  `fee_amt` double NOT NULL
+  `fee_amt` double NOT NULL,
+  `calc_fee_amt` double NOT NULL,
+  `calc_remarks` varchar(50) DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 
 -- --------------------------------------------------------
@@ -185,6 +187,25 @@ INSERT INTO `fba_ful_fees_usa` (`fba_fees_id`, `prod_size_code`, `first_outshp_w
 (52, 'MO', 2, 1, 'pound', 11.37, 0.39, 'USD', '2020-02-18', '2021-02-17'),
 (53, 'LO', 90, 1, 'pound', 75.78, 0.79, 'USD', '2020-02-18', '2021-02-17'),
 (54, 'SPO', 90, 1, 'pound', 137.32, 0.91, 'USD', '2020-02-18', '2021-02-17');
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `fba_products`
+--
+
+CREATE TABLE `fba_products` (
+  `amz_acct_id` int(11) NOT NULL,
+  `seller_sku` varchar(20) NOT NULL,
+  `fnsku` varchar(20) NOT NULL,
+  `asin` varchar(20) NOT NULL,
+  `pkgd_prod_wt` double NOT NULL,
+  `pkgd_prod_wt_uom` varchar(6) NOT NULL,
+  `pkgd_prod_ls` double NOT NULL,
+  `pkgd_prod_ms` double NOT NULL,
+  `pkgd_prod_ss` double NOT NULL,
+  `pkgd_prod_dim_uom` varchar(6) NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 
 -- --------------------------------------------------------
 
@@ -338,6 +359,12 @@ ALTER TABLE `fba_ful_fees_usa`
   ADD PRIMARY KEY (`fba_fees_id`);
 
 --
+-- Indexes for table `fba_products`
+--
+ALTER TABLE `fba_products`
+  ADD PRIMARY KEY (`amz_acct_id`,`seller_sku`);
+
+--
 -- Indexes for table `fba_prod_size_usa`
 --
 ALTER TABLE `fba_prod_size_usa`
@@ -406,6 +433,12 @@ ALTER TABLE `fba_fees_comp_details`
 --
 ALTER TABLE `fba_fees_comp_header`
   ADD CONSTRAINT `fk_fba_fees_comp_header_amz_account` FOREIGN KEY (`amz_acct_id`) REFERENCES `amz_accounts` (`amz_acct_id`) ON DELETE CASCADE ON UPDATE CASCADE;
+
+--
+-- Constraints for table `fba_products`
+--
+ALTER TABLE `fba_products`
+  ADD CONSTRAINT `fk_fba_prod_amz_acct` FOREIGN KEY (`amz_acct_id`) REFERENCES `amz_accounts` (`amz_acct_id`) ON DELETE CASCADE ON UPDATE CASCADE;
 COMMIT;
 
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;

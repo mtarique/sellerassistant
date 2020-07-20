@@ -19,11 +19,11 @@ class Amazon_payments extends CI_Controller
     {
         parent::__construct(); 
 
-        $this->load->helper('auth_helper');
+        $this->load->helper(array('auth_helper', 'fba_fees_calc_helper'));
 
         $this->load->library(array('mws/finances', 'encryption')); 
 
-        $this->load->model(array('payments/amazon/payments_model', 'settings/channels/amazon_model')); 
+        $this->load->model(array('payments/amazon/payments_model', 'settings/channels/amazon_model', 'products/amazon/products_model')); 
 
         $this->my_var = "HelloWorld"; 
     }
@@ -407,7 +407,28 @@ class Amazon_payments extends CI_Controller
                             {   
                                 // Insert only if FeeType is FBAPerUnitFulfillmentFee
                                 if($fee_component->FeeType == 'FBAPerUnitFulfillmentFee')
-                                {
+                                {   
+                                    // Fetch weight and dimentions of the product
+                                    $result = $this->products_model->get_fba_prod($amz_acct_id, $shipment_item->SellerSKU); 
+
+                                    if(!empty($result)) 
+                                    {
+                                        $row = $result[0]; 
+
+                                        $ls = $row->pkgd_prod_ls; 
+                                        $ms = $row->pkgd_prod_ms; 
+                                        $ss = $row->pkgd_prod_ss; 
+                                        $wt = $row->pkgd_prod_wt/453.59237; // Gram to pound
+                                        $dt = date('Y-m-d', strtotime($shipment_event->PostedDate));
+
+                                        $FBAPerUnitFulfillmentFeeCalculated = get_fba_ful_fees($ls, $ms, $ss, $wt, $dt); 
+                                        $calc_remarks = null; 
+                                    }
+                                    else {
+                                        $FBAPerUnitFulfillmentFeeCalculated = 0;
+                                        $calc_remarks = "MISSING_PRODUCT_DIMENSIONS"; 
+                                    } 
+
                                     // Add fees data to array rows
                                     $fees_data[$i]['fin_event_grp_id']    = $fin_event_grp_id; 
                                     $fees_data[$i]['amz_ord_id']          = $shipment_event->AmazonOrderId; 
@@ -419,6 +440,8 @@ class Amazon_payments extends CI_Controller
                                     $fees_data[$i]['fee_type']            = $fee_component->FeeType; 
                                     $fees_data[$i]['fee_curr']            = $fee_component->FeeAmount->CurrencyCode; 
                                     $fees_data[$i]['fee_amt']             = $fee_component->FeeAmount->CurrencyAmount; 
+                                    $fees_data[$i]['calc_fee_amt']        = $FBAPerUnitFulfillmentFeeCalculated*$shipment_item->QuantityShipped;   
+                                    $fees_data[$i]['calc_remarks']        = $calc_remarks; 
 
                                     $i++; // Increment the loop counter
                                 }
@@ -511,7 +534,28 @@ class Amazon_payments extends CI_Controller
                         {   
                             // Insert only if FeeType is FBAPerUnitFulfillmentFee
                             if($fee_component->FeeType == 'FBAPerUnitFulfillmentFee')
-                            {
+                            {   
+                                // Fetch weight and dimentions of the product
+                                $result = $this->products_model->get_fba_prod($amz_acct_id, $shipment_item->SellerSKU); 
+
+                                if(!empty($result)) 
+                                {
+                                    $row = $result[0]; 
+
+                                    $ls = $row->pkgd_prod_ls; 
+                                    $ms = $row->pkgd_prod_ms; 
+                                    $ss = $row->pkgd_prod_ss; 
+                                    $wt = $row->pkgd_prod_wt/453.59237; // Gram to pound
+                                    $dt = date('Y-m-d', strtotime($shipment_event->PostedDate));
+
+                                    $FBAPerUnitFulfillmentFeeCalculated = get_fba_ful_fees($ls, $ms, $ss, $wt, $dt); 
+                                    $calc_remarks = null; 
+                                }
+                                else {
+                                    $FBAPerUnitFulfillmentFeeCalculated = 0;
+                                    $calc_remarks = "MISSING_PRODUCT_DIMENSIONS"; 
+                                } 
+
                                 // Add fees data to array rows
                                 $fees_data[$i]['fin_event_grp_id']    = $fin_event_grp_id; 
                                 $fees_data[$i]['amz_ord_id']          = $shipment_event->AmazonOrderId; 
@@ -523,6 +567,8 @@ class Amazon_payments extends CI_Controller
                                 $fees_data[$i]['fee_type']            = $fee_component->FeeType; 
                                 $fees_data[$i]['fee_curr']            = $fee_component->FeeAmount->CurrencyCode; 
                                 $fees_data[$i]['fee_amt']             = $fee_component->FeeAmount->CurrencyAmount; 
+                                $fees_data[$i]['calc_fee_amt']        = $FBAPerUnitFulfillmentFeeCalculated*$shipment_item->QuantityShipped;   
+                                $fees_data[$i]['calc_remarks']        = $calc_remarks;   
 
                                 $i++; // Increment the loop counter
                             }
