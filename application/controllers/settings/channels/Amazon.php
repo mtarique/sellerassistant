@@ -30,6 +30,11 @@ class Amazon extends CI_Controller
         $this->load->view('settings/channels/amazon/accounts', $page_data);
     }
 
+    /**
+     * Add new Amazon account
+     *
+     * @return void
+     */
     public function new()
     {
         $page_data['title'] = "Connect Amazon Account";
@@ -82,6 +87,55 @@ class Amazon extends CI_Controller
         else {
             $ajax['status']  = false; 
             $ajax['message'] = show_alert('danger', validation_errors());
+        }
+
+        echo json_encode($ajax); 
+    }
+
+    /**
+     * List Amazon accounts in a table
+     *
+     * @return void
+     */
+    public function list_amz_accts()
+    {   
+        // Get active user id from session 
+        $user_id = $this->session->userdata('_userid');  
+
+        // Query to get all Amazon accounts for active user
+        $result = $this->amazon_model->get_amz_accts($user_id);
+
+        // Validate query response
+        if(!empty($result))
+        {   
+            $amz_accts_tbl = '<table class="table table-sm border border-grey-200 w-50" id="tblAmzAccts">';
+
+            foreach($result as $row)
+            {
+                $amz_accts_tbl .= '
+                    <tr>
+                        <td class="align-middle text-left"><img src="'.base_url('assets/img/brands/amazon-32.png').'" alt=""></td>
+                        <td class="align-middle text-left">'.$row->amz_acct_name.'</td>
+                        <td class="align-middle text-left">'.$row->amz_acct_name.'</td>
+                        <td class="align-middle text-left"><span class="badge badge-success"><i class="fas fa-check-circle"></i> Connected</span></td>
+                        <td class="align-middle text-center">
+                            <div class="d-flex flex-row">
+                                <a href="#" amz-acct-id="'.$row->amz_acct_id.'" data-toggle="tooltip" data-placement="top" title="Edit account" class="btn btn-sm btn-light shadow-sm mr-2 lnk-edit-amz-acct"><i class="fas fa-pencil-alt"></i></a>
+                                <a href="#" amz-acct-id="'.$row->amz_acct_id.'" data-toggle="tooltip" data-placement="top" title="Delete account" class="btn btn-sm btn-light shadow-sm lnk-del-amz-acct"><i class="fas fa-trash"></i></a>
+                            </div>
+                        </td>
+                    </tr>
+                ';
+            }            
+            
+            $amz_accts_tbl .= '</table>'; 
+
+            $ajax['status']  = true; 
+            $ajax['message'] = $amz_accts_tbl; 
+        }
+        else {
+            $ajax['status']  = false; 
+            $ajax['message'] = "<p><i class='fad fa-info-circle'></i> You have not connected any of your Amazon accounts please connect new account.</p>";    
         }
 
         echo json_encode($ajax); 

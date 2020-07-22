@@ -32,14 +32,18 @@ class Amazon_model extends CI_Model
     }
 
     /**
-     * Get Amazon Accounts by user id
+     * Get Amazon Accounts and its marketplace by user id
      *
      * @param   integer   $userid     
      * @return  array
      */
     public function get_amz_accts($userid)
     {
-        $query = $this->db->get_where('amz_accounts', array('user_id' => $userid)); 
+        $query = $this->db
+                        ->select('amz_accounts.*, amz_marketplaces.*')
+                        ->join('amz_marketplaces', 'amz_accounts.marketplace_id = amz_marketplaces.marketplace_id', 'left')
+                        ->where('amz_accounts.user_id', $userid)
+                        ->get('amz_accounts'); 
 
         return ($query->num_rows() > 0) ? $query->result() : null;
     }
@@ -52,12 +56,8 @@ class Amazon_model extends CI_Model
      */
     public function get_mws_keys($acctid)
     {
-        //$query = $this->db->get_where('amz_accounts', array('account_id' => $acctid)); 
-
-        
-
         $query = $this->db
-                        ->select('amz_accounts.*', 'amz_marketplaces.*')
+                        ->select('amz_accounts.*, amz_marketplaces.*')
                         ->join('amz_marketplaces', 'amz_accounts.marketplace_id = amz_marketplaces.marketplace_id', 'left')
                         ->where('amz_accounts.amz_acct_id', $acctid)
                         ->get('amz_accounts'); 
