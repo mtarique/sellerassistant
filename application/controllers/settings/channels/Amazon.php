@@ -120,7 +120,7 @@ class Amazon extends CI_Controller
                         <td class="align-middle text-left"><span class="badge badge-success"><i class="fas fa-check-circle"></i> Connected</span></td>
                         <td class="align-middle text-center">
                             <div class="d-flex flex-row">
-                                <a href="#" amz-acct-id="'.$row->amz_acct_id.'" data-toggle="tooltip" data-placement="top" title="Edit account" class="btn btn-sm btn-light shadow-sm mr-2 lnk-edit-amz-acct"><i class="fas fa-pencil-alt"></i></a>
+                                <a href="'.base_url('settings/channels/amazon/edit?amzacctid='.urlencode($this->encryption->encrypt($row->amz_acct_id))).'" target="_blank" data-toggle="tooltip" data-placement="top" title="Edit account" class="btn btn-sm btn-light shadow-sm mr-2 lnk-edit-amz-acct"><i class="fas fa-pencil-alt"></i></a>
                                 <a href="#" amz-acct-id="'.$row->amz_acct_id.'" data-toggle="tooltip" data-placement="top" title="Delete account" class="btn btn-sm btn-light shadow-sm lnk-del-amz-acct"><i class="fas fa-trash"></i></a>
                             </div>
                         </td>
@@ -139,6 +139,31 @@ class Amazon extends CI_Controller
         }
 
         echo json_encode($ajax); 
+    }
+
+    public function edit()
+    {   
+        // Get amazon account id from url
+        $amz_acct_id = urldecode($this->encryption->decrypt($this->input->get('amzacctid')));
+
+        // Query to get amazon account details along with MWS keys
+        $result = $this->amazon_model->get_mws_keys($amz_acct_id);
+        
+        if(!empty($result))
+        {   
+            $row = $result[0]; 
+
+            $page_data['amz_acct_name']     = $row->amz_acct_name; 
+            $page_data['seller_id']         = $this->encryption->decrypt($row->seller_id); 
+            $page_data['mws_auth_token']    = $this->encryption->decrypt($row->mws_auth_token); 
+            $page_data['aws_access_key_id'] = $this->encryption->decrypt($row->aws_access_key_id); 
+            $page_data['secret_key']        = $this->encryption->decrypt($row->secret_key); 
+        }
+
+        $page_data['title'] = "Edit Amazon Account";
+        $page_data['descr'] = "Change your amazon seller central account MWS API Keys."; 
+
+        $this->load->view('settings/channels/amazon/edit', $page_data);
     }
 }
 
