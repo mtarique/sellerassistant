@@ -25,19 +25,23 @@ function show_alert($type, $msg)
         // Set icons and themes based on alert type
         case "danger": 
             $icon  = '<i class = "far fa-times-circle fa-lg"></i>'; 
-            $theme = 'text-pink-600 border-pink-600'; 
+            $theme = 'text-pink-600-border-pink-600'; 
             break; 
         case "success": 
             $icon  = '<i class = "far fa-check-circle fa-lg"></i>'; 
-            $theme = 'text-green-600 border-green-600'; 
+            $theme = 'text-green-600-border-green-600'; 
             break;  
         case "info": 
             $icon  = '<i class = "fas fa-info-circle fa-lg"></i>'; 
-            $theme = 'text-cyan-600 border-cyan-600'; 
+            $theme = 'text-cyan-600-border-cyan-600'; 
             break; 
+        case "primary": 
+                $icon  = '<i class = "fas fa-info-circle fa-lg"></i>'; 
+                $theme = 'text-cyan-600-border-cyan-600'; 
+                break; 
         case "warning": 
             $icon  = '<i class = "fas fa-exclamation-circle fa-lg"></i>'; 
-            $theme = 'text-yellow-700 border-yellow-700'; 
+            $theme = 'text-yellow-700-border-yellow-700'; 
             break; 
         default: 
             $icon  = '';
