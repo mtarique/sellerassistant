@@ -120,7 +120,7 @@ class Amazon extends CI_Controller
                         <td class="align-middle text-left"><span class="badge badge-success"><i class="fas fa-check-circle"></i> Connected</span></td>
                         <td class="align-middle text-center">
                             <div class="d-flex flex-row">
-                                <a href="'.base_url('settings/channels/amazon/edit?amzacctid='.urlencode($this->encryption->encrypt($row->amz_acct_id))).'" target="_blank" data-toggle="tooltip" data-placement="top" title="Edit account" class="btn btn-sm btn-light shadow-sm mr-2 lnk-edit-amz-acct"><i class="fas fa-pencil-alt"></i></a>
+                                <a href="'.base_url('settings/channels/amazon/edit?amzacctid='.urlencode($this->encryption->encrypt($row->amz_acct_id))).'" data-toggle="tooltip" data-placement="top" title="Edit account" class="btn btn-sm btn-light shadow-sm mr-2"><i class="fas fa-pencil-alt"></i></a>
                                 <a href="#" amz-acct-id="'.$row->amz_acct_id.'" data-toggle="tooltip" data-placement="top" title="Delete account" class="btn btn-sm btn-light shadow-sm lnk-del-amz-acct"><i class="fas fa-trash"></i></a>
                             </div>
                         </td>
@@ -141,6 +141,11 @@ class Amazon extends CI_Controller
         echo json_encode($ajax); 
     }
 
+    /**
+     * Edit amazon account details
+     *
+     * @return void
+     */
     public function edit()
     {   
         // Get amazon account id from url
@@ -151,20 +156,68 @@ class Amazon extends CI_Controller
         
         if(!empty($result))
         {   
-            $row = $result[0]; 
-
-            $page_data['amz_acct_name']     = $row->amz_acct_name; 
-            $page_data['marketplace_id']    = $row->marketplace_id; 
-            $page_data['seller_id']         = $this->encryption->decrypt($row->seller_id); 
-            $page_data['mws_auth_token']    = $this->encryption->decrypt($row->mws_auth_token); 
-            $page_data['aws_access_key_id'] = $this->encryption->decrypt($row->aws_access_key_id); 
-            $page_data['secret_key']        = $this->encryption->decrypt($row->secret_key); 
+            $page_data['amz_acct_id']       = $amz_acct_id; 
+            $page_data['amz_acct_name']     = $result[0]->amz_acct_name; 
+            $page_data['marketplace_id']    = $result[0]->marketplace_id; 
+            $page_data['seller_id']         = $this->encryption->decrypt($result[0]->seller_id); 
+            $page_data['mws_auth_token']    = $this->encryption->decrypt($result[0]->mws_auth_token); 
+            $page_data['aws_access_key_id'] = $this->encryption->decrypt($result[0]->aws_access_key_id); 
+            $page_data['secret_key']        = $this->encryption->decrypt($result[0]->secret_key); 
         }
 
         $page_data['title'] = "Edit Amazon Account";
         $page_data['descr'] = "Change your amazon seller central account MWS API Keys."; 
 
         $this->load->view('settings/channels/amazon/edit', $page_data);
+    }
+
+    /**
+     * Update or save amazon account changes
+     *
+     * @return void
+     */
+    public function update()
+    {
+        // Set form validation rules 
+        $this->form_validation->set_rules('inputAmzAcctName', 'Account Name', 'required'); 
+        $this->form_validation->set_rules('inputMpId', 'Marketplace', 'required');
+        $this->form_validation->set_rules('inputSellerId', 'Seller Id', 'required');
+        $this->form_validation->set_rules('inputMwsAuthToken', 'Seller Id', 'required');
+        $this->form_validation->set_rules('inputAWSAccessKeyId', 'AWS Access Key ID', 'required');
+        $this->form_validation->set_rules('inputSecretKey', 'Secret Key', 'required');  
+
+        // Validate user input
+        if($this->form_validation->run() == true)
+        {   
+            // Amazon seller MWS account data array
+            $amz_acct_id                        = $this->encryption->decrypt($this->input->post('inputAmzAcctId'));
+            $amz_acct_data['amz_acct_name']     = $this->input->post('inputAmzAcctName'); 
+            $amz_acct_data['marketplace_id']    = $this->input->post('inputMpId'); 
+            $amz_acct_data['seller_id']         = $this->encryption->encrypt($this->input->post('inputSellerId')); 
+            $amz_acct_data['mws_auth_token']    = $this->encryption->encrypt($this->input->post('inputMwsAuthToken'));
+            $amz_acct_data['aws_access_key_id'] = $this->encryption->encrypt($this->input->post('inputAWSAccessKeyId')); 
+            $amz_acct_data['secret_key']        = $this->encryption->encrypt($this->input->post('inputSecretKey')); 
+
+            // Query to update amazon account data 
+            $result = $this->amazon_model->update_amz_acct($amz_acct_id, $amz_acct_data);
+            
+            // Validate query response
+            if($result == 1)
+            {
+                $ajax['status']  = true; 
+                $ajax['message'] = show_alert('success', "Changes saved!"); 
+            }
+            else {
+                $ajax['status']  = false; 
+                $ajax['message'] = show_alert('danger', $result);    
+            }
+        }
+        else {
+            $ajax['status']  = false; 
+            $ajax['message'] = show_alert('danger', validation_errors());
+        }
+
+        echo json_encode($ajax); 
     }
 }
 

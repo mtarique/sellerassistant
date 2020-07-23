@@ -76,5 +76,21 @@ class Amazon_model extends CI_Model
         
         return ($query->num_rows() > 0) ? $query->result() : null; 
     } 
+
+    /**
+     * Update amazon account details
+     *
+     * @param   integer     $amz_acct_id    
+     * @param   array       $amz_acct_data
+     * @return  void
+     */
+    public function update_amz_acct($amz_acct_id, $amz_acct_data)
+    {
+        $query = $this->db
+                        ->where('amz_acct_id', $amz_acct_id)
+                        ->update('amz_accounts', $amz_acct_data); 
+                        
+        return ($query) ? true : $this->db->error()['message'];
+    }
 }
 ?>

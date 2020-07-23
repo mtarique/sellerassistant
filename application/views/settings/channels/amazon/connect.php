@@ -80,11 +80,9 @@ https://help.godatafeed.com/hc/en-us/articles/360016189091-Connecting-Amazon-Aut
                 {
                     if(res.status)
                     {
-                        //swal({title: "Connected!", text: res.message, icon: "success"});
                         $('#resConnectMWS').html(res.message);  
                     }
                     else {
-                        //swal({title: "Oops!", text: res.message, icon: "error"}); 
                         $('#resConnectMWS').html(res.message); 
                     }
                 }, 
