@@ -121,7 +121,7 @@ class Amazon extends CI_Controller
                         <td class="align-middle text-center">
                             <div class="d-flex flex-row">
                                 <a href="'.base_url('settings/channels/amazon/edit?amzacctid='.urlencode($this->encryption->encrypt($row->amz_acct_id))).'" data-toggle="tooltip" data-placement="top" title="Edit account" class="btn btn-sm btn-light shadow-sm mr-2"><i class="fas fa-pencil-alt"></i></a>
-                                <a href="#" amz-acct-id="'.$row->amz_acct_id.'" data-toggle="tooltip" data-placement="top" title="Delete account" class="btn btn-sm btn-light shadow-sm lnk-del-amz-acct"><i class="fas fa-trash"></i></a>
+                                <a href="#" amz-acct-id="'.urlencode($this->encryption->encrypt($row->amz_acct_id)).'" data-toggle="tooltip" data-placement="top" title="Delete account" class="btn btn-sm btn-light shadow-sm lnk-del-amz-acct"><i class="fas fa-trash"></i></a>
                             </div>
                         </td>
                     </tr>
@@ -215,6 +215,30 @@ class Amazon extends CI_Controller
         else {
             $ajax['status']  = false; 
             $ajax['message'] = show_alert('danger', validation_errors());
+        }
+
+        echo json_encode($ajax); 
+    }
+
+    /**
+     * Delete amazon account by acct id 
+     *
+     * @return void
+     */
+    public function delete()
+    {
+        $amz_acct_id = urldecode($this->encryption->decrypt($this->input->get('amzacctid'))); 
+
+        $result = $this->amazon_model->delete_amz_acct($amz_acct_id);
+        
+        if($result == 1)
+        {
+            $ajax['status'] = true; 
+            $ajax['message'] = "Account deteted."; 
+        }
+        else {
+            $ajax['status'] = false; 
+            $ajax['message'] = $result; 
         }
 
         echo json_encode($ajax); 

@@ -92,5 +92,20 @@ class Amazon_model extends CI_Model
                         
         return ($query) ? true : $this->db->error()['message'];
     }
+
+    /**
+     * Delete Amazon account from system by account id
+     *
+     * @param  integer  $amz_acct_id
+     * @return void
+     */
+    public function delete_amz_acct($amz_acct_id)
+    {
+        $query = $this->db
+                        ->where('amz_acct_id', $amz_acct_id)
+                        ->delete('amz_accounts'); 
+                        
+        return ($query) ? true : $this->db->error()['message'];
+    }
 }
 ?>

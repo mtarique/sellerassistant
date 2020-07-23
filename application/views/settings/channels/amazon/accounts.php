@@ -17,6 +17,7 @@ $this->load->view('templates/loader');
 
 <script>
     $(document).ready(function(){
+
         $.ajax({
             type: "get", 
             url: "<?php echo base_url('settings/channels/amazon/list_amz_accts'); ?>", 
@@ -34,6 +35,9 @@ $this->load->view('templates/loader');
                 if(res.status)
                 {
                     $('#list-amz-accts').html(res.message);  
+
+                    // Deletes amazon account on delete button click
+                    del_amz_acct(); 
                 }
                 else {
                     $('#list-amz-accts').html(res.message); 
@@ -45,6 +49,66 @@ $this->load->view('templates/loader');
                 swal({title: "Request error!", text: xhr_text, icon: "error"});
             }
         }); 
+
+        /**
+         * Deletes amazon account on delete button click
+         *
+         * @return void
+         */
+        function del_amz_acct()
+        {
+            $('.lnk-del-amz-acct').each(function(){
+                $(this).click(function(){
+
+                    const amz_acct_id = $(this).attr('amz-acct-id'); 
+                    const deleted_row = $(this).closest('tr'); 
+
+                    swal({
+                        title: "Confirm delete!", 
+                        text: "Are you sure you want to delete this account?", 
+                        icon: "warning", 
+                        buttons: ["No", "Yes"], 
+                        dangerMode: true
+                    }).then((is_deleted) => {
+                        if(is_deleted) 
+                        {
+                            $.ajax({
+                                type: "get", 
+                                url: "<?php echo base_url('settings/channels/amazon/delete'); ?>", 
+                                data: "amzacctid="+amz_acct_id, 
+                                dataType: "json", 
+                                beforeSend: function()
+                                {
+                                    $('#loader').removeClass("d-none");
+                                }, 
+                                complete: function()
+                                {
+                                    $('#loader').addClass("d-none");
+                                }, 
+                                success: function(res)
+                                {
+                                    if(res.status) 
+                                    {   
+                                        swal({title: "Deleted!", text: res.message, icon: "success"});    
+
+                                        // Remove deleted row
+                                        deleted_row.hide('slow', function(){
+                                            deleted_row.remove();
+                                        });
+                                    }
+                                    else swal({title: "Oops!", text: res.message, icon: "error"});
+                                }, 
+                                error: function(xhr)
+                                {
+                                    var xhr_text = xhr.status+" "+xhr.statusText;
+                                    swal({title: "Request error!", text: xhr_text, icon: "error"});
+                                }
+                            }); 
+                        }
+                    }); 
+                }); 
+            }); 
+        }
     }); 
 </script>
 
