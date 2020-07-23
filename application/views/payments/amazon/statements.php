@@ -24,7 +24,7 @@ $this->load->view('templates/loader');
         <form class="form-inline" id="formViewPmts">
             <label class="mr-2" for="inputAmzAcctId">Amazon Account: </label>
             <select name="inputAmzAcctId" id="inputAmzAcctId" class="custom-select custom-select-sm rounded-0 mr-2" required>
-                <?php echo _options(get_amz_accts($this->session->userdata('_userid'))); ?>
+                <?php echo _options_amz_accts($this->session->userdata('_userid')); ?>
             </select>
 
             <label for="inputPmtDateFm" class="mr-2">From: </label>

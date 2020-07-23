@@ -64,5 +64,17 @@ class Amazon_model extends CI_Model
 
         return ($query->num_rows() > 0) ? $query->result() : null;
     }
+
+    /**
+     * Get all available amazon marketplaces
+     *
+     * @return void
+     */
+    public function get_marketplaces()
+    {
+        $query = $this->db->get('amz_marketplaces');
+        
+        return ($query->num_rows() > 0) ? $query->result() : null; 
+    } 
 }
 ?>

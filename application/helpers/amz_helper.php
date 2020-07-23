@@ -18,61 +18,68 @@
 defined('BASEPATH') or exit('No direct script access allowed.'); 
 
 /**
- * Get amazon accounts for active user id
+ * Get amazon accounts as select options
  *
- * @param   integer   $userid   Active user id from session variables
- * @return  array 
+ * @return void
  */
-function get_amz_accts($userid)
+function _options_amz_accts($userid, $selected = null)
 {
     $CI = & get_instance(); 
 
     $CI->load->model('settings/channels/amazon_model');
-    
+
     $result = $CI->amazon_model->get_amz_accts($userid); 
 
     if(!empty($result)) 
     {   
-        $opt_array = array(); 
+        $options = ''; 
         
         foreach($result as $row)
-        {
-            $opt_array[$row->amz_acct_name] = $row->amz_acct_id;
+        {   
+            if(isset($selected) && $selected == $row->amz_acct_id)
+            {   
+                $options .= '<option value="'.$row->amz_acct_id.'" selected>'.$row->amz_acct_name.'</option>'; 
+            }
+            else $options .= '<option value="'.$row->amz_acct_id.'">'.$row->amz_acct_name.'</option>'; 
         }
-
-        return $opt_array; 
+        return $options; 
     }
     else return null;
 }
 
- /**
- * Get Amazon MWS access keys
+/**
+ * Get amazon marketplaces as select options
  *
- * @param   integer   $acctid   Sales channel account id
- * @return  void
+ * @return void
  */
-function get_mws_keys($acctid)
+function _options_marketplaces($selected = null)
 {
     $CI = & get_instance(); 
 
-    $CI->load->model('settings/channels/amazon_model');
+    $CI->load->model('settings/channels/amazon_model'); 
 
-    $result = $CI->amazon_model->get_mws_keys($acctid); 
+    $result = $CI->amazon_model->get_marketplaces(); 
 
-    /* if(!empty($result)) 
+    if(!empty($result)) 
     {   
-        $opt_array = array(); 
+        $options = ''; 
         
         foreach($result as $row)
-        {
-            $opt_array[$row->account_name] = $row->account_id;
+        {   
+            $mp_id   = $row->marketplace_id; 
+            $mp_name = $row->sales_channel.' ('.$row->marketplace_name.')'; 
+
+            if(isset($selected) && $selected == $row->marketplace_id)
+            {   
+                $options .= '<option value="'.$mp_id.'" selected>'.$mp_name.'</option>'; 
+            }
+            else $options .= '<option value="'.$mp_id.'">'.$mp_name.'</option>'; 
         }
-
-        return $opt_array; 
+        return $options; 
     }
-    else return null; */
-
-    return null; 
+    else return null;
 }
+
+ ?>
 
 

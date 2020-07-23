@@ -24,7 +24,7 @@ defined('BASEPATH') or exit('No direct script access allowed.');
  * @param   string      $attributes
  * @return  string
  */
-function _options($options = array(), $attributes = '')
+function _options($options = array(), $attributes = '', $selected = null)
 {
     if(!is_array($options)) return null; 
     

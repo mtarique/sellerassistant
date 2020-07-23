@@ -16,7 +16,6 @@ https://help.godatafeed.com/hc/en-us/articles/360016189091-Connecting-Amazon-Aut
         <div class="card border-0 rounded-0">
             <div class="card-body p-0">
                 <div id="resConnectMWS"></div>
-                <!-- <p>Connecting your Amazon account is easy! You just need an Amazon professional seller account to sell on Amazon.</p> -->
                 <form id="formConnectMWS">
                     <div class="form-group">
                         <label for="inputAmzAcctName" class="font-weight-bold small req-after">Account Name</label>
@@ -25,7 +24,7 @@ https://help.godatafeed.com/hc/en-us/articles/360016189091-Connecting-Amazon-Aut
                     <div class="form-group">
                         <label for="inputMpId" class="font-weight-bold small req-after">Marketplace</label>
                         <select name="inputMpId" id="inputMpId" class="custom-select custom-select-sm" required>
-                            <option value="ATVPDKIKX0DER">Amazon.com (United States)</option>
+                            <?php echo _options_marketplaces('ATVPDKIKX0DER'); ?>
                         </select>
                     </div>
                     <div class="form-group">

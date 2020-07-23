@@ -154,6 +154,7 @@ class Amazon extends CI_Controller
             $row = $result[0]; 
 
             $page_data['amz_acct_name']     = $row->amz_acct_name; 
+            $page_data['marketplace_id']    = $row->marketplace_id; 
             $page_data['seller_id']         = $this->encryption->decrypt($row->seller_id); 
             $page_data['mws_auth_token']    = $this->encryption->decrypt($row->mws_auth_token); 
             $page_data['aws_access_key_id'] = $this->encryption->decrypt($row->aws_access_key_id); 

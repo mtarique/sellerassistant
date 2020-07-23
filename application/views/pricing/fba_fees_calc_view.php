@@ -14,7 +14,7 @@ $this->load->view('templates/loader');
                     <div class="form-group">
                         <label for="txtMp" class="req-after font-weight-bold small">Select Marketplace</label>
                         <select name="txtMp" id="txtMp" class="custom-select custom-select-sm">
-                            <option value="ATVPDKIKX0DER">Amazon US</option>
+                            <?php echo _options_marketplaces('ATVPDKIKX0DER'); ?>
                         </select>
                     </div>
                     <div class="form-group">
