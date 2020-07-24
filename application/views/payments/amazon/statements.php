@@ -68,7 +68,7 @@ $this->load->view('templates/loader');
 
             $.ajax({
                 type: "post",
-                url:  "<?php echo base_url('payments/amazon_payments/view_payments'); ?>", 
+                url:  "<?php echo base_url('payments/amazon/payments/view_payments'); ?>", 
                 data: $(this).serialize(), 
                 dataType: "json", 
                 beforeSend: function()
@@ -113,7 +113,7 @@ $this->load->view('templates/loader');
             $('#btnLoadMore').click(function(){
                 $.ajax({
                     type: "get", 
-                    url: "<?php echo base_url('payments/amazon_payments/get_payments_by_next_token'); ?>",
+                    url: "<?php echo base_url('payments/amazon/payments/get_payments_by_next_token'); ?>",
                     data: "nexttoken="+encodeURIComponent($(this).attr('next-token')),  
                     dataType: "json", 
                     beforeSend: function()
@@ -172,7 +172,7 @@ $this->load->view('templates/loader');
 
                     $.ajax({
                         type: "get", 
-                        url: "<?php echo base_url('payments/amazon_payments/fetch_fba_fees'); ?>", 
+                        url: "<?php echo base_url('payments/amazon/payments/fetch_fba_fees'); ?>", 
                         data: "fineventgrpid="+fin_event_grp_id+"&fineventgrpstart="+fin_event_grp_start+"&fineventgrpend="+fin_event_grp_end+"&amzacctid="+amz_acct_id, 
                         dataType: "json", 
                         beforeSend: function()
@@ -220,7 +220,7 @@ $this->load->view('templates/loader');
         {   
             $.ajax({
                 type: "get", 
-                url: "<?php echo base_url('payments/amazon_payments/fetch_fba_fees_by_next_token'); ?>", 
+                url: "<?php echo base_url('payments/amazon/payments/fetch_fba_fees_by_next_token'); ?>", 
                 data: "nexttoken="+NextToken+"&fineventgrpid="+FinEventGrpId+"&fineventgrpstart="+FinEventGrpStart+"&fineventgrpend="+FinEventGrpEnd+"&amzacctid="+AmzAcctId,   
                 dataType: "json", 
         

@@ -11,7 +11,7 @@ defined('BASEPATH') or exit('No direct script access allowed.');
 
 date_default_timezone_set('UTC');
 
-class Amazon_payments extends CI_Controller 
+class Payments extends CI_Controller 
 {
     private $my_var; 
 
@@ -94,7 +94,7 @@ class Amazon_payments extends CI_Controller
                             <td class="align-middle text-center">'.$fund_transfer_date.'</td>
                             <td class="align-middle text-left">'.$event_group->ProcessingStatus.'</td>
                             <td class="align-middle text-center">
-                                <a href="'.base_url('payments/amazon_payments/view_transactions?fineventgrpid='.$event_group->FinancialEventGroupId.'&amzacctid='.$amz_acct_id).'" target="_blank" class="btn btn-xs btn-warning shadow-sm">View Transactions</a>
+                                <a href="'.base_url('payments/amazon/payments/view_transactions?fineventgrpid='.$event_group->FinancialEventGroupId.'&amzacctid='.$amz_acct_id).'" target="_blank" class="btn btn-xs btn-warning shadow-sm">View Transactions</a>
                                 <a href="#" 
                                     class="btn btn-xs btn-warning shadow-sm btn-comp-fba-fees" 
                                     fin-event-grp-start="'.date('M d, Y', strtotime($event_group->FinancialEventGroupStart)).'" 

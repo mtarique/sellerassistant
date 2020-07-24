@@ -35,7 +35,7 @@ $this->load->view('templates/loader');
          */
         $.ajax({
             type: "get", 
-            url: "<?php echo base_url('payments/amazon_payments/get_pmt_trans'); ?>", 
+            url: "<?php echo base_url('payments/amazon/payments/get_pmt_trans'); ?>", 
             data: "fineventgrpid=<?php echo $fin_event_grp_id; ?>&amzacctid=<?php echo $amz_acct_id; ?>", 
             dataType: "json", 
             beforeSend: function()
@@ -106,7 +106,7 @@ $this->load->view('templates/loader');
             $('#btnLoadMore').click(function(){
                 $.ajax({
                     type: "get", 
-                    url: "<?php echo base_url('payments/amazon_payments/get_pmt_trans_by_next_token'); ?>", 
+                    url: "<?php echo base_url('payments/amazon/payments/get_pmt_trans_by_next_token'); ?>", 
                     data: "nexttoken="+encodeURIComponent($(this).attr('next-token'))+"&amzacctid=<?php echo $amz_acct_id; ?>", 
                     dataType: "json", 
                     beforeSend: function()
