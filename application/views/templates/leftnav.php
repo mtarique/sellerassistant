@@ -90,7 +90,7 @@ ul.collapse-not-in-use {
         		</a>
                 <ul class="collapse flex-column list-unstyled animated fadeIn" id="subPayments">
                     <li class="nav-item">
-                        <a href="<?php echo base_url('payments/amazon/payments'); ?>" class="nav-link fs-14 pl-5 pb-0">Fee Preview</a>
+                        <a href="<?php echo base_url('payments/amazon/fees'); ?>" class="nav-link fs-14 pl-5 pb-0">Fee Preview</a>
                     </li>
                     <li class="nav-item">
                         <a href="<?php echo base_url('payments/amazon/payments'); ?>" class="nav-link fs-14 pl-5 pb-0">Amazon Payments</a>

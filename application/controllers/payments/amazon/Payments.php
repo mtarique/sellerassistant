@@ -13,8 +13,6 @@ date_default_timezone_set('UTC');
 
 class Payments extends CI_Controller 
 {
-    private $my_var; 
-
     public function __construct()
     {
         parent::__construct(); 
@@ -23,9 +21,7 @@ class Payments extends CI_Controller
 
         $this->load->library(array('mws/finances', 'encryption')); 
 
-        $this->load->model(array('payments/amazon/payments_model', 'settings/channels/amazon_model', 'products/amazon/products_model')); 
-
-        $this->my_var = "HelloWorld"; 
+        $this->load->model(array('payments/amazon/payments_model', 'settings/channels/amazon_model', 'products/amazon/products_model'));  
     }
 
     /**
@@ -36,7 +32,7 @@ class Payments extends CI_Controller
     public function index()
     {
         $page_data['title'] = "Amazon Payments";
-        $page_data['descr'] = "View and do analysis for your Amazon payments.".$this->my_var; 
+        $page_data['descr'] = "View and do analysis for your Amazon payments."; 
 
         $this->load->view('payments/amazon/statements', $page_data);
     }
