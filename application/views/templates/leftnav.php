@@ -54,7 +54,22 @@ ul.collapse-not-in-use {
                     <span class="float-left nav-icon-width"><i class="far fa-tachometer-alt"></i></span>
                     <span class="font-weight-bold fs-14">Dashboard</span>
         		</a>
-        	</li>
+            </li>
+            <!-- 
+            NOTES: Will be enabled when development starts
+            <li class="nav-item">
+        		<a class="nav-link pb-0" href="#subProducts" data-toggle="collapse" aria-expanded="false">
+                    <span class="float-left nav-icon-width"><i class="far fa-box-full"></i></span>
+                    <span class="font-weight-bold fs-14">Products</span>
+                    <span class="float-right"><i class="fas fa-angle-right leftnav-caret"></i></span>
+        		</a>
+                <ul class="collapse flex-column list-unstyled animated fadeIn" id="subProducts">
+                    <li class="nav-item">
+                        <a href="<?php echo base_url('products/amazon/fba_prod'); ?>" class="nav-link fs-14 pl-5 pb-0">FBA Products</a>
+                    </li>
+                </ul>
+            </li>
+            -->
             <li class="nav-item">
         		<a class="nav-link pb-0" href="#subPricing" data-toggle="collapse" aria-expanded="false">
                     <span class="float-left nav-icon-width"><i class="far fa-tags"></i></span>
