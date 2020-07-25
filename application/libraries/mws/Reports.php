@@ -2,6 +2,8 @@
 /**
  * MWS Reports API
  * 
+ * http://docs.developer.amazonservices.com/en_IN/reports/Reports_Overview.html 
+ * 
  * @category    Amazon
  * @package 	Marketplace Web Services
  * @version     2009-01-01
@@ -54,7 +56,7 @@ class Reports {
 		$sign .= '/Reports/2009-01-01' . "\n";
         $sign .= $arr;
         
-        $signature = hash_hmac("sha256", $sign, base64_decode($secret_key), true);
+        $signature = hash_hmac("sha256", $sign, $secret_key, true);
 		$signature = urlencode(base64_encode($signature));
 
         // Generate request URL
@@ -93,6 +95,158 @@ class Reports {
     }
 
     /**
+     * Request a report
+     * 
+     * http://docs.developer.amazonservices.com/en_IN/reports/Reports_RequestReport.html
+     *
+     * @param   string      $sellerid             SellerId
+     * @param   string      $mwsauthtoken         MWSAuthToken
+     * @param   string      $awsaccesskey         AWSAccessKeyId
+     * @param   string      $secretkey            Secret Key
+     * @param   string      $reporttype           ReportType
+     * @param   array       $mpidlist           
+     * @param   date        $startdate
+     * @param   date        $enddate
+     * @param   string      $reportopt
+     * @return  object      Return XML response
+     */
+    public function RequestReport($sellerid, $mwsauthtoken, $awsaccesskey, $secretkey, $reporttype, $mpidlist = null, $startdate = null, $enddate = null, $reportopt = null)
+    {
+        $param = array(
+            'AWSAccessKeyId'        => $awsaccesskey, 
+            'Action'                => 'RequestReport', 
+            'MWSAuthToken'          => $mwsauthtoken, 
+            'Merchant'              => $sellerid, 
+            'SignatureMethod'       => 'HmacSHA256', 
+            'SignatureVersion'      => '2', 
+            'Timestamp'             => date("c", time()), 
+            'Version'               => '2009-01-01', 
+            'ReportType'            => $reporttype
+        ); 
+
+        // Optional parameters
+        if(isset($startdate)) $param['StartDate']     = $startdate;
+        if(isset($enddate)) $param['EndDate']         = $enddate;
+        if(isset($reportopt)) $param['ReportOptions'] = $reportopt;
+
+        // Marketplace id list array parameter
+        if(isset($mpidlist)) 
+        {   
+            if(is_array($mpidlist)) 
+            {
+                $n = 1; 
+
+                foreach($mpidlist as $mp_id)
+                {
+                    $param['MarketplaceIdList.Id.'.$n] = $mp_id;
+
+                    $n++; 
+                }
+            }
+            else $param['MarketplaceIdList.Id.1'] = $mpidlist;
+        }
+
+        // Get request url
+        $request_url = $this->GenerateRequestURL($secretkey, $param); 
+
+        // Make curl request
+        return $this->CurlRequest($request_url);
+    }
+
+    /**
+     * Get report request list 
+     * 
+     * http://docs.developer.amazonservices.com/en_IN/reports/Reports_GetReportRequestList.html
+     *
+     * @param   string    $sellerid             SellerId
+     * @param   string    $mwsauthtoken         MWSAuthToken
+     * @param   string    $awsaccesskey         AWSAccessKeyId
+     * @param   string    $secretkey            Secret Key
+     * @param   integer   $maxcount             Optional - MaxCount
+     * @param   date      $reqdtfm              Optional - RequestedFromDate
+     * @param   date      $reqdtto              Optional - RequestedToDate
+     * @param   array     $repreqidlist         Optional - ReportRequestIdList
+     * @param   array     $reptypelist          Optional - ReportTypeList
+     * @param   array     $repprostatuslist     Optional - ReportProcessingStatusList [ _SUBMITTED_, _IN_PROGRESS_, _CANCELLED_, _DONE_, _DONE_NO_DATA_]
+     * @return  object                          Returns XML response
+     */
+    public function GetReportRequestList($sellerid, $mwsauthtoken, $awsaccesskey, $secretkey, $maxcount = NULL, $reqdtfm = NULL, $reqdtto = NULL, $repreqidlist = NULL, $reptypelist = NULL, $repprostatuslist = NULL)
+    {
+        $param = array(
+            'AWSAccessKeyId'        => $awsaccesskey, 
+            'Action'                => 'GetReportRequestList', 
+            'MWSAuthToken'          => $mwsauthtoken, 
+            'Merchant'              => $sellerid, 
+            'SignatureMethod'       => 'HmacSHA256', 
+            'SignatureVersion'      => '2', 
+            'Timestamp'             => date("c", time()), 
+            'Version'               => '2009-01-01'
+        ); 
+
+        // Optional parameters
+        if(isset($maxcount)) $param['MaxCount']         = $maxcount;
+        if(isset($reqdtfm)) $param['RequestedFromDate'] = $reqdtfm;
+        if(isset($reqdtto)) $param['RequestedToDate']   = $reqdtto;
+
+        // Report request id list array parameter
+        if(isset($repreqidlist)) 
+        {   
+            if(is_array($repreqidlist)) 
+            {
+                $n = 1; 
+
+                foreach($repreqidlist as $rep_req_id)
+                {
+                    $param['ReportRequestIdList.Id.'.$n] = $rep_req_id;
+
+                    $n++; 
+                }
+            }
+            else $param['ReportRequestIdList.Id.1'] = $repreqidlist;
+        }
+
+        // Report type list array parameter
+        if(isset($reptypelist)) 
+        {   
+            if(is_array($reptypelist)) 
+            {
+                $n = 1; 
+
+                foreach($reptypelist as $rep_type)
+                {
+                    $param['ReportTypeList.Type.'.$n] = $rep_type;
+
+                    $n++; 
+                }
+            }
+            else $param['ReportTypeList.Type.1'] = $reptypelist;
+        }
+
+        // Report processing status list array parameter
+        if(isset($repprostatuslist)) 
+        {   
+            if(is_array($repprostatuslist)) 
+            {
+                $n = 1; 
+
+                foreach($repprostatuslist as $pro_status)
+                {
+                    $param['ReportProcessingStatusList.Status.'.$n] = $pro_status;
+
+                    $n++; 
+                }
+            }
+            else $param['ReportProcessingStatusList.Status.1'] = $repprostatuslist;
+        }
+
+        // Get request url
+        $request_url = $this->GenerateRequestURL($secretkey, $param); 
+
+        // Make curl request
+        return $this->CurlRequest($request_url);
+    }
+
+    /**
      * Get report list
      *
      * @param [type] $sellerid
@@ -106,10 +260,10 @@ class Reports {
     {   
         
         $param = array(
-            'AWSAccessKeyId'        => base64_decode($awsaccesskey), 
+            'AWSAccessKeyId'        => $awsaccesskey, 
             'Action'                => 'GetReportList', 
-            'MWSAuthToken'          => base64_decode($mwsauthtoken), 
-            'Merchant'              => base64_decode($sellerid), 
+            'MWSAuthToken'          => $mwsauthtoken, 
+            'Merchant'              => $sellerid, 
             'SignatureMethod'       => 'HmacSHA256', 
             'SignatureVersion'      => '2', 
             'Timestamp'             => date("c", time()), 
@@ -159,10 +313,10 @@ class Reports {
     public function GetReportListByNextToken($sellerid, $mwsauthtoken, $awsaccesskey, $secretkey, $nexttoken)
     {
         $param = array(
-            'AWSAccessKeyId'        => base64_decode($awsaccesskey), 
+            'AWSAccessKeyId'        => $awsaccesskey, 
             'Action'                => 'GetReportListByNextToken', 
-            'MWSAuthToken'          => base64_decode($mwsauthtoken), 
-            'Merchant'              => base64_decode($sellerid), 
+            'MWSAuthToken'          => $mwsauthtoken, 
+            'Merchant'              => $sellerid, 
             'SignatureMethod'       => 'HmacSHA256', 
             'SignatureVersion'      => '2', 
             'Timestamp'             => date("c", time()), 
@@ -190,10 +344,10 @@ class Reports {
     public function GetReport($sellerid, $mwsauthtoken, $awsaccesskey, $secretkey, $reportid)
     {
         $param = array(
-            'AWSAccessKeyId'        => base64_decode($awsaccesskey), 
+            'AWSAccessKeyId'        => $awsaccesskey, 
             'Action'                => 'GetReport', 
-            'MWSAuthToken'          => base64_decode($mwsauthtoken), 
-            'Merchant'              => base64_decode($sellerid), 
+            'MWSAuthToken'          => $mwsauthtoken, 
+            'Merchant'              => $sellerid, 
             'SignatureMethod'       => 'HmacSHA256', 
             'SignatureVersion'      => '2', 
             'Timestamp'             => date("c", time()), 
