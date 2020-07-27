@@ -6,6 +6,7 @@ $this->load->view('templates/titlebar');
 $this->load->view('templates/loader'); 
 ?>
 
+
 <div class="card bg-light border-0 rounded-0 mb-3">
     <div class="card-body">
         <h5 class="card-title">Amazon Account</h5>
@@ -51,34 +52,8 @@ $this->load->view('templates/loader');
                     {   
                         const rep_req_id = res.report_request_id[0]; 
 
-                        // Check report generation status
-                        $('#resPrevFees').text("Report Request Id: "+rep_req_id); 
+                        check_report_status(amz_acct_id, rep_req_id);
 
-                        
-
-                        // Work here
-                        var refreshId = setInterval(function() {
-                            /* var properID = CheckReload();
-                            if (properID > 0) {
-                                clearInterval(refreshId);
-                            } */
-
-                            var pro_status = check_report_status(amz_acct_id, rep_req_id); 
-
-                            if(pro_status == "_DONE_")
-                            {
-                                $('#resPrevFees').append("<br>Generated Report Id: "+ check_report_status(amz_acct_id, rep_req_id)); 
-                                clearInterval(refreshId);
-                            }
-                            else if(pro_status == "_IN_PROGRESS_") {
-                                $('#resPrevFees').append("<br>Processing Status: "+ check_report_status(amz_acct_id, rep_req_id)); 
-                                //clearInterval(refreshId);
-                            }
-                            else {
-                                clearInterval(refreshId);
-                            }
-
-                        }, 10000);
                     }
                     else {
                         $('#resPrevFees').html(res.message); 
@@ -92,7 +67,6 @@ $this->load->view('templates/loader');
             }); 
         }); 
 
-        
         function check_report_status(amz_acct_id, rep_req_id)
         {
             $.ajax({
@@ -104,10 +78,71 @@ $this->load->view('templates/loader');
                 {
                     if(res.status) 
                     {
-                       return res.gen_rep_id[0]; 
+                        if(res.pro_status[0] == "_DONE_")
+                        {
+                            fetch_report(amz_acct_id, res.gen_rep_id[0])
+                        }
+                        else if(res.pro_status[0] == "_SUBMITTED_" || res.pro_status[0] == "_IN_PROGRESS_")
+                        {
+                            setTimeout(function() {
+                                check_report_status(amz_acct_id, rep_req_id)
+                            }, 10000);
+                        } 
+                        else if(res.pro_status[0] == "_CANCELLED_" || res.pro_status[0]== "_DONE_NO_DATA_")
+                        {
+                            //$("#resPrevFees").html(res.message); 
+                            get_done_reports(amz_acct_id); 
+                            
+                        } 
+                    }
+                    else $("#resPrevFees").html(res.message); 
+                }, 
+                error: function(xhr) 
+                {
+                    const xhr_text = xhr.status+" "+xhr.statusText;
+                    swal({title: "Request error!", text: xhr_text, icon: "error"});  
+                }
+            }); 
+        }
+
+        function get_done_reports(amz_acct_id)
+        {
+            $.ajax({
+                type: "get", 
+                url: "<?php echo base_url('payments/amazon/fees/get_done_reports'); ?>", 
+                data: "amzacctid="+amz_acct_id, 
+                dataType: "json", 
+                success: function(res)
+                {
+                    if(res.status) 
+                    {
+                        fetch_report(amz_acct_id, res.gen_rep_id[0])
+                    }
+                    else $("#resPrevFees").html(res.message); 
+                }, 
+                error: function(xhr) 
+                {
+                    const xhr_text = xhr.status+" "+xhr.statusText;
+                    swal({title: "Request error!", text: xhr_text, icon: "error"});  
+                }
+            }); 
+        }
+
+        function fetch_report(amz_acct_id, gen_rep_id)
+        {
+            $.ajax({
+                type: "get", 
+                url: "<?php echo base_url('payments/amazon/fees/get_report'); ?>", 
+                data: "amzacctid="+amz_acct_id+"&genrepid="+gen_rep_id, 
+                dataType: "json", 
+                success: function(res)
+                {
+                    if(res.status) 
+                    {
+                        $("#resPrevFees").html(res.message); 
                     }
                     else {
-                        return res.pro_status[0]; 
+                        $("#resPrevFees").html(res.message); 
                     }
                 }, 
                 error: function(xhr) 
