@@ -72,35 +72,30 @@ class Fees extends CI_Controller
 
                         //if((time()-(60*60*24)) < strtotime($submitted_date))
                         if(strtotime($last_submitted_date) < strtotime('-2 day'))
-                        //if(strtotime($last_submitted_date) < )
                         {   
-                            $processing['status']  = false; 
-                            $processing['message'] = "REQUEST_REPORT";
-                            $processing['text'] = "OLD REPORT - Request new report.".date("Y-m-d", strtotime('-1 day'));  
+                            $processing = $this->request_report($seller_id, $mws_auth_token, $aws_access_key_id, $secret_key, $report_type); 
                         }
                         else {
+                            // Get Fee Preview report
+                            $processing = $this->get_report($amz_acct_id, $seller_id, $mws_auth_token, $aws_access_key_id, $secret_key, $xml->GetReportRequestListResult->ReportRequestInfo->GeneratedReportId); 
+                            /* $report = $this->get_report($amz_acct_id, $seller_id, $mws_auth_token, $aws_access_key_id, $secret_key, $xml->GetReportRequestListResult->ReportRequestInfo->GeneratedReportId); 
 
-                            // Get report
-                            $get_report = $this->get_report($seller_id, $mws_auth_token, $aws_access_key_id, $secret_key, $xml->GetReportRequestListResult->ReportRequestInfo->GeneratedReportId); 
-
-                            if($get_report['status'] == true)
+                            if(!empty($report))
                             {
-                                $processing['status'] = $get_report['status'];
-                                $processing['message']   = $get_report['message'];   
+                                $processing['status']  = true;
+                                $processing['message'] = 'REPORT_GENERATED';
+                                $processing['report']  = $report;
                             }
                             else {
-                                $processing['status'] = $get_report['status'];
-                                $processing['message']   = $get_report['message'];   
-                                $processing['text'] = "FORMAT ERROR - REQUEST NEW REPORT - ".$get_report['delim']; 
-                            }
-                            /*$processing['gen_rep_id'] = $xml->GetReportRequestListResult->ReportRequestInfo->GeneratedReportId;  */
+                                $processing['status']  = false; 
+                                $processing['message'] = show_alert('danger', "FBA Fee Preview report is not available, please try again."); 
+                            } */
                         }
                     }
                     else {
                         // Request a new report
-                        $processing['status']  = false; 
-                        $processing['message'] = "REQUEST_REPORT"; 
-                        $processing['text'] = "NO DATA - Request new report."; 
+                        $processing = $this->request_report($seller_id, $mws_auth_token, $aws_access_key_id, $secret_key, $report_type); 
+                        
                         /* $processing['message'] = show_alert('danger', "No done reports are available request a new one.");  */
                     }
                 }
@@ -140,8 +135,9 @@ class Fees extends CI_Controller
 
         if(isset($xml->RequestReportResult->ReportRequestInfo->ReportRequestId))
         {
-            $processing['status'] = true; 
-            $processing['report_request_id'] = $xml->RequestReportResult->ReportRequestInfo->ReportRequestId; 
+            $processing['status']     = true; 
+            $processing['message']    = "REPORT_REQUESTED";
+            $processing['rep_req_id'] = $xml->RequestReportResult->ReportRequestInfo->ReportRequestId; 
         }
         else {
             $processing['status']  = false;
@@ -152,13 +148,62 @@ class Fees extends CI_Controller
     }
 
     /**
+     * Get report status
+     *
+     * @return void
+     */
+    public function get_report_status()
+    {
+        $amz_acct_id = $this->input->get('amzacctid'); 
+        $rep_req_id  = $this->input->get('repreqid'); 
+
+        // Get Amazon MWS Access keys by amazon account id
+        $result = $this->amazon_model->get_mws_keys($amz_acct_id);
+
+        if(!empty($result)) 
+        {
+            $seller_id         = $this->encryption->decrypt($result[0]->seller_id); 
+            $mws_auth_token    = $this->encryption->decrypt($result[0]->mws_auth_token); 
+            $aws_access_key_id = $this->encryption->decrypt($result[0]->aws_access_key_id); 
+            $secret_key        = $this->encryption->decrypt($result[0]->secret_key); 
+
+            $response = $this->reports->GetReportRequestList($seller_id, $mws_auth_token, $aws_access_key_id, $secret_key, null, null, null, $rep_req_id);
+        
+            $xml = new SimpleXMLElement($response); 
+
+            if(isset($xml->GetReportRequestListResult->ReportRequestInfo))
+            {   
+                if(isset($xml->GetReportRequestListResult->ReportRequestInfo->ReportProcessingStatus) && $xml->GetReportRequestListResult->ReportRequestInfo->ReportProcessingStatus == "_DONE_")
+                //if(isset($xml->GetReportRequestListResult->ReportRequestInfo->ReportProcessingStatus))
+                {
+                    $ajax['status']  = true; 
+                }
+                else {
+                    $ajax['status']  = false; 
+                    $ajax['message'] = show_alert("info", "Repost Status: ".$xml->GetReportRequestListResult->ReportRequestInfo->ReportProcessingStatus); 
+                }
+            }
+            else {
+                $ajax['status']  = false;
+                $ajax['message'] = show_alert('danger', $xml->Error->Message); 
+            }
+        }
+        else {
+            $ajax['status']  = false; 
+            $ajax['message'] = show_alert('danger', "Amazon account details not found.");     
+        }
+
+        echo json_encode($ajax);
+    }
+
+    /**
      * Get report 
      *
      * @return void
      */
-    public function get_report($seller_id, $mws_auth_token, $aws_access_key_id, $secret_key, $gen_rep_id)
+    public function get_report($amz_acct_id, $seller_id, $mws_auth_token, $aws_access_key_id, $secret_key, $gen_rep_id)
     {
-        
+        // GetReport MWS Reports API
         $response = $this->reports->GetReport($seller_id, $mws_auth_token, $aws_access_key_id, $secret_key, $gen_rep_id);
 
         if(!empty($response))
@@ -166,101 +211,132 @@ class Fees extends CI_Controller
             // UTF8 encode response array
             $response = utf8_encode($response); 
 
-            if($this->get_delimiter($response, 5) == '\t')
-            {
-                //$rows = explode("\n", $response); 
-                $rows = str_getcsv($response, "\n"); 
+            // Break the response in rows
+            $rows = str_getcsv($response, "\n"); 
 
-                //$head = explode("\t", $rows[0]); 
-
-                $html_table = '
-                    <table class="table table-sm border border-grey-200 w50" id="tblFeePrev">
-                        <thead>
-                            <tr>
-                                <th>SKU</th>
-                                <th>FNSKU</th>
-                                <th>ASIN</th>
-                                <th>Product Name</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                '; 
-
-                foreach(array_slice($rows, 1) as $row)
-                {   
-                    
-                    //$data = explode("\t", $row); 
-                    //$delim = '"""'.$this->get_delimiter($response, 5).'"""'; 
-                    $data = str_getcsv($row, "\t"); 
-
-                    $html_table .= '
+            $html_table = '
+                <table class="table table-sm border border-grey-200 table-bordered" id="tblFeePrev">
+                    <thead>
                         <tr>
-                            <td>'.$data[0].'</td>
-                            <td>'.$data[1].'</td>
-                            <td>'.$data[2].'</td>
-                            <td>'.$data[3].'</td>
+                            <th class="align-middle small font-weight-bold">Product Name</th>
+                            <th class="align-middle small font-weight-bold">SKU</th>
+                            <th class="align-middle small font-weight-bold">ASIN</th>
+                            <th class="align-middle small font-weight-bold">LS</th>
+                            <th class="align-middle small font-weight-bold">MS</th>
+                            <th class="align-middle small font-weight-bold">SS</th>
+                            <!--<th class="align-middle small font-weight-bold">Dimension</th>-->
+                            <th class="align-middle small font-weight-bold">WT</th>
+                            <th class="align-middle small font-weight-bold">Size Tier</th>
+                            <th class="align-middle small font-weight-bold">FBA Fees</th>
+                            <th class="align-middle small font-weight-bold">LS</th>
+                            <th class="align-middle small font-weight-bold">MS</th>
+                            <th class="align-middle small font-weight-bold">SS</th>
+                            <th class="align-middle small font-weight-bold">WT</th>
+                            <th class="align-middle small font-weight-bold">Size Tier</th>
+                            <th class="align-middle small font-weight-bold">Calculated FBA Fees</th>
+                            <th class="align-middle small font-weight-bold">FBA Fees Difference</th>
                         </tr>
-                    '; 
-                }
-                
-                $html_table .= '</tbody></table>'; 
+                    </thead>
+                    <tbody>
+            '; 
 
-                $processing['status'] = true; 
-                $processing['message'] = $html_table; 
-            }
-            elseif($this->get_delimiter($response, 5) == ',')
-            {
-                //$rows = explode("\n", $response);
-                $rows = str_getcsv($response, "\n"); 
-                
-                $html_table = '
-                    <table class="table table-sm border border-grey-200 w50" id="tblFeePrev">
-                        <thead>
-                            <tr>
-                                <th>SKU</th>
-                                <th>FNSKU</th>
-                                <th>ASIN</th>
-                                <th>Product Name</th>
-                            </tr>
-                        </thead>
-                        <tbody>
+            // Loop through response rows slicing first heading row
+            foreach(array_slice($rows, 1) as $row)
+            {   
+                // Extract cells data from row
+                $data = ($this->get_delimiter($response, 5) == '\t') ? str_getcsv($row, "\t") : str_getcsv($row, ","); 
+
+                $ProdDimAmz = number_format($data[9], 2).' x '.number_format($data[10], 2).' x '.number_format($data[11], 2);
+
+                // Get own product dimensions and calculate FBA Fees
+                $result = $this->products_model->get_fba_prod($amz_acct_id, $data[0]); 
+
+                if(!empty($result)) 
+                {
+                    $ls = $result[0]->pkgd_prod_ls; 
+                    $ms = $result[0]->pkgd_prod_ms; 
+                    $ss = $result[0]->pkgd_prod_ss; 
+                    $wt = $result[0]->pkgd_prod_wt/453.59237; // Gram to pound
+                    $dt = date('Y-m-d');
+
+                    //$ProdDimOwn = number_format($ls, 2).' x '.number_format($ms, 2).' x '.number_format($ss, 2);
+                    $SizeTierCalculated = get_size_tier(get_size_code($ls, $ms, $ss, $wt, $dt), $dt);  
+                    $FBAPerUnitFulfillmentFeeCalculated = get_fba_ful_fees($ls, $ms, $ss, $wt, $dt); 
+                }
+                else {
+                    $ls = 0.00; 
+                    $ms = 0.00; 
+                    $ss = 0.00; 
+                    $wt = 0.00; 
+
+                    //$ProdDimOwn = number_format($ls, 2).' x '.number_format($ms, 2).' x '.number_format($ss, 2);
+                    $SizeTierCalculated = "--"; 
+                    $FBAPerUnitFulfillmentFeeCalculated = 0;
+                } 
+
+                $excess_marker = (($data[24]-$FBAPerUnitFulfillmentFeeCalculated) > 0) ? 'bg-red-200' : 'bg-green-200'; 
+                $html_table .= '
+                    <tr>
+                        <td class="align-middle text-left w-50">
+                            <div class="d-flex jutify-content-between align-items-center">
+                                <div class="col-md-2">
+                                    <img src="https://ws-na.amazon-adsystem.com/widgets/q?_encoding=UTF8&MarketPlace=US&ASIN='.$data[2].'&ServiceVersion=20070822&ID=AsinImage&WS=1&Format=_SL250_" alt="Loading..." class="float-left prod-img"/>
+                                </div>
+                                <div class="col-md-10 small">
+                                    '.$data[3].'
+                                </div>
+                            </div>
+                        </td>
+                        <td class="align-middle text-center">'.$data[0].'</td>
+                        <td class="align-middle text-center">'.$data[2].'</td>
+                        <td class="align-middle text-center">'.$data[9].'</td>
+                        <td class="align-middle text-center">'.$data[10].'</td>
+                        <td class="align-middle text-center">'.$data[11].'</td>
+                        <!--<td class="align-middle text-center">
+                            '.$ProdDimAmz.'
+                            <div class="d-flex flex-column">
+                                <span class="text-nowrap"></span>
+                                <span class="text-nowrap"></span>
+                            </div>
+                        </td>-->
+                        <td class="align-middle text-center">'.$data[14].'</td>
+                        <td class="align-middle text-left">'.$data[16].'</td>
+                        <td class="align-middle text-center">'.$data[24].'</td>
+
+                        <td class="align-middle text-center">'.number_format($ls, 2).'</td>
+                        <td class="align-middle text-center">'.number_format($ms, 2).'</td>
+                        <td class="align-middle text-center">'.number_format($ss, 2).'</td>
+                        <td class="align-middle text-center">'.number_format($wt, 2).'</td>
+                        <td class="align-middle text-center">'.$SizeTierCalculated.'</td>
+
+                        <td class="align-middle text-center">'.number_format((float)$FBAPerUnitFulfillmentFeeCalculated, '2', '.', '').'</td>
+                        <td class="align-middle text-center '.$excess_marker.'">'.number_format((float)($data[24]-$FBAPerUnitFulfillmentFeeCalculated), '2', '.', '').'</td>
+                    </tr>
                 '; 
-
-                foreach(array_slice($rows, 1) as $row)
-                {   
-
-                    $data = str_getcsv($row, ",", '"'); 
-
-                    $html_table .= '
-                        <tr>
-                            <td>'.utf8_encode($data[0]).'</td>
-                            <td>'.utf8_encode($data[1]).'</td>
-                            <td>'.utf8_encode($data[2]).'</td>
-                            <td>'.utf8_encode($data[3]).'</td>
-                        </tr>
-                    '; 
-                }
-
-                $html_table .= '</tbody></table>'; 
-
-                $processing['status'] = true; 
-                $processing['message'] = $html_table; 
-            }
-            else {
-                $processing['status'] = false; 
-                $processing['message'] = "REQUEST_REPORT"; 
-                $processing['delim'] = $this->get_delimiter($response, 5); 
             }
             
+            $html_table .= '</tbody></table>'; 
+
+            //return $html_table; 
+            $processing['status']  = true;
+            $processing['message'] = 'REPORT_GENERATED';
+            $processing['report']  = $html_table;
         }
         else {
-            $processing['status'] = false; 
-            $processing['message'] = show_alert('danger', "Preview report is not available."); 
+            $processing['status']  = false; 
+            $processing['message'] = show_alert('danger', "FBA Fee Preview report is not available, please try again."); 
         }
 
-        return $processing;
+        return $processing; 
     }
 
+    /**
+     * Undocumented function
+     *
+     * @param [type] $data
+     * @param integer $checkLines
+     * @return void
+     */
     public function get_delimiter($data, $checkLines = 2){
         //$file = new SplFileObject($file);
         $delimiters = array(

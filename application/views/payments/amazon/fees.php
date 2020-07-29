@@ -6,6 +6,15 @@ $this->load->view('templates/titlebar');
 $this->load->view('templates/loader'); 
 ?>
 
+<style>
+    .prod-img{
+	   width: 100%!important;
+	   min-height: 100px !important;
+	   max-height: 100px !important;
+	   object-fit: contain;
+	}
+</style>
+
 <div class="card bg-light border-0 rounded-0 mb-3">
     <div class="card-body">
         <h5 class="card-title">Amazon Account</h5>
@@ -31,10 +40,18 @@ $this->load->view('templates/loader');
 
             event.preventDefault(); 
 
+            const form_data = $(this).serialize(); 
+
+            get_report(form_data);             
+        }); 
+
+        function get_report(form_data)
+        {
             $.ajax({
                 type: "post", 
                 url: "<?php echo base_url('payments/amazon/fees/get_done_reports');  ?>", 
-                data: $(this).serialize(), 
+                //data: $(this).serialize(), 
+                data: form_data, 
                 dataType: "json", 
                 beforeSend: function()
                 {
@@ -48,17 +65,44 @@ $this->load->view('templates/loader');
                 {   
                     //JSON.parse(res)
                     if(res.status)
-                    {
-                        $('#resPrevFees').html(res.message); 
+                    {   
+                        if(res.message == "REPORT_GENERATED")
+                        {
+                            $('#resPrevFees').html(res.report); 
+                        }
+                        else {
+                            setTimeout(function(){
+                                get_report(form_data)
+
+                                // Check report status
+                                $.ajax({
+                                    type: "get", 
+                                    url: "<?php echo base_url('payments/amazon/fees/get_report_status'); ?>", 
+                                    data: form_data, 
+                                    dataType: "json", 
+                                    success: function(res)
+                                    {
+                                    }, 
+                                    error: function(xhr)
+                                    {
+                                        const xhr_text = xhr.status+" "+xhr.statusText;
+                                        swal({title: "Request error!", text: xhr_text, icon: "error"});
+                                    }
+                                }); 
+                            }, 5000); 
+                            //$('#resPrevFees').html("Report Request Id: "+res.rep_req_id[0]); 
+                        }
+                        
                     }
                     else {
-                        if(res.message == "REQUEST_REPORT")
+                        $('#resPrevFees').html(res.message);
+                        /* if(res.message == "REQUEST_REPORT")
                         {
                             swal({title: "Oops!", text: res.text, icon: "error"});
                         }
                         else {
                             $('#resPrevFees').html(res.message); 
-                        }
+                        } */
                     }
                 }, 
                 error: function(xhr)
@@ -67,6 +111,6 @@ $this->load->view('templates/loader');
                     swal({title: "Request error!", text: xhr_text, icon: "error"});
                 }
             }); 
-        }); 
+        }
     });
 </script>
