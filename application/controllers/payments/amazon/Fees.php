@@ -71,7 +71,8 @@ class Fees extends CI_Controller
                         $last_submitted_date = date("Y-m-d", strtotime($xml->GetReportRequestListResult->ReportRequestInfo->SubmittedDate)); 
 
                         //if((time()-(60*60*24)) < strtotime($submitted_date))
-                        if(strtotime($last_submitted_date) < strtotime('-2 day'))
+                        // Take -2 day or -3 day for safety sake
+                        if(strtotime($last_submitted_date) < strtotime('+2 day'))
                         {   
                             $processing = $this->request_report($seller_id, $mws_auth_token, $aws_access_key_id, $secret_key, $report_type); 
                         }
@@ -154,8 +155,9 @@ class Fees extends CI_Controller
      */
     public function get_report_status()
     {
-        $amz_acct_id = $this->input->get('amzacctid'); 
+        $amz_acct_id = $this->input->get('txtAmzAcctId'); 
         $rep_req_id  = $this->input->get('repreqid'); 
+        $report_type = "_GET_FBA_ESTIMATED_FBA_FEES_TXT_DATA_";
 
         // Get Amazon MWS Access keys by amazon account id
         $result = $this->amazon_model->get_mws_keys($amz_acct_id);
@@ -173,14 +175,29 @@ class Fees extends CI_Controller
 
             if(isset($xml->GetReportRequestListResult->ReportRequestInfo))
             {   
-                if(isset($xml->GetReportRequestListResult->ReportRequestInfo->ReportProcessingStatus) && $xml->GetReportRequestListResult->ReportRequestInfo->ReportProcessingStatus == "_DONE_")
-                //if(isset($xml->GetReportRequestListResult->ReportRequestInfo->ReportProcessingStatus))
+                if(isset($xml->GetReportRequestListResult->ReportRequestInfo->ReportProcessingStatus))
                 {
-                    $ajax['status']  = true; 
+                    $report_status = $xml->GetReportRequestListResult->ReportRequestInfo->ReportProcessingStatus; 
+
+                    if($report_status == "_DONE_")
+                    {   
+                        $ajax['status'] = true; 
+                        $ajax['report_status'] = "_DONE_"; 
+                    }
+                    elseif($report_status == "_SUBMITTED_" || $report_status == "_IN_PROGRESS_")
+                    {   
+                        $ajax['status'] = true; 
+                        $ajax['report_status'] = "_IN_PROGRESS_"; 
+                    }
+                    else {
+                        $ajax['status'] = false;
+                        $ajax['message'] = show_alert('danger', "Report cancelled or have no data in it.");
+                    }
                 }
                 else {
-                    $ajax['status']  = false; 
-                    $ajax['message'] = show_alert("info", "Repost Status: ".$xml->GetReportRequestListResult->ReportRequestInfo->ReportProcessingStatus); 
+                    //$ajax = $this->request_report($seller_id, $mws_auth_token, $aws_access_key_id, $secret_key, $report_type); 
+                    $ajax['status']  = false;
+                    $ajax['message'] = show_alert('danger', "Report request error."); 
                 }
             }
             else {

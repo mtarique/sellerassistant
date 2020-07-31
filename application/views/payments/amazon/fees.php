@@ -72,24 +72,10 @@ $this->load->view('templates/loader');
                         }
                         else {
                             setTimeout(function(){
-                                get_report(form_data)
-
-                                // Check report status
-                                $.ajax({
-                                    type: "get", 
-                                    url: "<?php echo base_url('payments/amazon/fees/get_report_status'); ?>", 
-                                    data: form_data, 
-                                    dataType: "json", 
-                                    success: function(res)
-                                    {
-                                    }, 
-                                    error: function(xhr)
-                                    {
-                                        const xhr_text = xhr.status+" "+xhr.statusText;
-                                        swal({title: "Request error!", text: xhr_text, icon: "error"});
-                                    }
-                                }); 
-                            }, 5000); 
+                                //get_report(form_data)
+                                get_report_status(form_data, res.rep_req_id[0]); 
+                                
+                            }, 10000); 
                             //$('#resPrevFees').html("Report Request Id: "+res.rep_req_id[0]); 
                         }
                         
@@ -103,6 +89,40 @@ $this->load->view('templates/loader');
                         else {
                             $('#resPrevFees').html(res.message); 
                         } */
+                    }
+                }, 
+                error: function(xhr)
+                {
+                    const xhr_text = xhr.status+" "+xhr.statusText;
+                    swal({title: "Request error!", text: xhr_text, icon: "error"});
+                }
+            }); 
+        }
+
+        function get_report_status(form_data, rep_req_id)
+        {
+            // Check report status
+            $.ajax({
+                type: "get", 
+                url: "<?php echo base_url('payments/amazon/fees/get_report_status'); ?>", 
+                data: form_data+"&repreqid="+rep_req_id, 
+                dataType: "json", 
+                success: function(res)
+                {
+                    if(res.status)
+                    {
+                        if(res.report_status == "_DONE_")
+                        {
+                            get_report(form_data); 
+                        }
+                        else {
+                            setTimeout(function(){
+                                get_report_status(form_data, rep_req_id); 
+                            }, 5000)
+                        }
+                    }
+                    else {
+                        $('#resPrevFees').html(res.message); 
                     }
                 }, 
                 error: function(xhr)
