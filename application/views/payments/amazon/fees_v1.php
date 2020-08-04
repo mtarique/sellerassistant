@@ -6,7 +6,6 @@ $this->load->view('templates/titlebar');
 $this->load->view('templates/loader'); 
 ?>
 
-
 <div class="card bg-light border-0 rounded-0 mb-3">
     <div class="card-body">
         <h5 class="card-title">Amazon Account</h5>
@@ -34,7 +33,7 @@ $this->load->view('templates/loader');
 
             $.ajax({
                 type: "post", 
-                url: "<?php echo base_url('payments/amazon/fees/req_fba_est_fees_report'); ?>", 
+                url: "<?php echo base_url('payments/amazon/fees/get_done_reports'); ?>", 
                 data: $(this).serialize(), 
                 dataType: "json", 
                 beforeSend: function()

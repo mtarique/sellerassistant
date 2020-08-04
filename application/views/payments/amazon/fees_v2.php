@@ -18,53 +18,49 @@ $this->load->view('templates/loader');
 <div class="card bg-light border-0 rounded-0 mb-3">
     <div class="card-body">
         <h5 class="card-title">Amazon Account</h5>
-        <div class="form-inline">
+        <form id="formPrevFees" class="form-inline">
             <label class="mr-2 sr-only" for="txtAmzAcctId">Amazon Account</label>
-            <select id="txtAmzAcctId" class="custom-select custom-select-sm rounded-0 w-25 mr-2">
+            <select name="txtAmzAcctId" id="txtAmzAcctId" class="custom-select custom-select-sm rounded-0 w-25 mr-2" required>
                 <?php echo _options_amz_accts($this->session->userdata('_userid')); ?>
             </select>
-            <button type="button" name="btnPrevFees" id="btnPrevFees"class="btn btn-sm btn-primary rounded-0 shadowsm">Preview Fees</button>
-        </div>
+            <button type="submit" name="btnPrevFees" id="btnPrevFees"class="btn btn-sm btn-primary rounded-0 shadowsm">Preview Fees</button>
+        </form>
     </div>
 </div>
 
-<div id="resPrevFees"></div>
+<div id="resPrevFees"></div>     
 
 <?php $this->load->view('templates/footer'); ?>
 
-<script>
+<script type="text/javascript">
     $(document).ready(function(){
-        /**
-         * Preview fees on button click
-         */
-        $('#btnPrevFees').click(function(){
+        
+        // Submit preview fba estimated fees form
+        $('#formPrevFees').submit(function(event){
 
-            // Check for non empty amazon account id
-            if($('#txtAmzAcctId').val() != "")
-            {
-                const amz_acct_id = $('#txtAmzAcctId').val(); 
-                
-                // Get fee preview report
-                get_done_report(amz_acct_id); 
-            }
-            else swal({title: "Oops!", text: "Please select an account.", icon: "error"});
-            
+            event.preventDefault(); 
+
+            const form_data = $(this).serialize(); 
+
+            get_report(form_data);             
         }); 
 
         /*
-         * Ajax request to get done report
-         * 
-         * If _DONE_ reports are available then fetch it 
-         * else request a new report check status till it gets _DONE_ 
+         * Get fee preview report - AJAX request
          *
-         * @return mixed 
+         * 1. Check for most recent _DONE_ reports and fetch it
+         * 2. If no _DONE_ reports are available then request a new report and check report request status
+         *
+         * @param   form_data   Contains Amazon account id [Better to use GET method and send data as amz_acct_id]
+         * @return  html 
+         *
          */
-        function get_done_report(amz_acct_id)
+        function get_report(form_data)
         {
             $.ajax({
-                type: "get", 
-                url: "<?php echo base_url('payments/amazon/fees/get_done_report');  ?>", 
-                data: "amzacctid="+amz_acct_id, 
+                type: "post", 
+                url: "<?php echo base_url('payments/amazon/fees/get_done_reports');  ?>", 
+                data: form_data, 
                 dataType: "json", 
                 beforeSend: function()
                 {
@@ -75,25 +71,20 @@ $this->load->view('templates/loader');
                     if(res.status)
                     {   
                         if(res.message == "REPORT_GENERATED")
-                        {   
-                            // Output report
+                        {
                             $('#resPrevFees').html(res.report); 
 
-                            // Hide loading animation
                             $('#loader').addClass("d-none");
                         }
                         else {
                             // Wait 10 seconds and check report request status
                             setTimeout(function(){
-                                get_report_status(amz_acct_id, res.rep_req_id[0]); 
+                                get_report_status(form_data, res.rep_req_id[0]); 
                             }, 10000); 
                         }
                     }
                     else {
-                        // Show error message
                         $('#resPrevFees').html(res.message);
-
-                        // Hide loading animation
                         $('#loader').addClass("d-none");
                     }
                 }, 
@@ -102,20 +93,16 @@ $this->load->view('templates/loader');
                     const xhr_text = xhr.status+" "+xhr.statusText;
                     swal({title: "Request error!", text: xhr_text, icon: "error"});
                 }
-            });
+            }); 
         }
 
-        /*
-         * Ajax request to get report status
-         * 
-         * @return mixed 
-         */
-        function get_report_status(amz_acct_id, rep_req_id)
+        function get_report_status(form_data, rep_req_id)
         {
+            // Check report status
             $.ajax({
                 type: "get", 
                 url: "<?php echo base_url('payments/amazon/fees/get_report_status'); ?>", 
-                data: "amzacctid="+amz_acct_id+"&repreqid="+rep_req_id, 
+                data: form_data+"&repreqid="+rep_req_id, 
                 dataType: "json", 
                 success: function(res)
                 {
@@ -126,9 +113,8 @@ $this->load->view('templates/loader');
                             get_report(form_data); 
                         }
                         else {
-                            // Wait for 5 more seconds and check report status again
                             setTimeout(function(){
-                                get_report_status(amz_acct_id, rep_req_id); 
+                                get_report_status(form_data, rep_req_id); 
                             }, 5000)
                         }
                     }
@@ -141,7 +127,7 @@ $this->load->view('templates/loader');
                     const xhr_text = xhr.status+" "+xhr.statusText;
                     swal({title: "Request error!", text: xhr_text, icon: "error"});
                 }
-            });
+            }); 
         }
-    }); 
+    });
 </script>

@@ -1,13 +1,15 @@
 <?php 
 /**
- * FBA Estimated Fee Preview
+ * Amazon FBA Fee preview
  * 
- * @package     Codeigniter
+ * @package 	Codeigniter
  * @version     3.1.11
- * @subpackage  Controller
- * @author      MD TARIQUE ANWER| mtarique@outlook.com
+ * @subpackage 	Controller 
+ * @author 		MD TARIQUE ANWER | mtarique@outlook.com
  */
-defined('BASEPATH') or exit('No direct script access allowed'); 
+defined('BASEPATH') or exit('No direct script access allowed.'); 
+
+date_default_timezone_set('UTC');
 
 class Fees extends CI_Controller 
 {
@@ -15,7 +17,7 @@ class Fees extends CI_Controller
     {
         parent::__construct(); 
 
-        $this->load->helper(array('auth_helper', 'fba_fees_calc_helper')); 
+        $this->load->helper(array('auth_helper', 'fba_fees_calc_helper'));
 
         $this->load->library(array('mws/reports', 'encryption')); 
 
@@ -23,7 +25,7 @@ class Fees extends CI_Controller
     }
 
     /**
-     * View Amazon FBA Fee Preview page
+     * View Amazon fee peview page
      *
      * @return void
      */
@@ -35,101 +37,101 @@ class Fees extends CI_Controller
         $this->load->view('payments/amazon/fees', $page_data);
     }
 
-    /**
-     * Get _DONE_ report 
-     * 
-     * if latest report is available fetch it else request a new report
-     *
-     * @return void
-     */
-    public function get_done_report()
+    public function get_done_reports()
     {   
-        // Amazon account id & report type
-        $amz_acct_id = $this->input->get('amzacctid');
-        $report_type = "_GET_FBA_ESTIMATED_FBA_FEES_TXT_DATA_"; 
+        // Set form validation rules
+        $this->form_validation->set_rules('txtAmzAcctId', 'Amazon Account Id', 'required'); 
 
-        // Get Amazon MWS Access keys by amazon account id
-        $result = $this->amazon_model->get_mws_keys($amz_acct_id);
-
-        if(!empty($result))
+        if($this->form_validation->run() == true)
         {   
-            // MWS API Keys
-            $seller_id         = $this->encryption->decrypt($result[0]->seller_id); 
-            $mws_auth_token    = $this->encryption->decrypt($result[0]->mws_auth_token); 
-            $aws_access_key_id = $this->encryption->decrypt($result[0]->aws_access_key_id); 
-            $secret_key        = $this->encryption->decrypt($result[0]->secret_key);
+            // Amazon account id 
+            $amz_acct_id = $this->input->post('txtAmzAcctId'); 
+            $report_type = "_GET_FBA_ESTIMATED_FBA_FEES_TXT_DATA_";
 
-            // Get recent and latest _DONE_ report
-            $response = $this->reports->GetReportRequestList($seller_id, $mws_auth_token, $aws_access_key_id, $secret_key, 1, null, null, null, $report_type, '_DONE_');
+            // Get Amazon MWS Access keys by amazon account id
+            $result = $this->amazon_model->get_mws_keys($amz_acct_id);
 
-            // Get response as XML
-            $xml = new SimpleXMLElement($response); 
+            if(!empty($result))
+            {   
+                // MWS API Keys
+                $seller_id         = $this->encryption->decrypt($result[0]->seller_id); 
+                $mws_auth_token    = $this->encryption->decrypt($result[0]->mws_auth_token); 
+                $aws_access_key_id = $this->encryption->decrypt($result[0]->aws_access_key_id); 
+                $secret_key        = $this->encryption->decrypt($result[0]->secret_key);
 
-            // Validate XML response 
-            if(isset($xml->GetReportRequestListResult))
-            {
-                if(isset($xml->GetReportRequestListResult->ReportRequestInfo->ReportProcessingStatus) && $xml->GetReportRequestListResult->ReportRequestInfo->ReportProcessingStatus == "_DONE_")
-                {
-                    $last_submitted_date = date("Y-m-d", strtotime($xml->GetReportRequestListResult->ReportRequestInfo->SubmittedDate)); 
+                $response = $this->reports->GetReportRequestList($seller_id, $mws_auth_token, $aws_access_key_id, $secret_key, 1, null, null, null, '_GET_FBA_ESTIMATED_FBA_FEES_TXT_DATA_', '_DONE_');
+        
+                $xml = new SimpleXMLElement($response); 
 
-                    // If done report is older than 2 days
-                    if(strtotime($last_submitted_date) < strtotime('-2 day'))
-                    {   
-                        $json_data = $this->request_report($seller_id, $mws_auth_token, $aws_access_key_id, $secret_key, $report_type); 
+                /*  */
+                if(isset($xml->GetReportRequestListResult))
+                {   
+                    if(isset($xml->GetReportRequestListResult->ReportRequestInfo->ReportProcessingStatus) && $xml->GetReportRequestListResult->ReportRequestInfo->ReportProcessingStatus == "_DONE_")
+                    {
+                        $last_submitted_date = date("Y-m-d", strtotime($xml->GetReportRequestListResult->ReportRequestInfo->SubmittedDate)); 
+
+                        //if((time()-(60*60*24)) < strtotime($submitted_date))
+                        // Take -2 day or -3 day for safety sake
+                        if(strtotime($last_submitted_date) < strtotime('-2 day'))
+                        {   
+                            $processing = $this->request_report($seller_id, $mws_auth_token, $aws_access_key_id, $secret_key, $report_type); 
+                        }
+                        else {
+                            // Get Fee Preview report
+                            $processing = $this->get_report($amz_acct_id, $seller_id, $mws_auth_token, $aws_access_key_id, $secret_key, $xml->GetReportRequestListResult->ReportRequestInfo->GeneratedReportId); 
+                        }
                     }
                     else {
-                        // Get Fee Preview report
-                        $json_data = $this->get_report($amz_acct_id, $seller_id, $mws_auth_token, $aws_access_key_id, $secret_key, $xml->GetReportRequestListResult->ReportRequestInfo->GeneratedReportId); 
+                        // Request a new report
+                        $processing = $this->request_report($seller_id, $mws_auth_token, $aws_access_key_id, $secret_key, $report_type); 
                     }
                 }
                 else {
-                    // Request a new report
-                    $json_data = $this->request_report($seller_id, $mws_auth_token, $aws_access_key_id, $secret_key, $report_type); 
+                    $processing['status']  = false;
+                    $processing['message'] = show_alert('danger', $xml->Error->Message); 
                 }
             }
             else {
-                $json_data['status']  = false; 
-                $json_data['message'] = show_alert('danger', $xml->Error->Message);
+                $processing['status']  = false; 
+                $processing['message'] = show_alert('danger', "Amazon account details not found.");  
             }
         }
         else {
-            $json_data['status']  = false; 
-            $json_data['message'] = show_alert('danger', "Amazon account details not found.");
+            $processing['status']  = false; 
+            $processing['message'] = show_alert('danger', validation_errors()); 
         }
 
-        echo json_encode($json_data); 
+        echo json_encode($processing); 
     }
 
     /**
-     * Request new report
+     * Undocumented function
      *
-     * @param  string   $seller_id
-     * @param  string   $mws_auth_token
-     * @param  string   $aws_access_key_id
-     * @param  string   $secret_key
-     * @param  string   $report_type
-     * @return array
+     * @param [type] $seller_id
+     * @param [type] $mws_auth_token
+     * @param [type] $aws_access_key_id
+     * @param [type] $secret_key
+     * @param [type] $report_type
+     * @return void
      */
     public function request_report($seller_id, $mws_auth_token, $aws_access_key_id, $secret_key, $report_type)
-    {   
-        // Request report
+    {
         $response = $this->reports->RequestReport($seller_id, $mws_auth_token, $aws_access_key_id, $secret_key, $report_type, null, date('c', strtotime('-72 hours')), date('c'));
         
-        // Get response in XML
         $xml = new SimpleXMLElement($response); 
 
         if(isset($xml->RequestReportResult->ReportRequestInfo->ReportRequestId))
         {
-            $json_data['status']     = true; 
-            $json_data['message']    = "REPORT_REQUESTED";
-            $json_data['rep_req_id'] = $xml->RequestReportResult->ReportRequestInfo->ReportRequestId; 
+            $processing['status']     = true; 
+            $processing['message']    = "REPORT_REQUESTED";
+            $processing['rep_req_id'] = $xml->RequestReportResult->ReportRequestInfo->ReportRequestId; 
         }
         else {
-            $json_data['status']  = false;
-            $json_data['message'] = show_alert('danger', $xml->Error->Message); 
+            $processing['status']  = false;
+            $processing['message'] = show_alert('danger', $xml->Error->Message); 
         }
 
-        return $json_data; 
+        return $processing; 
     }
 
     /**
@@ -139,7 +141,7 @@ class Fees extends CI_Controller
      */
     public function get_report_status()
     {
-        $amz_acct_id = $this->input->get('amzacctid'); 
+        $amz_acct_id = $this->input->get('txtAmzAcctId'); 
         $rep_req_id  = $this->input->get('repreqid'); 
         $report_type = "_GET_FBA_ESTIMATED_FBA_FEES_TXT_DATA_";
 
@@ -147,19 +149,16 @@ class Fees extends CI_Controller
         $result = $this->amazon_model->get_mws_keys($amz_acct_id);
 
         if(!empty($result)) 
-        {   
-            // MWS API Keys
+        {
             $seller_id         = $this->encryption->decrypt($result[0]->seller_id); 
             $mws_auth_token    = $this->encryption->decrypt($result[0]->mws_auth_token); 
             $aws_access_key_id = $this->encryption->decrypt($result[0]->aws_access_key_id); 
             $secret_key        = $this->encryption->decrypt($result[0]->secret_key); 
 
-            // Get report request list by report id
             $response = $this->reports->GetReportRequestList($seller_id, $mws_auth_token, $aws_access_key_id, $secret_key, null, null, null, $rep_req_id);
-            
+        
             $xml = new SimpleXMLElement($response); 
 
-            // If valid response
             if(isset($xml->GetReportRequestListResult->ReportRequestInfo))
             {   
                 if(isset($xml->GetReportRequestListResult->ReportRequestInfo->ReportProcessingStatus))
@@ -168,46 +167,40 @@ class Fees extends CI_Controller
 
                     if($report_status == "_DONE_")
                     {   
-                        $json_data['status'] = true; 
-                        $json_data['report_status'] = "_DONE_"; 
+                        $ajax['status'] = true; 
+                        $ajax['report_status'] = "_DONE_"; 
                     }
                     elseif($report_status == "_SUBMITTED_" || $report_status == "_IN_PROGRESS_")
                     {   
-                        $json_data['status'] = true; 
-                        $json_data['report_status'] = "_IN_PROGRESS_"; 
+                        $ajax['status'] = true; 
+                        $ajax['report_status'] = "_IN_PROGRESS_"; 
                     }
                     else {
-                        $json_data['status'] = false;
-                        $json_data['message'] = show_alert('danger', "Report cancelled or have no data in it.");
+                        $ajax['status'] = false;
+                        $ajax['message'] = show_alert('danger', "Report cancelled or have no data in it.");
                     }
                 }
                 else {
-                    $json_data['status']  = false;
-                    $json_data['message'] = show_alert('danger', "Report request error."); 
+                    $ajax['status']  = false;
+                    $ajax['message'] = show_alert('danger', "Report request error."); 
                 }
             }
             else {
-                $json_data['status']  = false;
-                $json_data['message'] = show_alert('danger', $xml->Error->Message); 
+                $ajax['status']  = false;
+                $ajax['message'] = show_alert('danger', $xml->Error->Message); 
             }
         }
         else {
-            $json_data['status']  = false; 
-            $json_data['message'] = show_alert('danger', "Amazon account details not found.");     
+            $ajax['status']  = false; 
+            $ajax['message'] = show_alert('danger', "Amazon account details not found.");     
         }
 
-        echo json_encode($json_data);
+        echo json_encode($ajax);
     }
 
     /**
-     * Get report
+     * Get report 
      *
-     * @param  string   $amz_acct_id
-     * @param  string   $seller_id
-     * @param  string   $mws_auth_token
-     * @param  string   $aws_access_key_id
-     * @param  string   $secret_key
-     * @param  string   $gen_rep_id
      * @return void
      */
     public function get_report($amz_acct_id, $seller_id, $mws_auth_token, $aws_access_key_id, $secret_key, $gen_rep_id)
@@ -327,50 +320,44 @@ class Fees extends CI_Controller
             $html_table .= '</tbody></table>'; 
 
             //return $html_table; 
-            $json_data['status']  = true;
-            $json_data['message'] = 'REPORT_GENERATED';
-            $json_data['report']  = $html_table;
+            $processing['status']  = true;
+            $processing['message'] = 'REPORT_GENERATED';
+            $processing['report']  = $html_table;
         }
         else {
-            $json_data['status']  = false; 
-            $json_data['message'] = show_alert('danger', "FBA Fee Preview report is not available, please try again."); 
+            $processing['status']  = false; 
+            $processing['message'] = show_alert('danger', "FBA Fee Preview report is not available, please try again."); 
         }
 
-        return $json_data; 
+        return $processing; 
     }
 
     /**
-     * Get delimeter of text or csv file
+     * Undocumented function
      *
-     * @param  string   $data
-     * @param  integer  $checkLines
+     * @param [type] $data
+     * @param integer $checkLines
      * @return void
      */
     public function get_delimiter($data, $checkLines = 2){
-        
-        $delimiters = array(',', '\t', ';', '|',':');
+        //$file = new SplFileObject($file);
+        $delimiters = array(
+          ',', '\t', ';', '|',':'
+        );
 
         $results = array();
 
         $i = 0;
 
-        while($i <= $checkLines)
-        {
+        while($i <= $checkLines){
             $line = explode("\n", $data); 
-
-            foreach ($delimiters as $delimiter)
-            {
+            foreach ($delimiters as $delimiter){
                 $regExp = '/['.$delimiter.']/';
-
                 $fields = preg_split($regExp, $line[$i]);
-
-                if(count($fields) > 1)
-                {
-                    if(!empty($results[$delimiter]))
-                    {
+                if(count($fields) > 1){
+                    if(!empty($results[$delimiter])){
                         $results[$delimiter]++;
-                    } 
-                    else {
+                    } else {
                         $results[$delimiter] = 1;
                     }   
                 }
@@ -382,5 +369,4 @@ class Fees extends CI_Controller
         return $results[0];
     }
 }
-
 ?>
