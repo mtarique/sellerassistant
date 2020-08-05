@@ -13,6 +13,12 @@ $this->load->view('templates/loader');
 	   max-height: 100px !important;
 	   object-fit: contain;
 	}
+
+    .col-wd-500{
+        word-wrap: break-word;
+        min-width: 500px;
+        max-width: 500px;
+    }
 </style>
 
 <div class="card bg-light border-0 rounded-0 mb-3">
@@ -79,6 +85,23 @@ $this->load->view('templates/loader');
                             // Output report
                             $('#resPrevFees').html(res.report); 
 
+                            const dt_fees = $('#tblFeePrev').DataTable({
+                                /* fixedHeader: {headerOffset: $('#topnav').outerHeight()}, */
+                                dom: 'Bfrtip', 
+                                buttons: [
+                                    {extend: 'copy', className: 'btn btn-sm btn-primary rounded-0 shadow-sm'},
+                                    {extend: 'excel', className: 'btn btn-sm btn-primary rounded-0 shadow-sm'},
+                                    {extend: 'pdf', className: 'btn btn-sm btn-primary rounded-0 shadow-sm'}, 
+                                ], 
+                                paging: false, 
+                                scrollY: '50vh', 
+                                scrollX: true, 
+                                scrollCollapse: true, 
+                                fixedColumns:   {
+                                    leftColumns: 4
+                                }
+                            }); 
+
                             // Hide loading animation
                             $('#loader').addClass("d-none");
                         }
@@ -123,7 +146,7 @@ $this->load->view('templates/loader');
                     {
                         if(res.report_status == "_DONE_")
                         {
-                            get_report(form_data); 
+                            get_done_report(amz_acct_id); 
                         }
                         else {
                             // Wait for 5 more seconds and check report status again

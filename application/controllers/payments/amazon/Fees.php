@@ -226,10 +226,11 @@ class Fees extends CI_Controller
             $html_table = '
                 <table class="table table-sm border border-grey-200 table-bordered" id="tblFeePrev">
                     <thead>
-                        <tr>
+                        <tr class="bg-light">
                             <th class="align-middle small font-weight-bold">Product Name</th>
                             <th class="align-middle small font-weight-bold">SKU</th>
                             <th class="align-middle small font-weight-bold">ASIN</th>
+                            <th class="align-middle small font-weight-bold">FBA Fees Difference</th>
                             <th class="align-middle small font-weight-bold">LS</th>
                             <th class="align-middle small font-weight-bold">MS</th>
                             <th class="align-middle small font-weight-bold">SS</th>
@@ -243,7 +244,6 @@ class Fees extends CI_Controller
                             <th class="align-middle small font-weight-bold">WT</th>
                             <th class="align-middle small font-weight-bold">Size Tier</th>
                             <th class="align-middle small font-weight-bold">Calculated FBA Fees</th>
-                            <th class="align-middle small font-weight-bold">FBA Fees Difference</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -286,18 +286,19 @@ class Fees extends CI_Controller
                 $excess_marker = (($data[24]-$FBAPerUnitFulfillmentFeeCalculated) > 0) ? 'bg-red-200' : 'bg-green-200'; 
                 $html_table .= '
                     <tr>
-                        <td class="align-middle text-left w-50">
+                        <td class="align-middle text-left col-wd-500">
                             <div class="d-flex jutify-content-between align-items-center">
                                 <div class="col-md-2">
                                     <img src="https://ws-na.amazon-adsystem.com/widgets/q?_encoding=UTF8&MarketPlace=US&ASIN='.$data[2].'&ServiceVersion=20070822&ID=AsinImage&WS=1&Format=_SL250_" alt="Loading..." class="float-left prod-img"/>
                                 </div>
-                                <div class="col-md-10 small">
+                                <div class="col-md-10 small texttruncate">
                                     '.$data[3].'
                                 </div>
                             </div>
                         </td>
                         <td class="align-middle text-center">'.$data[0].'</td>
                         <td class="align-middle text-center">'.$data[2].'</td>
+                        <td class="align-middle text-center '.$excess_marker.'">'.number_format((float)($data[24]-$FBAPerUnitFulfillmentFeeCalculated), '2', '.', '').'</td>
                         <td class="align-middle text-center">'.$data[9].'</td>
                         <td class="align-middle text-center">'.$data[10].'</td>
                         <td class="align-middle text-center">'.$data[11].'</td>
@@ -316,10 +317,10 @@ class Fees extends CI_Controller
                         <td class="align-middle text-center">'.number_format($ms, 2).'</td>
                         <td class="align-middle text-center">'.number_format($ss, 2).'</td>
                         <td class="align-middle text-center">'.number_format($wt, 2).'</td>
-                        <td class="align-middle text-center">'.$SizeTierCalculated.'</td>
+                        <td class="align-middle text-left text-nowrap">'.$SizeTierCalculated.'</td>
 
                         <td class="align-middle text-center">'.number_format((float)$FBAPerUnitFulfillmentFeeCalculated, '2', '.', '').'</td>
-                        <td class="align-middle text-center '.$excess_marker.'">'.number_format((float)($data[24]-$FBAPerUnitFulfillmentFeeCalculated), '2', '.', '').'</td>
+                        
                     </tr>
                 '; 
             }
