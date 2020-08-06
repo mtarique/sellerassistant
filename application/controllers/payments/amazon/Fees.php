@@ -224,26 +224,26 @@ class Fees extends CI_Controller
             $rows = str_getcsv($response, "\n"); 
 
             $html_table = '
-                <table class="table table-sm border border-grey-200 table-bordered" id="tblFeePrev">
+                <table class="table table-bordered table-hover table-sm small border border-grey-200" id="tblFeePrev">
                     <thead>
                         <tr class="bg-light">
-                            <th class="align-middle small font-weight-bold">Product Name</th>
-                            <th class="align-middle small font-weight-bold">SKU</th>
-                            <th class="align-middle small font-weight-bold">ASIN</th>
-                            <th class="align-middle small font-weight-bold">FBA Fees Difference</th>
-                            <th class="align-middle small font-weight-bold">LS</th>
-                            <th class="align-middle small font-weight-bold">MS</th>
-                            <th class="align-middle small font-weight-bold">SS</th>
-                            <!--<th class="align-middle small font-weight-bold">Dimension</th>-->
-                            <th class="align-middle small font-weight-bold">WT</th>
-                            <th class="align-middle small font-weight-bold">Size Tier</th>
-                            <th class="align-middle small font-weight-bold">FBA Fees</th>
-                            <th class="align-middle small font-weight-bold">LS</th>
-                            <th class="align-middle small font-weight-bold">MS</th>
-                            <th class="align-middle small font-weight-bold">SS</th>
-                            <th class="align-middle small font-weight-bold">WT</th>
-                            <th class="align-middle small font-weight-bold">Size Tier</th>
-                            <th class="align-middle small font-weight-bold">Calculated FBA Fees</th>
+                            <th class="align-middle font-weight-bold">Product Name</th>
+                            <th class="align-middle font-weight-bold">SKU</th>
+                            <th class="align-middle font-weight-bold">ASIN</th>
+                            <th class="align-middle font-weight-bold">FBA Fees Difference</th>
+                            <th class="align-middle font-weight-bold">LS</th>
+                            <th class="align-middle font-weight-bold">MS</th>
+                            <th class="align-middle font-weight-bold">SS</th>
+                            <!--<th class="align-middle font-weight-bold">Dimension</th>-->
+                            <th class="align-middle font-weight-bold">WT</th>
+                            <th class="align-middle font-weight-bold">Size Tier</th>
+                            <th class="align-middle font-weight-bold">FBA Fees</th>
+                            <th class="align-middle font-weight-bold">LS</th>
+                            <th class="align-middle font-weight-bold">MS</th>
+                            <th class="align-middle font-weight-bold">SS</th>
+                            <th class="align-middle font-weight-bold">WT</th>
+                            <th class="align-middle font-weight-bold">Size Tier</th>
+                            <th class="align-middle font-weight-bold">Calculated FBA Fees</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -291,7 +291,7 @@ class Fees extends CI_Controller
                                 <div class="col-md-2">
                                     <img src="https://ws-na.amazon-adsystem.com/widgets/q?_encoding=UTF8&MarketPlace=US&ASIN='.$data[2].'&ServiceVersion=20070822&ID=AsinImage&WS=1&Format=_SL250_" alt="Loading..." class="float-left prod-img"/>
                                 </div>
-                                <div class="col-md-10 small texttruncate">
+                                <div class="col-md-10">
                                     '.$data[3].'
                                 </div>
                             </div>
