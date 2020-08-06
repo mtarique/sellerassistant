@@ -16,8 +16,8 @@ $this->load->view('templates/loader');
 
     .col-wd-500{
         word-wrap: break-word;
-        min-width: 400px;
-        max-width: 400px;
+        min-width: 500px;
+        max-width: 500px;
     }
 </style>
 
