@@ -58,6 +58,7 @@ class Fees extends CI_Controller
             $mws_auth_token    = $this->encryption->decrypt($result[0]->mws_auth_token); 
             $aws_access_key_id = $this->encryption->decrypt($result[0]->aws_access_key_id); 
             $secret_key        = $this->encryption->decrypt($result[0]->secret_key);
+            $curr_code         = $result[0]->curr_code; 
 
             // Get recent and latest _DONE_ report
             $response = $this->reports->GetReportRequestList($seller_id, $mws_auth_token, $aws_access_key_id, $secret_key, 1, null, null, null, $report_type, '_DONE_');
@@ -79,7 +80,7 @@ class Fees extends CI_Controller
                     }
                     else {
                         // Get Fee Preview report
-                        $json_data = $this->get_report($amz_acct_id, $seller_id, $mws_auth_token, $aws_access_key_id, $secret_key, $xml->GetReportRequestListResult->ReportRequestInfo->GeneratedReportId); 
+                        $json_data = $this->get_report($amz_acct_id, $seller_id, $mws_auth_token, $aws_access_key_id, $secret_key, $curr_code, $xml->GetReportRequestListResult->ReportRequestInfo->GeneratedReportId); 
                     }
                 }
                 else {
@@ -207,10 +208,11 @@ class Fees extends CI_Controller
      * @param  string   $mws_auth_token
      * @param  string   $aws_access_key_id
      * @param  string   $secret_key
+     * @param  string   $curr_code      Currency code of selected account
      * @param  string   $gen_rep_id
      * @return void
      */
-    public function get_report($amz_acct_id, $seller_id, $mws_auth_token, $aws_access_key_id, $secret_key, $gen_rep_id)
+    public function get_report($amz_acct_id, $seller_id, $mws_auth_token, $aws_access_key_id, $secret_key, $curr_code, $gen_rep_id)
     {
         // GetReport MWS Reports API
         $response = $this->reports->GetReport($seller_id, $mws_auth_token, $aws_access_key_id, $secret_key, $gen_rep_id);
@@ -224,26 +226,32 @@ class Fees extends CI_Controller
             $rows = str_getcsv($response, "\n"); 
 
             $html_table = '
-                <table class="table table-bordered table-hover table-sm small border border-grey-200" id="tblFeePrev">
+                <table class="table table-bordered table-hover table-sm small border border-grey-300" id="tblFeePrev">
                     <thead>
                         <tr class="bg-light">
-                            <th class="align-middle font-weight-bold">Product Name</th>
-                            <th class="align-middle font-weight-bold">SKU</th>
-                            <th class="align-middle font-weight-bold">ASIN</th>
-                            <th class="align-middle font-weight-bold">FBA Fees Difference</th>
-                            <th class="align-middle font-weight-bold">LS</th>
-                            <th class="align-middle font-weight-bold">MS</th>
-                            <th class="align-middle font-weight-bold">SS</th>
-                            <!--<th class="align-middle font-weight-bold">Dimension</th>-->
-                            <th class="align-middle font-weight-bold">WT</th>
-                            <th class="align-middle font-weight-bold">Size Tier</th>
-                            <th class="align-middle font-weight-bold">FBA Fees</th>
-                            <th class="align-middle font-weight-bold">LS</th>
-                            <th class="align-middle font-weight-bold">MS</th>
-                            <th class="align-middle font-weight-bold">SS</th>
-                            <th class="align-middle font-weight-bold">WT</th>
-                            <th class="align-middle font-weight-bold">Size Tier</th>
-                            <th class="align-middle font-weight-bold">Calculated FBA Fees</th>
+                            <th class="align-middle font-weight-bold text-left">Product Name</th>
+                            <th class="align-middle font-weight-bold text-center">SKU</th>
+                            <th class="align-middle font-weight-bold text-center">ASIN</th>
+                            <th class="align-middle font-weight-bold text-center">Currency</th>
+                            <th class="align-middle font-weight-bold text-center">FBA Fees Amazon</th>
+                            <th class="align-middle font-weight-bold text-center">FBA Fees Calculated</th>
+                            <th class="align-middle font-weight-bold text-center">FBA Fees Difference</th>
+
+                            <th class="align-middle font-weight-bold text-left">Size Tier Amazon</th>
+                            <th class="align-middle font-weight-bold text-center">LS</th>
+                            <th class="align-middle font-weight-bold text-center">MS</th>
+                            <th class="align-middle font-weight-bold text-center">SS</th>
+                            <th class="align-middle font-weight-bold text-left">Unit of Dimension</th>
+                            <th class="align-middle font-weight-bold text-center">WT</th>
+                            <th class="align-middle font-weight-bold text-left">Unit of Weight</th>
+                            
+                            <th class="align-middle font-weight-bold text-left">Size Tier Calculated</th>
+                            <th class="align-middle font-weight-bold text-center">LS</th>
+                            <th class="align-middle font-weight-bold text-center">MS</th>
+                            <th class="align-middle font-weight-bold text-center">SS</th>
+                            <th class="align-middle font-weight-bold text-left">Unit of Dimension</th>
+                            <th class="align-middle font-weight-bold text-center">WT</th>
+                            <th class="align-middle font-weight-bold text-left">Unit of Weight</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -255,74 +263,78 @@ class Fees extends CI_Controller
                 // Extract cells data from row
                 $data = ($this->get_delimiter($response, 5) == '\t') ? str_getcsv($row, "\t") : str_getcsv($row, ","); 
 
-                $ProdDimAmz = number_format($data[9], 2).' x '.number_format($data[10], 2).' x '.number_format($data[11], 2);
-
-                // Get own product dimensions and calculate FBA Fees
-                $result = $this->products_model->get_fba_prod($amz_acct_id, $data[0]); 
-
-                if(!empty($result)) 
+                // If currency is 
+                if($data['17'] == $curr_code)
                 {
-                    $ls = $result[0]->pkgd_prod_ls; 
-                    $ms = $result[0]->pkgd_prod_ms; 
-                    $ss = $result[0]->pkgd_prod_ss; 
-                    $wt = $result[0]->pkgd_prod_wt/453.59237; // Gram to pound
-                    $dt = date('Y-m-d');
+                    $ProdDimAmz = number_format($data[9], 2).' x '.number_format($data[10], 2).' x '.number_format($data[11], 2);
 
-                    //$ProdDimOwn = number_format($ls, 2).' x '.number_format($ms, 2).' x '.number_format($ss, 2);
-                    $SizeTierCalculated = get_size_tier(get_size_code($ls, $ms, $ss, $wt, $dt), $dt);  
-                    $FBAPerUnitFulfillmentFeeCalculated = get_fba_ful_fees($ls, $ms, $ss, $wt, $dt); 
+                    // Get own product dimensions and calculate FBA Fees
+                    $result = $this->products_model->get_fba_prod($amz_acct_id, $data[0]); 
+
+                    if(!empty($result)) 
+                    {
+                        $ls = $result[0]->pkgd_prod_ls; 
+                        $ms = $result[0]->pkgd_prod_ms; 
+                        $ss = $result[0]->pkgd_prod_ss; 
+                        $wt = $result[0]->pkgd_prod_wt/453.59237; // Gram to pound
+                        $dt = date('Y-m-d');
+
+                        //$ProdDimOwn = number_format($ls, 2).' x '.number_format($ms, 2).' x '.number_format($ss, 2);
+                        $SizeTierCalculated = get_size_tier(get_size_code($ls, $ms, $ss, $wt, $dt), $dt);  
+                        $FBAPerUnitFulfillmentFeeCalculated = get_fba_ful_fees($ls, $ms, $ss, $wt, $dt); 
+                    }
+                    else {
+                        $ls = 0.00; 
+                        $ms = 0.00; 
+                        $ss = 0.00; 
+                        $wt = 0.00; 
+
+                        //$ProdDimOwn = number_format($ls, 2).' x '.number_format($ms, 2).' x '.number_format($ss, 2);
+                        $SizeTierCalculated = "--"; 
+                        $FBAPerUnitFulfillmentFeeCalculated = 0;
+                    } 
+
+                    // Highlight excess FBA fees
+                    $excess_marker = (($data[24]-$FBAPerUnitFulfillmentFeeCalculated) > 0) ? 'bg-red-200' : 'bg-green-200'; 
+
+                    $html_table .= '
+                        <tr>
+                            <td class="align-middle text-left col-wd-500">
+                                <div class="d-flex jutify-content-between align-items-center">
+                                    <div class="col-md-2">
+                                        <img src="https://ws-na.amazon-adsystem.com/widgets/q?_encoding=UTF8&MarketPlace=US&ASIN='.$data[2].'&ServiceVersion=20070822&ID=AsinImage&WS=1&Format=_SL250_" alt="Loading..." class="float-left prod-img"/>
+                                    </div>
+                                    <div class="col-md-10">
+                                        '.$data[3].'
+                                    </div>
+                                </div>
+                            </td>
+                            <td class="align-middle text-center">'.$data[0].'</td>
+                            <td class="align-middle text-center">'.$data[2].'</td>
+
+                            <td class="align-middle text-center">'.$data[17].'</td>
+                            <td class="align-middle text-center">'.$data[24].'</td>
+                            <td class="align-middle text-center">'.number_format((float)$FBAPerUnitFulfillmentFeeCalculated, '2', '.', '').'</td>
+                            <td class="align-middle text-center '.$excess_marker.'">'.number_format((float)($data[24]-$FBAPerUnitFulfillmentFeeCalculated), '2', '.', '').'</td>
+
+                            <td class="align-middle text-left text-nowrap">'.$data[16].'</td>
+                            <td class="align-middle text-center">'.$data[9].'</td>
+                            <td class="align-middle text-center">'.$data[10].'</td>
+                            <td class="align-middle text-center">'.$data[11].'</td>
+                            <td class="align-middle text-left">'.$data[13].'</td>
+                            <td class="align-middle text-center">'.$data[14].'</td>
+                            <td class="align-middle text-left">'.$data[15].'</td>
+                            
+                            <td class="align-middle text-left text-nowrap">'.$SizeTierCalculated.'</td>
+                            <td class="align-middle text-center">'.number_format($ls, 2).'</td>
+                            <td class="align-middle text-center">'.number_format($ms, 2).'</td>
+                            <td class="align-middle text-center">'.number_format($ss, 2).'</td>
+                            <td class="align-middle text-left">inches</td>
+                            <td class="align-middle text-center">'.number_format($wt, 2).'</td>
+                            <td class="align-middle text-left">pounds</td>
+                        </tr>
+                    '; 
                 }
-                else {
-                    $ls = 0.00; 
-                    $ms = 0.00; 
-                    $ss = 0.00; 
-                    $wt = 0.00; 
-
-                    //$ProdDimOwn = number_format($ls, 2).' x '.number_format($ms, 2).' x '.number_format($ss, 2);
-                    $SizeTierCalculated = "--"; 
-                    $FBAPerUnitFulfillmentFeeCalculated = 0;
-                } 
-
-                $excess_marker = (($data[24]-$FBAPerUnitFulfillmentFeeCalculated) > 0) ? 'bg-red-200' : 'bg-green-200'; 
-                $html_table .= '
-                    <tr>
-                        <td class="align-middle text-left col-wd-500">
-                            <div class="d-flex jutify-content-between align-items-center">
-                                <div class="col-md-2">
-                                    <img src="https://ws-na.amazon-adsystem.com/widgets/q?_encoding=UTF8&MarketPlace=US&ASIN='.$data[2].'&ServiceVersion=20070822&ID=AsinImage&WS=1&Format=_SL250_" alt="Loading..." class="float-left prod-img"/>
-                                </div>
-                                <div class="col-md-10">
-                                    '.$data[3].'
-                                </div>
-                            </div>
-                        </td>
-                        <td class="align-middle text-center">'.$data[0].'</td>
-                        <td class="align-middle text-center">'.$data[2].'</td>
-                        <td class="align-middle text-center '.$excess_marker.'">'.number_format((float)($data[24]-$FBAPerUnitFulfillmentFeeCalculated), '2', '.', '').'</td>
-                        <td class="align-middle text-center">'.$data[9].'</td>
-                        <td class="align-middle text-center">'.$data[10].'</td>
-                        <td class="align-middle text-center">'.$data[11].'</td>
-                        <!--<td class="align-middle text-center">
-                            '.$ProdDimAmz.'
-                            <div class="d-flex flex-column">
-                                <span class="text-nowrap"></span>
-                                <span class="text-nowrap"></span>
-                            </div>
-                        </td>-->
-                        <td class="align-middle text-center">'.$data[14].'</td>
-                        <td class="align-middle text-left">'.$data[16].'</td>
-                        <td class="align-middle text-center">'.$data[24].'</td>
-
-                        <td class="align-middle text-center">'.number_format($ls, 2).'</td>
-                        <td class="align-middle text-center">'.number_format($ms, 2).'</td>
-                        <td class="align-middle text-center">'.number_format($ss, 2).'</td>
-                        <td class="align-middle text-center">'.number_format($wt, 2).'</td>
-                        <td class="align-middle text-left text-nowrap">'.$SizeTierCalculated.'</td>
-
-                        <td class="align-middle text-center">'.number_format((float)$FBAPerUnitFulfillmentFeeCalculated, '2', '.', '').'</td>
-                        
-                    </tr>
-                '; 
             }
             
             $html_table .= '</tbody></table>'; 
@@ -330,7 +342,8 @@ class Fees extends CI_Controller
             //return $html_table; 
             $json_data['status']  = true;
             $json_data['message'] = 'REPORT_GENERATED';
-            $json_data['report']  = $html_table;
+            $json_data['report']  = $html_table;   
+            
         }
         else {
             $json_data['status']  = false; 

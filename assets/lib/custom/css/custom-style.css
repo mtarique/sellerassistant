@@ -4114,7 +4114,7 @@
 }
 
 /* OVERWRITE DROPDOWN AND TABLE ROW HOVER COLOR */
-.dropdown-menu > a:hover {
+.navbar .dropdown-menu > a:hover {
   background-color: #c6e8fb;
   background-image: none;
 }

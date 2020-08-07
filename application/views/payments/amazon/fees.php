@@ -21,15 +21,14 @@ $this->load->view('templates/loader');
     }
 </style>
 
-<div class="card bg-light border-0 rounded-0 mb-3">
-    <div class="card-body">
-        <h5 class="card-title">Amazon Account</h5>
+<div class="card bg-light border border-grey-300 rounded-0 mb-3">
+    <div class="card-body py-2">
         <div class="form-inline">
-            <label class="mr-2 sr-only" for="txtAmzAcctId">Amazon Account</label>
+            <label class="mr-2 font-weight-bold small" for="txtAmzAcctId">Amazon Account: </label>
             <select id="txtAmzAcctId" class="custom-select custom-select-sm rounded-0 w-25 mr-2">
                 <?php echo _options_amz_accts($this->session->userdata('_userid')); ?>
             </select>
-            <button type="button" name="btnPrevFees" id="btnPrevFees"class="btn btn-sm btn-primary rounded-0 shadowsm">Preview Fees</button>
+            <button type="button" name="btnPrevFees" id="btnPrevFees"class="btn btn-sm btn-primary shadowsm">Preview Fees</button>
         </div>
     </div>
 </div>
@@ -86,21 +85,46 @@ $this->load->view('templates/loader');
                             $('#resPrevFees').html(res.report); 
 
                             const dt_fees = $('#tblFeePrev').DataTable({
-                                /* fixedHeader: {headerOffset: $('#topnav').outerHeight()}, */
-                                dom: 'Bfrtip', 
-                                buttons: [
-                                    {extend: 'copy', className: 'btn btn-sm btn-primary rounded-0 shadow-sm'},
-                                    {extend: 'excel', className: 'btn btn-sm btn-primary rounded-0 shadow-sm'},
-                                    {extend: 'pdf', className: 'btn btn-sm btn-primary rounded-0 shadow-sm'}, 
-                                ], 
+                                language: {
+                                    'search' : '' /*Empty to remove the label*/
+                                },
                                 paging: false, 
-                                scrollY: '50vh', 
+                                lengthChange: false, 
+                                dom: 
+                                    "<'row mb-0'<'col-md-2'f><'col-md-10'B>>" + 
+                                    "<'row'<'col-sm-12'tr>>" +
+                                    "<'row'<'col-sm-12 col-md-5'i><'col-sm-12 col-md-7'p>>",
+                                buttons: {
+                                    dom: {
+                                        button: {
+                                            className: 'btn'
+                                        }
+                                    }, 
+                                    buttons: [
+                                        {
+                                            extend: 'colvis', 
+                                            text: '<i class="fas fa-eye-slash"></i> Show/Hide Columns', 
+                                            className: 'btn btn-sm btn-light text-secondary border-grey-300', 
+                                        },
+                                        {
+                                            extend: 'excel', 
+                                            text: '<i class="fas fa-file-export"></i> Export to Excel', 
+                                            className: 'btn btn-sm btn-light text-secondary border-grey-300', 
+                                        },
+                                    ]
+                                },  
+                                scrollY: '60vh', 
                                 scrollX: true, 
                                 scrollCollapse: true, 
                                 fixedColumns:   {
-                                    leftColumns: 4
+                                    leftColumns: 7
                                 }
                             }); 
+
+                            // Customize 
+                            $('.dataTables_filter input').attr({type: "search", placeholder:"Search..."});
+                            $('.dataTables_filter input').addClass('ml-0');
+                            $('.dt-buttons').removeClass('btn-group'); 
 
                             // Hide loading animation
                             $('#loader').addClass("d-none");
