@@ -21,6 +21,26 @@ $this->load->view('templates/loader');
     }
 </style>
 
+<div class="modal fade" id="mdl-upd-dim" tabindex="-1" aria-labelledby="mdl-upd-dim-lbl" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="mdl-upd-dim-lbl">Update Dimensions</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                Lorem ipsum dolor, sit amet consectetur adipisicing elit. Accusantium exercitationem iste eius molestias eum est, animi labore culpa sint, tempora reiciendis sequi at dignissimos, veritatis fugiat officiis et totam in!
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                <button type="button" class="btn btn-primary">Save changes</button>
+            </div>
+        </div>
+    </div>
+</div>
+
 <div class="card bg-light border border-grey-300 rounded-0 mb-3">
     <div class="card-body py-2">
         <div class="form-inline">
@@ -28,7 +48,7 @@ $this->load->view('templates/loader');
             <select id="txtAmzAcctId" class="custom-select custom-select-sm rounded-0 w-25 mr-2">
                 <?php echo _options_amz_accts($this->session->userdata('_userid')); ?>
             </select>
-            <button type="button" name="btnPrevFees" id="btnPrevFees"class="btn btn-sm btn-primary shadowsm">Preview Fees</button>
+            <button type="button" name="btnPrevFees" id="btnPrevFees" class="btn btn-sm btn-primary" data-toggle="button" aria-pressed="false">Preview Fees</button>
         </div>
     </div>
 </div>
@@ -111,6 +131,18 @@ $this->load->view('templates/loader');
                                             text: '<i class="fas fa-file-export"></i> Export to Excel', 
                                             className: 'btn btn-sm btn-light text-secondary border-grey-300', 
                                         },
+                                        {   
+                                            text: '<i class=""></i> Update Dimensions', 
+                                            className: 'btn btn-sm btn-light text-secondary border-grey-300', 
+                                            action: function(e, dt, node, config) {
+                                                $('#mdl-upd-dim').modal({
+                                                    show: true, 
+                                                    backdrop: false, 
+                                                    keyboard: false
+                                                });
+                                            }
+
+                                        }
                                     ]
                                 },  
                                 scrollY: '60vh', 
