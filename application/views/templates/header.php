@@ -24,6 +24,8 @@
     <script src="<?php echo base_url('assets/lib/flatpickr/dist/flatpickr.min.js'); ?>"></script>
     <script src="<?php echo base_url('assets/lib/datatables/datatables.min.js'); ?>"></script>
     <script src="<?php echo base_url('assets/lib/sweetalert/2.1.2/sweetalert.min.js'); ?>"></script>
+    <script src="<?php echo base_url('assets/lib/sheetjs/0.16.5/dist/xlsx.full.min.js'); ?>"></script>
+    <script src="<?php echo base_url('assets/lib/filesaverjs/2.0.4/dist/filesaver.min.js'); ?>"></script>
     <script src="<?php echo base_url('assets/lib/custom/js/custom-script.js'); ?>"></script>
 </head>
 <body class="d-flex flex-column min-vh-100">

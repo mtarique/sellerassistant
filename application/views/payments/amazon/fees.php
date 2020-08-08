@@ -23,23 +23,68 @@ $this->load->view('templates/loader');
 
 <div class="modal fade" id="mdl-upd-dim" tabindex="-1" aria-labelledby="mdl-upd-dim-lbl" aria-hidden="true">
     <div class="modal-dialog">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title" id="mdl-upd-dim-lbl">Update Dimensions</h5>
+        <div class="modal-content rounded-0">
+            <div class="modal-header rounded-0 bg-blue-800 text-light">
+                <h5 class="modal-title py-0" id="mdl-upd-dim-lbl">Update Dimensions</h5>
                 <button type="button" class="close" data-dismiss="modal" aria-label="close">
-                    <span aria-hidden="true">&times;</span>
+                    <span class="text-light" aria-hidden="true">&times;</span>
                 </button>
             </div>
-            <div class="modal-body">
-                Lorem ipsum dolor, sit amet consectetur adipisicing elit. Accusantium exercitationem iste eius molestias eum est, animi labore culpa sint, tempora reiciendis sequi at dignissimos, veritatis fugiat officiis et totam in!
+            <div class="modal-body bglight">
+                <ol>
+                    <li>
+                        <p class="small">Download product dimension excel uploader with missing weight and dimensions SKU's.</p>
+                        <button type="button" id="btnTestExpXl" class="btn btn-light border-grey-300">Download <i class="fas fa-download"></i></button>
+                    </li>
+                    <li>
+                        <p class="small">Update product's weight and dimension in downloaded uploader file, save it and upload.</p>
+                        <div class="input-group mb-3">
+                            <div class="custom-file">
+                                <input type="file" class="custom-file-input" id="inputGroupFile01" aria-describedby="inputGroupFileAddon01">
+                                <label class="custom-file-label" for="inputGroupFile01">Choose file</label>
+                            </div>
+                        </div>
+                    </li>
+                </ol>
             </div>
             <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
-                <button type="button" class="btn btn-primary">Save changes</button>
+                <button type="button" class="btn btn-sm btn-secondary" data-dismiss="modal">Close</button>
+                <button type="button" class="btn btn-sm btn-primary">Save changes</button>
             </div>
         </div>
     </div>
 </div>
+
+<table class="table table-sm" id="tblTestSheetJS">
+    <thead>
+        <tr>
+            <th>SKU</th>
+            <th>ASIN</th>
+        </tr>
+    </thead>
+    <tbody>
+        <tr>
+            <td>61844</td>
+            <td>B00SMLU6VM</td>
+        </tr>
+        <tr>
+            <td>62489</td>
+            <td>B01ADHDSOO</td>
+        </tr>
+        <tr>
+            <td>72752</td>
+            <td>B07HQQ7CJC</td>
+        </tr>
+        <tr>
+            <td>90111</td>
+            <td>B0772LWQ5T</td>
+        </tr>
+        <tr>
+            <td>61840</td>
+            <td>B00SMLU7H0</td>
+        </tr>
+    </tbody>
+</table>
 
 <div class="card bg-light border border-grey-300 rounded-0 mb-3">
     <div class="card-body py-2">
@@ -49,6 +94,7 @@ $this->load->view('templates/loader');
                 <?php echo _options_amz_accts($this->session->userdata('_userid')); ?>
             </select>
             <button type="button" name="btnPrevFees" id="btnPrevFees" class="btn btn-sm btn-primary" data-toggle="button" aria-pressed="false">Preview Fees</button>
+            <button type="button" class="btn btn-sm btn-success ml-2" data-toggle="modal" data-target="#mdl-upd-dim">Test excel export</button>
         </div>
     </div>
 </div>
@@ -223,4 +269,52 @@ $this->load->view('templates/loader');
             });
         }
     }); 
+</script>
+
+<script>
+    var wb = XLSX.utils.book_new(); 
+
+    wb.props = {
+        Title: "My SheetJS", 
+        Subject: "Testing", 
+        Author: "Tarique", 
+        CreatedDate: new Date() 
+    }
+
+    wb.SheetNames.push("Datasheet"); 
+
+    //var ws_data = [['hello', 'world'], ['first', 'time']]; 
+
+    const ws_data = [['SKU', 'ASIN', 'Packaged Product Weight', 'Packaged Product Weight UOM']]; 
+
+    $('#tblTestSheetJS tbody tr').each(function(){
+
+        const data = new Array(); 
+
+        $(this).find('td').each(function(){
+            data.push($(this).text()); 
+        }); 
+
+        ws_data.push(data); 
+    });
+
+    var ws = XLSX.utils.aoa_to_sheet(ws_data);
+
+    wb.Sheets["Datasheet"] = ws; 
+
+    var wbout = XLSX.write(wb, {bookType: 'xlsx', type: 'binary'});  
+
+    function s2ab(s) {
+        var buf = new ArrayBuffer(s.length);
+
+        var view = new Uint8Array(buf); 
+
+        for (var i = 0; i<s.length; i++) view[i] = s.charCodeAt(i) & 0xFF; 
+
+        return buf;    
+    }
+
+    $("#btnTestExpXl").click(function(){
+        saveAs(new Blob([s2ab(wbout)],{type:"application/octet-stream"}), 'test.xlsx');
+    });
 </script>
