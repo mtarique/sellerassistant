@@ -33,7 +33,7 @@ $this->load->view('templates/loader');
                 </div>
                 <div class="modal-body bglight">
                     <ol>
-                        <li>
+                        <li class="sr-only">
                             <p class="small">Selected Amazon Account ID.</p>
                             <label for="inputAmzAcctId" class="sr-only">Amazon Account Id</label>
                             <input type="text" name="inputAmzAcctId" id="inputAmzAcctId" class="form-control form-control-sm" required>
