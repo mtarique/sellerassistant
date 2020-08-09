@@ -21,70 +21,46 @@ $this->load->view('templates/loader');
     }
 </style>
 
-<div class="modal fade" id="mdl-upd-dim" tabindex="-1" aria-labelledby="mdl-upd-dim-lbl" aria-hidden="true">
+<div class="modal fade" id="mdl-upd-dim" tabindex="-1" aria-labelledby="mdlUpdDimLbl" aria-hidden="true">
     <div class="modal-dialog">
-        <div class="modal-content border-0 rounded-0">
-            <div class="modal-header rounded-0 bg-blue-800 text-light">
-                <h5 class="modal-title py-0" id="mdl-upd-dim-lbl">Update Dimensions</h5>
-                <button type="button" class="close" data-dismiss="modal" aria-label="close">
-                    <span class="text-light" aria-hidden="true">&times;</span>
-                </button>
-            </div>
-            <div class="modal-body bglight">
-                <ol>
-                    <li>
-                        <p class="small">Download product dimension excel uploader with missing weight and dimensions SKU's.</p>
-                        <button type="button" id="btnTestExpXl" class="btn btn-light border-grey-300">Download <i class="fas fa-download"></i></button>
-                    </li>
-                    <li>
-                        <p class="small">Update product's weight and dimension in downloaded uploader file, save it and upload.</p>
-                        <div class="input-group mb-3">
-                            <div class="custom-file">
-                                <input type="file" class="custom-file-input" id="inputGroupFile01" aria-describedby="inputGroupFileAddon01">
-                                <label class="custom-file-label" for="inputGroupFile01">Choose file</label>
+        <div class="modal-content rounded-0">
+            <form id="formUpdProdDim">
+                <div class="modal-header rounded-0 bg-blue-800 text-light">
+                    <h5 class="modal-title py-0" id="mdlUpdDimLbl">Update Dimensions</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="close">
+                        <span class="text-light" aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body bglight">
+                    <ol>
+                        <li>
+                            <p class="small">Selected Amazon Account ID.</p>
+                            <label for="inputAmzAcctId" class="sr-only">Amazon Account Id</label>
+                            <input type="text" name="inputAmzAcctId" id="inputAmzAcctId" class="form-control form-control-sm" required>
+                        </li>
+                        <li>
+                            <p class="small">Download product dimension excel uploader with missing weight and dimensions SKU's.</p>
+                            <button type="button" name="btnDownProdDimUploader" id="btnDownProdDimUploader" class="btn btn-light border-grey-300">Download <i class="fas fa-download"></i></button>
+                        </li>
+                        <li>
+                            <p class="small">Update product's weight and dimension in downloaded uploader file, save it and upload.</p>
+                            <div class="input-group mb-3">
+                                <div class="custom-file">
+                                    <input type="file" class="custom-file-input" id="fileProdDimUploader" aria-describedby="inputGroupFileAddon01" accept=".xlsx" required>
+                                    <label class="custom-file-label" for="fileProdDimUploader">Choose file</label>
+                                </div>
                             </div>
-                        </div>
-                    </li>
-                </ol>
-            </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-sm btn-secondary" data-dismiss="modal">Close</button>
-                <button type="button" class="btn btn-sm btn-primary">Save changes</button>
-            </div>
+                        </li>
+                    </ol>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-sm btn-secondary" data-dismiss="modal">Close</button>
+                    <button type="button" class="btn btn-sm btn-primary">Save changes</button>
+                </div>
+            </form>
         </div>
     </div>
 </div>
-
-<table class="table table-sm" id="tblTestSheetJS">
-    <thead>
-        <tr>
-            <th>SKU</th>
-            <th>ASIN</th>
-        </tr>
-    </thead>
-    <tbody>
-        <tr>
-            <td>61844</td>
-            <td>B00SMLU6VM</td>
-        </tr>
-        <tr>
-            <td>62489</td>
-            <td>B01ADHDSOO</td>
-        </tr>
-        <tr>
-            <td>72752</td>
-            <td>B07HQQ7CJC</td>
-        </tr>
-        <tr>
-            <td>90111</td>
-            <td>B0772LWQ5T</td>
-        </tr>
-        <tr>
-            <td>61840</td>
-            <td>B00SMLU7H0</td>
-        </tr>
-    </tbody>
-</table>
 
 <div class="card bg-light border border-grey-300 rounded-0 mb-3">
     <div class="card-body py-2">
@@ -94,7 +70,6 @@ $this->load->view('templates/loader');
                 <?php echo _options_amz_accts($this->session->userdata('_userid')); ?>
             </select>
             <button type="button" name="btnPrevFees" id="btnPrevFees" class="btn btn-sm btn-primary" data-toggle="button" aria-pressed="false">Preview Fees</button>
-            <button type="button" class="btn btn-sm btn-success ml-2" data-toggle="modal" data-target="#mdl-upd-dim">Test excel export</button>
         </div>
     </div>
 </div>
@@ -186,6 +161,8 @@ $this->load->view('templates/loader');
                                                     backdrop: false, 
                                                     keyboard: false
                                                 });
+
+                                                $('#inputAmzAcctId').val(amz_acct_id);
                                             }
 
                                         }
@@ -199,6 +176,34 @@ $this->load->view('templates/loader');
                                 }
                             }); 
 
+                            // Array of missing dimension SKU's
+                            const ws_data = [
+                                ['SKU', 'ASIN', 'Packaged Product Weight (gsrams)', 'Longest Side (inches)', 'Median Side (inches)', 'Shortest Side (inches)']
+                            ];
+
+                            // Loop through datatable rows
+                            dt_fees.rows().every(function(){
+
+                                // Current iteration row
+                                var dt_row = this.data();
+
+                                const ws_row = new Array(); 
+
+                                // If calculated fulfillment fees is zero 
+                                if(dt_row[5] === '0.00')
+                                {
+                                    ws_row.push(dt_row[1]); 
+                                    ws_row.push(dt_row[2]); 
+
+                                    ws_data.push(ws_row);
+                                }
+                            });
+
+                            // Download SKUs with missing dimensions
+                            $("#btnDownProdDimUploader").click(function(){
+                                download_excel('Bulk.Update.Prod-Dimensions.v01', 'Template', ws_data); 
+                            });
+                            
                             // Customize 
                             $('.dataTables_filter input').attr({type: "search", placeholder:"Search..."});
                             $('.dataTables_filter input').addClass('ml-0');
@@ -268,53 +273,52 @@ $this->load->view('templates/loader');
                 }
             });
         }
+
+        /**
+         * Download excel file using SheetJS and FileSaverJS
+         * 
+         * @param string    file_name     Name of the file
+         * @param string    sheet_name    Name of the sheet
+         * @param array     sheet_data    Array to outputted in sheet
+         * @return 
+         */
+        function download_excel(file_name, sheet_name, sheet_data) {
+
+            // New workbook
+            var wb = XLSX.utils.book_new(); 
+
+            // Set excel property
+            wb.props = {
+                Title: file_name, 
+                Subject: "Testing", 
+                Author: "MD TARIQUE ANWER", 
+                CreatedDate: new Date() 
+            }
+
+            // Create new sheet
+            wb.SheetNames.push(sheet_name); 
+
+            // Get data to sheet
+            var ws = XLSX.utils.aoa_to_sheet(sheet_data);
+
+            wb.Sheets[sheet_name] = ws; 
+
+            var wbout = XLSX.write(wb, {bookType: 'xlsx', type: 'binary'});  
+
+            // Convert binary to octet-stream 
+            function s2ab(s) {
+                var buf = new ArrayBuffer(s.length);
+
+                var view = new Uint8Array(buf); 
+
+                for (var i = 0; i<s.length; i++) view[i] = s.charCodeAt(i) & 0xFF; 
+
+                return buf;    
+            }
+
+            // Download excel file
+            saveAs(new Blob([s2ab(wbout)],{type:"application/octet-stream"}), file_name+'.xlsx');
+        }
     }); 
-</script>
 
-<script>
-    var wb = XLSX.utils.book_new(); 
-
-    wb.props = {
-        Title: "My SheetJS", 
-        Subject: "Testing", 
-        Author: "Tarique", 
-        CreatedDate: new Date() 
-    }
-
-    wb.SheetNames.push("Datasheet"); 
-
-    //var ws_data = [['hello', 'world'], ['first', 'time']]; 
-
-    const ws_data = [['SKU', 'ASIN', 'Packaged Product Weight', 'Packaged Product Weight UOM']]; 
-
-    $('#tblTestSheetJS tbody tr').each(function(){
-
-        const data = new Array(); 
-
-        $(this).find('td').each(function(){
-            data.push($(this).text()); 
-        }); 
-
-        ws_data.push(data); 
-    });
-
-    var ws = XLSX.utils.aoa_to_sheet(ws_data);
-
-    wb.Sheets["Datasheet"] = ws; 
-
-    var wbout = XLSX.write(wb, {bookType: 'xlsx', type: 'binary'});  
-
-    function s2ab(s) {
-        var buf = new ArrayBuffer(s.length);
-
-        var view = new Uint8Array(buf); 
-
-        for (var i = 0; i<s.length; i++) view[i] = s.charCodeAt(i) & 0xFF; 
-
-        return buf;    
-    }
-
-    $("#btnTestExpXl").click(function(){
-        saveAs(new Blob([s2ab(wbout)],{type:"application/octet-stream"}), 'test.xlsx');
-    });
 </script>
