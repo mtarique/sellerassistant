@@ -23,7 +23,7 @@ $this->load->view('templates/loader');
 
 <div class="modal fade" id="mdl-upd-dim" tabindex="-1" aria-labelledby="mdl-upd-dim-lbl" aria-hidden="true">
     <div class="modal-dialog">
-        <div class="modal-content rounded-0">
+        <div class="modal-content border-0 rounded-0">
             <div class="modal-header rounded-0 bg-blue-800 text-light">
                 <h5 class="modal-title py-0" id="mdl-upd-dim-lbl">Update Dimensions</h5>
                 <button type="button" class="close" data-dismiss="modal" aria-label="close">

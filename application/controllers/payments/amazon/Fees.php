@@ -273,9 +273,9 @@ class Fees extends CI_Controller
 
                     if(!empty($result)) 
                     {
-                        $ls = $result[0]->pkgd_prod_ls; 
-                        $ms = $result[0]->pkgd_prod_ms; 
-                        $ss = $result[0]->pkgd_prod_ss; 
+                        $ls = $result[0]->longest_side; 
+                        $ms = $result[0]->median_side; 
+                        $ss = $result[0]->shortest_side; 
                         $wt = $result[0]->pkgd_prod_wt/453.59237; // Gram to pound
                         $dt = date('Y-m-d');
 

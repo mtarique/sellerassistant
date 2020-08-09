@@ -411,9 +411,9 @@ class Payments extends CI_Controller
                                     {
                                         $row = $result[0]; 
 
-                                        $ls = $row->pkgd_prod_ls; 
-                                        $ms = $row->pkgd_prod_ms; 
-                                        $ss = $row->pkgd_prod_ss; 
+                                        $ls = $row->longest_side; 
+                                        $ms = $row->median_side; 
+                                        $ss = $row->shortest_side; 
                                         $wt = $row->pkgd_prod_wt/453.59237; // Gram to pound
                                         $dt = date('Y-m-d', strtotime($shipment_event->PostedDate));
 
@@ -435,7 +435,7 @@ class Payments extends CI_Controller
                                     $fees_data[$i]['qty_shp']             = $shipment_item->QuantityShipped; 
                                     $fees_data[$i]['fee_type']            = $fee_component->FeeType; 
                                     $fees_data[$i]['fee_curr']            = $fee_component->FeeAmount->CurrencyCode; 
-                                    $fees_data[$i]['fee_amt']             = $fee_component->FeeAmount->CurrencyAmount; 
+                                    $fees_data[$i]['fee_amt']             = -$fee_component->FeeAmount->CurrencyAmount; 
                                     $fees_data[$i]['calc_fee_amt']        = $FBAPerUnitFulfillmentFeeCalculated*$shipment_item->QuantityShipped;   
                                     $fees_data[$i]['calc_remarks']        = $calc_remarks; 
 
@@ -538,9 +538,9 @@ class Payments extends CI_Controller
                                 {
                                     $row = $result[0]; 
 
-                                    $ls = $row->pkgd_prod_ls; 
-                                    $ms = $row->pkgd_prod_ms; 
-                                    $ss = $row->pkgd_prod_ss; 
+                                    $ls = $row->longest_side; 
+                                    $ms = $row->median_side; 
+                                    $ss = $row->shortest_side; 
                                     $wt = $row->pkgd_prod_wt/453.59237; // Gram to pound
                                     $dt = date('Y-m-d', strtotime($shipment_event->PostedDate));
 
@@ -562,7 +562,7 @@ class Payments extends CI_Controller
                                 $fees_data[$i]['qty_shp']             = $shipment_item->QuantityShipped; 
                                 $fees_data[$i]['fee_type']            = $fee_component->FeeType; 
                                 $fees_data[$i]['fee_curr']            = $fee_component->FeeAmount->CurrencyCode; 
-                                $fees_data[$i]['fee_amt']             = $fee_component->FeeAmount->CurrencyAmount; 
+                                $fees_data[$i]['fee_amt']             = -$fee_component->FeeAmount->CurrencyAmount; 
                                 $fees_data[$i]['calc_fee_amt']        = $FBAPerUnitFulfillmentFeeCalculated*$shipment_item->QuantityShipped;   
                                 $fees_data[$i]['calc_remarks']        = $calc_remarks;   
 

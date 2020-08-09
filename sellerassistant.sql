@@ -1,14 +1,13 @@
 -- phpMyAdmin SQL Dump
--- version 4.7.0
+-- version 5.0.2
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: Jul 20, 2020 at 11:02 AM
--- Server version: 10.1.25-MariaDB
--- PHP Version: 7.1.7
+-- Generation Time: Aug 09, 2020 at 09:52 AM
+-- Server version: 10.4.13-MariaDB
+-- PHP Version: 7.4.8
 
 SET SQL_MODE = "NO_AUTO_VALUE_ON_ZERO";
-SET AUTOCOMMIT = 0;
 START TRANSACTION;
 SET time_zone = "+00:00";
 
@@ -200,11 +199,11 @@ CREATE TABLE `fba_products` (
   `fnsku` varchar(20) NOT NULL,
   `asin` varchar(20) NOT NULL,
   `pkgd_prod_wt` double NOT NULL,
-  `pkgd_prod_wt_uom` varchar(6) NOT NULL,
-  `pkgd_prod_ls` double NOT NULL,
-  `pkgd_prod_ms` double NOT NULL,
-  `pkgd_prod_ss` double NOT NULL,
-  `pkgd_prod_dim_uom` varchar(6) NOT NULL
+  `unit_of_weight` varchar(6) NOT NULL,
+  `longest_side` double NOT NULL,
+  `median_side` double NOT NULL,
+  `shortest_side` double NOT NULL,
+  `unit_of_dimension` varchar(6) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 
 -- --------------------------------------------------------
@@ -391,27 +390,32 @@ ALTER TABLE `users`
 -- AUTO_INCREMENT for table `amz_accounts`
 --
 ALTER TABLE `amz_accounts`
-  MODIFY `amz_acct_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
+  MODIFY `amz_acct_id` int(11) NOT NULL AUTO_INCREMENT;
+
 --
 -- AUTO_INCREMENT for table `fba_ful_fees_usa`
 --
 ALTER TABLE `fba_ful_fees_usa`
   MODIFY `fba_fees_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=55;
+
 --
 -- AUTO_INCREMENT for table `fba_prod_size_usa`
 --
 ALTER TABLE `fba_prod_size_usa`
   MODIFY `prod_size_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=31;
+
 --
 -- AUTO_INCREMENT for table `fba_stg_fees_usa`
 --
 ALTER TABLE `fba_stg_fees_usa`
   MODIFY `storage_fees_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=20;
+
 --
 -- AUTO_INCREMENT for table `users`
 --
 ALTER TABLE `users`
-  MODIFY `user_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
+  MODIFY `user_id` int(11) NOT NULL AUTO_INCREMENT;
+
 --
 -- Constraints for dumped tables
 --
