@@ -46,7 +46,7 @@ $this->load->view('templates/loader');
                             <p class="small">Update product's weight and dimension in downloaded uploader file, save it and upload.</p>
                             <div class="input-group mb-3">
                                 <div class="custom-file">
-                                    <input type="file" class="custom-file-input" id="fileProdDimUploader" aria-describedby="inputGroupFileAddon01" accept=".xlsx" required>
+                                    <input type="file" class="custom-file-input" name="fileProdDimUploader" id="fileProdDimUploader" aria-describedby="inputGroupFileAddon01" accept=".xlsx" required>
                                     <label class="custom-file-label" for="fileProdDimUploader">Choose file</label>
                                 </div>
                             </div>
@@ -178,7 +178,7 @@ $this->load->view('templates/loader');
 
                             // Array of missing dimension SKU's
                             const ws_data = [
-                                ['SKU', 'ASIN', 'Packaged Product Weight (gsrams)', 'Longest Side (inches)', 'Median Side (inches)', 'Shortest Side (inches)']
+                                ['SKU', 'ASIN', 'Packaged Product Weight (grams)', 'Longest Side (inches)', 'Median Side (inches)', 'Shortest Side (inches)']
                             ];
 
                             // Loop through datatable rows
@@ -319,6 +319,44 @@ $this->load->view('templates/loader');
             // Download excel file
             saveAs(new Blob([s2ab(wbout)],{type:"application/octet-stream"}), file_name+'.xlsx');
         }
+
+        /**
+         * Submit update product dimension form
+         */
+        $('#formUpdProdDim').submit(function(event){
+            // Prevent form's default behaviour
+            event.preventDefault(); 
+
+            // Ajax form submit
+            $.ajx({
+                type: "post", 
+                enctype: "multipart/form-data", 
+                url: "<?php echo base_url('payments/amazon/fees/'); ?>", 
+                data: new FormData(this), 
+                contentType: false, 
+                processData: false, 
+                cache: false, 
+                dataType: "json", 
+                beforeSend: function()
+                {
+                    $('#loader').removeClass('d-none'); 
+                }, 
+                complete: function()
+                {
+                    $('#loader').addClass('d-none'); 
+                }, 
+                success: function(res)
+                {
+
+                }, 
+                error: function(xhr)
+                {
+                    var xhr_text = xhr.status+" "+xhr.statusText;
+				    swal({title: "Request Error!", text: xhr_text, icon: "error"});
+                }
+            });
+
+        }); 
     }); 
 
 </script>

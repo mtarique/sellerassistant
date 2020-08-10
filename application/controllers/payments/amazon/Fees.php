@@ -353,6 +353,73 @@ class Fees extends CI_Controller
         return $json_data; 
     }
 
+    public function upd_prod_dim()
+    {   
+        // Set form validation rules
+        $this->form_validation->set_rules('inputAmzAcctId', 'Amazon Account Id', 'required'); 
+        if(empty($_FILES['fileProdDimUploader']['name']))
+        {
+            $this->form_validation->set_rules('fileProdDimUploader', 'Product dimension uploader file', 'required'); 
+        }
+
+        // Validate form input
+        if($this->form_validation->run() == true)
+        {
+            // Get uploaded file extension
+            $ext = pathinfo($_FILES['fileProdDimUploader']['name'], PATHINFO_EXTENSION); 
+
+            // Validate xlsx file type
+            if($ext == 'xlsx')
+            {
+                $reader = new \PhpOffice\PhpSpreadsheet\Reader\Xlsx();
+
+                // Get file path
+                $spreadsheet = $reader->load($_FILES['fileProdDimUploader']['tmp_name']); 
+
+                // Get sheet data from active sheet
+                //$sheet_data = $spreadsheet->getActiveSheet()->toArray(null, true, true, true); 
+                $worksheet = $spreadsheet->getSheetByName('Template'); 
+
+                if($worksheet)
+                {   
+                    if($worksheet->getCellByColumnAndRow(1, 1)->getValue() == "SKU" && 
+                       $worksheet->getCellByColumnAndRow(2, 1)->getValue() == "ASIN" && 
+                       $worksheet->getCellByColumnAndRow(3, 1)->getValue() == "Packaged Product Weight (grams)" && 
+                       $worksheet->getCellByColumnAndRow(4, 1)->getVAlue() == "Longest Side (inches)" && 
+                       $worksheet->getCellByColumnAndRow(5, 1)->getValue() == "Median Side (inches)" &&
+                       $worksheet->getCellByColumnAndRow(6, 1)->getValue() == "Shortest Side(inches)")
+                    {
+                        foreach(array_slice($worksheet->toArray(), 1) as $sheet_row)
+                        {
+                            foreach($sheet_row as $sheet_cell)
+                            {
+                                
+                            }                        
+                        }
+                    }
+                    else {
+                        $json_data['status'] = false; 
+                        $json_data['message'] = show_alert('danger', 'File heading did not match, please upload a valid file.'); 
+                    }
+                }
+                else {
+                    $json_data['status'] = false; 
+                    $json_data['message'] = show_alert('danger', 'Template sheet missing, please upload a valid file.'); 
+                }
+            }
+            else {
+                $json_data['status'] = false; 
+                $json_data['message'] = show_alert('danger', 'Incorrect file type, please upload xlsx file.'); 
+            }
+        }
+        else {
+            $json_data['status'] = false; 
+            $json_data['message'] = show_alert('danger', validation_errors()); 
+        }
+
+        echo json_encode($json_data); 
+    }
+
     /**
      * Get delimeter of text or csv file
      *
