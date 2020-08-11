@@ -9,6 +9,9 @@
  */
 defined('BASEPATH') or exit('No direct script access allowed.'); 
 
+use PhpOffice\PhpSpreadsheet\Spreadsheet;
+use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
+
 date_default_timezone_set('UTC');
 
 class Payments extends CI_Controller 
@@ -587,7 +590,7 @@ class Payments extends CI_Controller
                     $ajax['next_token']= $xml->ListFinancialEventsByNextTokenResult->NextToken; 
                 }
 
-                $ajax['message'] = show_alert('success', "Comparison completed! Your report is ready to download."); 
+                $ajax['message'] = show_alert('success', "Comparison completed! D."); 
             }
             else {
                 $ajax['status'] = false;  
@@ -601,6 +604,32 @@ class Payments extends CI_Controller
         }
 
         echo json_encode($ajax); 
+    }
+
+    public function down_pmt_comp_rpt()
+    {
+        //
+        $fin_event_grp_id = $this->input->get('fineventgrpid'); 
+
+        $spreadsheet = new Spreadsheet(); 
+
+        $worksheet = $spreadsheet->getActiveSheet(); 
+
+        $worksheet->setCellValue('A1', $fin_event_grp_id); 
+
+        $writer = new Xlsx($spreadsheet);
+
+        //$filename = 'phpspreadsheetfile';
+        //header('Content-Type: application/vnd.ms-excel');
+        header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+        header('Content-Disposition: attachment;filename="phpexcelfile.xlsx"');
+        header('Cache-Control: max-age=0');
+
+        $writer = \PhpOffice\PhpSpreadsheet\IOFactory::createWriter($spreadsheet, "Xlsx");
+        ob_end_clean();
+        $writer->save('php://output'); // download file
+        exit(); 
+
     }
 }
 ?>

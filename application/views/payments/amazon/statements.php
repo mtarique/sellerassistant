@@ -38,7 +38,12 @@ $this->load->view('templates/loader');
     </div>
 </div>
 
-<div id="resAmzPmts"></div>
+<div id="resAmzPmts">
+    <?php 
+        echo show_alert('success', 'Comparison Completed! <a href="'.base_url('payments/amazon/payments/down_pmt_comp_rpt?fineventgrpid=QUiogHBiOoJTE_6LLPXKAT-zrVMqioiIFSDfncyLH3s').'">Download Comparison Report</a>'); 
+        echo show_alert('warning', 'Some of your products have not weight and dimensions <a href="">Download Missing Dimensions Products List</a>'); 
+    ?>
+</div>
 
 <table class="table table-hover table-sm border small" id="tblAmzPmts">
     <thead>
