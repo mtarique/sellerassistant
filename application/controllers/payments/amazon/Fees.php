@@ -353,7 +353,12 @@ class Fees extends CI_Controller
         return $json_data; 
     }
 
-    public function upd_prod_dim()
+    /**
+     * Bulk update product weight and dimensions from excel upload
+     *
+     * @return void
+     */
+    public function bulk_upd_prod_dim()
     {   
         // Set form validation rules
         $this->form_validation->set_rules('inputAmzAcctId', 'Amazon Account Id', 'required'); 
@@ -364,7 +369,10 @@ class Fees extends CI_Controller
 
         // Validate form input
         if($this->form_validation->run() == true)
-        {
+        {   
+            // Amazon account id
+            $amz_acct_id = $this->input->post('inputAmzAcctId'); 
+
             // Get uploaded file extension
             $ext = pathinfo($_FILES['fileProdDimUploader']['name'], PATHINFO_EXTENSION); 
 
@@ -377,33 +385,75 @@ class Fees extends CI_Controller
                 $spreadsheet = $reader->load($_FILES['fileProdDimUploader']['tmp_name']); 
 
                 // Get sheet data from active sheet
-                //$sheet_data = $spreadsheet->getActiveSheet()->toArray(null, true, true, true); 
                 $worksheet = $spreadsheet->getSheetByName('Template'); 
 
                 if($worksheet)
                 {   
+                    // 
                     if($worksheet->getCellByColumnAndRow(1, 1)->getValue() == "SKU" && 
                        $worksheet->getCellByColumnAndRow(2, 1)->getValue() == "ASIN" && 
                        $worksheet->getCellByColumnAndRow(3, 1)->getValue() == "Packaged Product Weight (grams)" && 
                        $worksheet->getCellByColumnAndRow(4, 1)->getVAlue() == "Longest Side (inches)" && 
-                       $worksheet->getCellByColumnAndRow(5, 1)->getValue() == "Median Side (inches)" &&
-                       $worksheet->getCellByColumnAndRow(6, 1)->getValue() == "Shortest Side(inches)")
-                    {
-                        foreach(array_slice($worksheet->toArray(), 1) as $sheet_row)
+                       $worksheet->getCellByColumnAndRow(5, 1)->getValue() == "Median Side (inches)" && 
+                       $worksheet->getCellByColumnAndRow(6, 1)->getValue() == "Shortest Side (inches)")
+                    {   
+
+                        // Get sheet data 
+                        $sheet_data = array_slice($worksheet->toArray(), 1); 
+
+                        $is_valid_sheet = false; 
+
+                        foreach($sheet_data as $sheet_row)
+                        {   
+                            $sku  = $sheet_row[0]; 
+                            $asin = $sheet_row[1]; 
+                            $wt   = $sheet_row[2]; 
+                            $ls   = $sheet_row[3]; 
+                            $ms   = $sheet_row[4]; 
+                            $ss   = $sheet_row[5];
+
+                            if(!empty($sku) &&
+                               !empty($asin) &&
+                               !empty($wt) && $wt != 0 &&
+                               !empty($ls) && $ls != 0 &&
+                               !empty($ms) && $ms != 0 && 
+                               !empty($ss) && $ss != 0)
+                            {   
+                                $is_valid_sheet = true; 
+                                continue; 
+                            } 
+                            else {
+                                $is_valid_sheet = false;
+                                break; 
+                            }
+                        }
+
+                        if($is_valid_sheet)
                         {
-                            foreach($sheet_row as $sheet_cell)
+                            $result = $this->products_model->upd_prod_dim($amz_acct_id, $sheet_data); 
+
+                            if($result == 1)
                             {
-                                
-                            }                        
+                                $json_data['status']  = true; 
+                                $json_data['message'] = show_alert('success', 'Products weight and dimensions successfully updated.');
+                            }
+                            else {
+                                $json_data['status']  = false; 
+                                $json_data['message'] = show_alert('danger', 'Database error occurred, please try again.');
+                            }
+                        }
+                        else {
+                            $json_data['status']  = false; 
+                            $json_data['message'] = show_alert('danger', 'Missing or zero values found in the sheet, please upload a valid file.');
                         }
                     }
                     else {
-                        $json_data['status'] = false; 
+                        $json_data['status']  = false; 
                         $json_data['message'] = show_alert('danger', 'File heading did not match, please upload a valid file.'); 
                     }
                 }
                 else {
-                    $json_data['status'] = false; 
+                    $json_data['status']  = false; 
                     $json_data['message'] = show_alert('danger', 'Template sheet missing, please upload a valid file.'); 
                 }
             }
@@ -417,6 +467,7 @@ class Fees extends CI_Controller
             $json_data['message'] = show_alert('danger', validation_errors()); 
         }
 
+        // Send json encoded data as ajax response
         echo json_encode($json_data); 
     }
 

@@ -21,33 +21,36 @@ $this->load->view('templates/loader');
     }
 </style>
 
-<div class="modal fade" id="mdl-upd-dim" tabindex="-1" aria-labelledby="mdlUpdDimLbl" aria-hidden="true">
-    <div class="modal-dialog">
+<div class="modal shadow-sm fade" id="mdl-upd-dim" tabindex="-1" aria-labelledby="mdlUpdDimLbl" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
         <div class="modal-content rounded-0">
             <form id="formUpdProdDim">
                 <div class="modal-header rounded-0 bg-blue-800 text-light">
-                    <h5 class="modal-title py-0" id="mdlUpdDimLbl">Update Dimensions</h5>
+                    <div class="modal-title py-0" id="mdlUpdDimLbl">
+                        <h5 class="mb-0">Update Product Dimensions</h5>
+                        <small>Bulk update products weight and dimensions for <span id="titleAmzActName"></span>.</small>
+                    </div>
                     <button type="button" class="close" data-dismiss="modal" aria-label="close">
                         <span class="text-light" aria-hidden="true">&times;</span>
                     </button>
                 </div>
                 <div class="modal-body bglight">
+                    <div id="resUpdProdDim"></div>
                     <ol>
-                        <li class="sr-only">
-                            <p class="small">Selected Amazon Account ID.</p>
-                            <label for="inputAmzAcctId" class="sr-only">Amazon Account Id</label>
-                            <input type="text" name="inputAmzAcctId" id="inputAmzAcctId" class="form-control form-control-sm" required>
-                        </li>
                         <li>
                             <p class="small">Download product dimension excel uploader with missing weight and dimensions SKU's.</p>
                             <button type="button" name="btnDownProdDimUploader" id="btnDownProdDimUploader" class="btn btn-light border-grey-300">Download <i class="fas fa-download"></i></button>
                         </li>
                         <li>
                             <p class="small">Update product's weight and dimension in downloaded uploader file, save it and upload.</p>
+                            <div class="d-none">
+                                <label for="inputAmzAcctId" class="sr-only">Amazon Account Id</label>
+                                <input type="text" name="inputAmzAcctId" id="inputAmzAcctId" class="form-control form-controlsm mb-2" placeholder="Amazon Account Id" readonly="true" required>
+                            </div>
                             <div class="input-group mb-3">
                                 <div class="custom-file">
                                     <input type="file" class="custom-file-input" name="fileProdDimUploader" id="fileProdDimUploader" aria-describedby="inputGroupFileAddon01" accept=".xlsx" required>
-                                    <label class="custom-file-label" for="fileProdDimUploader">Choose file</label>
+                                    <label class="custom-file-label" for="fileProdDimUploader">Choose file...</label>
                                 </div>
                             </div>
                         </li>
@@ -55,7 +58,7 @@ $this->load->view('templates/loader');
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-sm btn-secondary" data-dismiss="modal">Close</button>
-                    <button type="button" class="btn btn-sm btn-primary">Save changes</button>
+                    <button type="submit" id="btnUpdProdDim" name="btnUpdProdDim" class="btn btn-sm btn-primary">Update</button>
                 </div>
             </form>
         </div>
@@ -70,6 +73,7 @@ $this->load->view('templates/loader');
                 <?php echo _options_amz_accts($this->session->userdata('_userid')); ?>
             </select>
             <button type="button" name="btnPrevFees" id="btnPrevFees" class="btn btn-sm btn-primary" data-toggle="button" aria-pressed="false">Preview Fees</button>
+            <!-- <button type="button" class="btn btn-sm btn-success ml-2" data-toggle="modal" data-target="#mdl-upd-dim">Test Update Dim</button> -->
         </div>
     </div>
 </div>
@@ -87,11 +91,14 @@ $this->load->view('templates/loader');
 
             // Check for non empty amazon account id
             if($('#txtAmzAcctId').val() != "")
-            {
-                const amz_acct_id = $('#txtAmzAcctId').val(); 
+            {   
+                $('#resPrevFees').empty(); 
+
+                const amz_acct_id   = $('#txtAmzAcctId').val(); 
+                const amz_acct_name = $('#txtAmzAcctId option:selected').text(); 
                 
                 // Get fee preview report
-                get_done_report(amz_acct_id); 
+                get_done_report(amz_acct_id, amz_acct_name); 
             }
             else swal({title: "Oops!", text: "Please select an account.", icon: "error"});
             
@@ -105,7 +112,7 @@ $this->load->view('templates/loader');
          *
          * @return mixed 
          */
-        function get_done_report(amz_acct_id)
+        function get_done_report(amz_acct_id, amz_acct_name)
         {
             $.ajax({
                 type: "get", 
@@ -115,6 +122,7 @@ $this->load->view('templates/loader');
                 beforeSend: function()
                 {
                     $('#loader').removeClass("d-none");
+                    $('#resPrevFees').empty();
                 }, 
                 success: function(res)
                 {   
@@ -122,8 +130,33 @@ $this->load->view('templates/loader');
                     {   
                         if(res.message == "REPORT_GENERATED")
                         {   
+                            
+                    
                             // Output report
                             $('#resPrevFees').html(res.report); 
+
+
+                            /* Issue ID#1 */
+                            /* $('#tblFeePrev').DataTable().destroy();
+                            $('#tblFeePrev').empty();  */
+
+                            /* if($.fn.DataTable.isDataTable("#tblFeePrev")) {
+                                $('#tblFeePrev').DataTable().clear();
+                            } */
+
+                            /* if ($.fn.DataTable.isDataTable('#tblFeePrev')) {
+                                $('#tblFeePrev').DataTable().clear();
+                            } */
+
+                            //$('#tblFeePrev').DataTable().clear().destroy();
+
+                            //$('#tblFeePrev tbody').empty();
+
+                            //$('#tblFeePrev').dataTable().fnDestroy();
+                            
+                            /* $('#tblFeePrev').dataTable({
+                                "destroy": true
+                            }); */
 
                             const dt_fees = $('#tblFeePrev').DataTable({
                                 language: {
@@ -153,7 +186,7 @@ $this->load->view('templates/loader');
                                             className: 'btn btn-sm btn-light text-secondary border-grey-300', 
                                         },
                                         {   
-                                            text: '<i class=""></i> Update Dimensions', 
+                                            text: '<i class="fas fa-upload"></i> Update Dimensions', 
                                             className: 'btn btn-sm btn-light text-secondary border-grey-300', 
                                             action: function(e, dt, node, config) {
                                                 $('#mdl-upd-dim').modal({
@@ -163,6 +196,7 @@ $this->load->view('templates/loader');
                                                 });
 
                                                 $('#inputAmzAcctId').val(amz_acct_id);
+                                                $('#titleAmzActName').text(amz_acct_name); 
                                             }
 
                                         }
@@ -176,31 +210,32 @@ $this->load->view('templates/loader');
                                 }
                             }); 
 
-                            // Array of missing dimension SKU's
-                            const ws_data = [
-                                ['SKU', 'ASIN', 'Packaged Product Weight (grams)', 'Longest Side (inches)', 'Median Side (inches)', 'Shortest Side (inches)']
-                            ];
-
-                            // Loop through datatable rows
-                            dt_fees.rows().every(function(){
-
-                                // Current iteration row
-                                var dt_row = this.data();
-
-                                const ws_row = new Array(); 
-
-                                // If calculated fulfillment fees is zero 
-                                if(dt_row[5] === '0.00')
-                                {
-                                    ws_row.push(dt_row[1]); 
-                                    ws_row.push(dt_row[2]); 
-
-                                    ws_data.push(ws_row);
-                                }
-                            });
-
+                            /* Issue ID#1 */
                             // Download SKUs with missing dimensions
-                            $("#btnDownProdDimUploader").click(function(){
+                            $("#btnDownProdDimUploader").unbind().click(function(){
+                                // Array of missing dimension SKU's
+                                const ws_data = [
+                                    ['SKU', 'ASIN', 'Packaged Product Weight (grams)', 'Longest Side (inches)', 'Median Side (inches)', 'Shortest Side (inches)']
+                                ];
+
+                                // Loop through datatable rows
+                                dt_fees.rows().every(function(){
+
+                                    // Current iteration row
+                                    var dt_row = this.data();
+
+                                    const ws_row = new Array(); 
+
+                                    // If calculated fulfillment fees is zero 
+                                    if(dt_row[5] === '0.00')
+                                    {
+                                        ws_row.push(dt_row[1]); 
+                                        ws_row.push(dt_row[2]); 
+
+                                        ws_data.push(ws_row);
+                                    }
+                                });
+
                                 download_excel('Bulk.Update.Prod-Dimensions.v01', 'Template', ws_data); 
                             });
                             
@@ -319,7 +354,7 @@ $this->load->view('templates/loader');
             // Download excel file
             saveAs(new Blob([s2ab(wbout)],{type:"application/octet-stream"}), file_name+'.xlsx');
         }
-
+        
         /**
          * Submit update product dimension form
          */
@@ -328,10 +363,10 @@ $this->load->view('templates/loader');
             event.preventDefault(); 
 
             // Ajax form submit
-            $.ajx({
+            $.ajax({
                 type: "post", 
                 enctype: "multipart/form-data", 
-                url: "<?php echo base_url('payments/amazon/fees/'); ?>", 
+                url: "<?php echo base_url('payments/amazon/fees/bulk_upd_prod_dim'); ?>", 
                 data: new FormData(this), 
                 contentType: false, 
                 processData: false, 
@@ -339,15 +374,19 @@ $this->load->view('templates/loader');
                 dataType: "json", 
                 beforeSend: function()
                 {
-                    $('#loader').removeClass('d-none'); 
+                    $('#btnUpdProdDim').prop('disabled', true);
+                    $('#btnUpdProdDim').html('<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Updating...'); 
+                     
                 }, 
                 complete: function()
                 {
-                    $('#loader').addClass('d-none'); 
+                    $('#btnUpdProdDim').prop('disabled', false);
+                    $('#btnUpdProdDim').html('Update'); 
                 }, 
                 success: function(res)
                 {
-
+                    if(res.status) $('#resUpdProdDim').html(res.message);
+                    else $('#resUpdProdDim').html(res.message);
                 }, 
                 error: function(xhr)
                 {
@@ -357,6 +396,13 @@ $this->load->view('templates/loader');
             });
 
         }); 
+
+        // Bootstrap modal on close  - Reset the form  and clear data
+        $('#mdl-upd-dim').on('hidden.bs.modal', function () {
+		    $('#formUpdProdDim').trigger('reset');
+            $('#resUpdProdDim').empty();
+            $(".custom-file-input").next(".custom-file-label").text('Choose file...'); 
+        })
     }); 
 
 </script>
