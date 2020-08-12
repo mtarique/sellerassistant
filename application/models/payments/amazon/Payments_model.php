@@ -69,6 +69,17 @@ class Payments_model extends CI_Model
             return false; 
         }
     }
+
+    public function get_fba_fees_comp($fin_event_grp_id)
+    {
+        $query = $this->db
+                        ->select('fba_fees_comp_details.*, fba_fees_comp_header.*')
+                        ->join('fba_fees_comp_header', 'fba_fees_comp_details.fin_event_grp_id = fba_fees_comp_header.fin_event_grp_id', 'left')
+                        ->where('fba_fees_comp_details.fin_event_grp_id', $fin_event_grp_id)
+                        ->get('fba_fees_comp_details'); 
+
+        return ($query->num_rows() > 0) ? $query->result() : null;
+    }
 }
 
 ?>

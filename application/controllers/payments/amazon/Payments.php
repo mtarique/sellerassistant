@@ -606,23 +606,92 @@ class Payments extends CI_Controller
         echo json_encode($ajax); 
     }
 
-    public function down_pmt_comp_rpt()
+    /**
+     * Undocumented function
+     *
+     * @return void
+     */
+    public function down_fee_comp_pmt_rpt()
     {
         //
         $fin_event_grp_id = $this->input->get('fineventgrpid'); 
 
         $spreadsheet = new Spreadsheet(); 
 
+        // Get active sheet
         $worksheet = $spreadsheet->getActiveSheet(); 
 
-        $worksheet->setCellValue('A1', $fin_event_grp_id); 
+        // Set heading rows to bold
+        $worksheet->getStyle("A1:J1")->getFont()->setBold(true);
 
+        // Cells color array
+        $cell_colors['A1:J1'] = 'F2F2F2'; 
+
+        // Loop through cells color array and set cells color
+        foreach($cell_colors as $key => $val)
+        {
+            $worksheet->getStyle($key)
+                    ->getFill()
+                    ->setFillType(\PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID)
+                    ->getStartColor()
+                    ->setARGB($val); 
+        }
+
+        // Set worksheet title
+        $worksheet->setTitle('Report');
+
+        // Set header cells
+        $worksheet->setCellValue('A1', "Order Id")
+                ->setCellValue('B1', "Order Date")
+                ->setCellValue('C1', "SKU") 
+                ->setCellValue('D1', "ASIN")
+                ->setCellValue('E1', "Qty Shp")
+                ->setCellValue('F1', "Fee Type")
+                ->setCellValue('G1', "Currency")
+                ->setCellValue('H1', "Fee Amount - Amazon")
+                ->setCellValue('I1', "Fee Amount - Calculated")
+                ->setCellValue('J1', "Fee Difference"); 
+
+        $result = $this->payments_model->get_fba_fees_comp($fin_event_grp_id); 
+
+        if(!empty($result))
+        {  
+            $n = 2;
+
+            foreach($result as $row)
+            {   
+                // Highlight row if excess fees charged by Amazon
+                if(($row->fee_amt-$row->calc_fee_amt) > 0)
+                {
+                    $worksheet->getStyle("A$n:J$n")
+                        ->getFill()
+                        ->setFillType(\PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID)
+                        ->getStartColor()
+                        ->setARGB('ffc7ce'); 
+                }
+                
+                // Write data to worksheet
+                $worksheet->setCellValue("A$n", $row->amz_ord_id)
+                    ->setCellValue("B$n", $row->posted_date) 
+                    ->setCellValue("C$n", $row->seller_sku)
+                    ->setCellValue("D$n", $row->seller_sku)
+                    ->setCellValue("E$n", $row->qty_shp)
+                    ->setCellValue("F$n", $row->fee_type)
+                    ->setCellValue("G$n", $row->fee_curr)
+                    ->setCellValue("H$n", $row->fee_amt)
+                    ->setCellValue("I$n", $row->calc_fee_amt)
+                    ->setCellValue("J$n", "=H$n-I$n");
+
+                $n++; 
+            }
+        }
+        else $worksheet->setCellValue('A2', "An error occurred");
+
+        // Write data to excel
         $writer = new Xlsx($spreadsheet);
 
-        //$filename = 'phpspreadsheetfile';
-        //header('Content-Type: application/vnd.ms-excel');
         header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
-        header('Content-Disposition: attachment;filename="phpexcelfile.xlsx"');
+        header('Content-Disposition: attachment;filename="FeeCompPmtReport.xlsx"');
         header('Cache-Control: max-age=0');
 
         $writer = \PhpOffice\PhpSpreadsheet\IOFactory::createWriter($spreadsheet, "Xlsx");
