@@ -621,11 +621,45 @@ class Payments extends CI_Controller
         // Get active sheet
         $worksheet = $spreadsheet->getActiveSheet(); 
 
+        // Set default heading row
+        $hn = 1; 
+
+        // Set auto filter
+        $worksheet->setAutoFilter("A$hn:J$hn");
+
+        // Heading row style
+        /* $worksheet->getStyle("A1:J1")
+            ->getAlignment()
+            ->applyFromArray(
+                array(
+                    'horizontal' => \PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER,
+                    'vertical'   => \PhpOffice\PhpSpreadsheet\Style\Alignment::VERTICAL_CENTER,
+                    'rotation'   => 0,
+                    'wrap'       => true
+                )
+            ); */
+
+        $worksheet->getStyle("A$hn:J$hn")->getAlignment()->setVertical(\PhpOffice\PhpSpreadsheet\Style\Alignment::VERTICAL_CENTER);
+        $worksheet->getStyle("A$hn:J$hn")->getAlignment()->setHorizontal(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER);
+        $worksheet->getStyle("A$hn:J$hn")->getAlignment()->setWrapText(true); 
+        $worksheet->getStyle("A$hn:J$hn")->getAlignment()->setShrinkToFit(true); 
+
         // Set heading rows to bold
-        $worksheet->getStyle("A1:J1")->getFont()->setBold(true);
+        $worksheet->getStyle("A$hn:J$hn")->getFont()->setBold(true);
+
+        // Set auto column size
+        $worksheet->getColumnDimension('A')->setAutoSize(true);
+        $worksheet->getColumnDimension('B')->setAutoSize(true);
+        $worksheet->getColumnDimension('C')->setAutoSize(true);
+        $worksheet->getColumnDimension('D')->setWidth(15);
+        $worksheet->getColumnDimension('F')->setAutoSize(true);
+        //$worksheet->getRowDimension('1')->setAutoSize(true);
+        $worksheet->getColumnDimension('H')->setWidth(13);
+        $worksheet->getColumnDimension('I')->setWidth(13);
+        $worksheet->getColumnDimension('J')->setWidth(13);
 
         // Cells color array
-        $cell_colors['A1:J1'] = 'F2F2F2'; 
+        $cell_colors["A$hn:J$hn"] = 'F2F2F2'; 
 
         // Loop through cells color array and set cells color
         foreach($cell_colors as $key => $val)
@@ -641,17 +675,18 @@ class Payments extends CI_Controller
         $worksheet->setTitle('Report');
 
         // Set header cells
-        $worksheet->setCellValue('A1', "Order Id")
-                ->setCellValue('B1', "Order Date")
-                ->setCellValue('C1', "SKU") 
-                ->setCellValue('D1', "ASIN")
-                ->setCellValue('E1', "Qty Shp")
-                ->setCellValue('F1', "Fee Type")
-                ->setCellValue('G1', "Currency")
-                ->setCellValue('H1', "Fee Amount - Amazon")
-                ->setCellValue('I1', "Fee Amount - Calculated")
-                ->setCellValue('J1', "Fee Difference"); 
+        $worksheet->setCellValue("A$hn", "SKU") 
+                ->setCellValue("B$hn", "ASIN")
+                ->setCellValue("C$hn", "Amazon Order Id")
+                ->setCellValue("D$hn", "Order Date (YYYY-MM-DD)")
+                ->setCellValue("E$hn", "Qty Shp")
+                ->setCellValue("F$hn", "Fee Type")
+                ->setCellValue("G$hn", "Currency")
+                ->setCellValue("H$hn", "Fee Amount - Amazon")
+                ->setCellValue("I$hn", "Fee Amount - Calculated")
+                ->setCellValue("J$hn", "Fee Difference"); 
 
+        // Query to get fba fees comparison
         $result = $this->payments_model->get_fba_fees_comp($fin_event_grp_id); 
 
         if(!empty($result))
@@ -669,12 +704,20 @@ class Payments extends CI_Controller
                         ->getStartColor()
                         ->setARGB('ffc7ce'); 
                 }
+
+                $worksheet->getStyle("A$n:J$n")->getAlignment()->setVertical(\PhpOffice\PhpSpreadsheet\Style\Alignment::VERTICAL_CENTER);
+                $worksheet->getStyle("A$n:E$n")->getAlignment()->setHorizontal(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER);
+                $worksheet->getStyle("G$n")->getAlignment()->setHorizontal(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER);
+                $worksheet->getStyle("A1:J1")->getAlignment()->setWrapText(true); 
+                $worksheet->getStyle("A1:J1")->getAlignment()->setShrinkToFit(true); 
+
+                $worksheet->getStyle("H$n:J$n")->getNumberFormat()->setFormatCode('0.00');
                 
                 // Write data to worksheet
-                $worksheet->setCellValue("A$n", $row->amz_ord_id)
-                    ->setCellValue("B$n", $row->posted_date) 
-                    ->setCellValue("C$n", $row->seller_sku)
-                    ->setCellValue("D$n", $row->seller_sku)
+                $worksheet->setCellValue("A$n", $row->seller_sku)
+                    ->setCellValue("B$n", $row->seller_sku)
+                    ->setCellValue("C$n", $row->amz_ord_id)
+                    ->setCellValue("D$n", date('Y-m-d', strtotime($row->posted_date)))
                     ->setCellValue("E$n", $row->qty_shp)
                     ->setCellValue("F$n", $row->fee_type)
                     ->setCellValue("G$n", $row->fee_curr)
