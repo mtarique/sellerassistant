@@ -34,8 +34,8 @@ class Payments_model extends CI_Model
             'fin_event_grp_end'   => date('Y-m-d', strtotime($fin_event_grp_end)), 
             'fin_event_curr'      => $fin_event_curr, 
             'beg_bal_amt'         => $beg_bal_amt, 
-            'deposit-amt'         => $deposit_amt, 
-            'fund_trf_date'       => $fund_trf_date,  
+            'deposit_amt'         => $deposit_amt, 
+            'fund_trf_date'       => date('Y-m-d', strtotime($fund_trf_date)),  
             'amz_acct_id'         => $amz_acct_id
         ); 
 
@@ -74,6 +74,12 @@ class Payments_model extends CI_Model
         }
     }
 
+    /**
+     * Get FBA fees data from amazon payments
+     *
+     * @param  string   $fin_event_grp_id
+     * @return void
+     */
     public function get_fba_fees_comp($fin_event_grp_id)
     {
         $query = $this->db
@@ -83,6 +89,19 @@ class Payments_model extends CI_Model
                         ->get('amz_pmt_details'); 
 
         return ($query->num_rows() > 0) ? $query->result() : null;
+    }
+
+    /**
+     * Check if payments already saved and exist
+     *
+     * @param  string   $fin_event_grp_id
+     * @return boolean
+     */
+    public function is_pmt_exist($fin_event_grp_id)
+    {
+        $query = $this->db->get_where('amz_pmt_header', array('fin_event_grp_id' => $fin_event_grp_id)); 
+
+        return ($query->num_rows() > 0) ? true : false; 
     }
 }
 

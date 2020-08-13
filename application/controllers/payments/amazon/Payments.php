@@ -86,49 +86,36 @@ class Payments extends CI_Controller
                                     <th class="align-middle text-right">Deposit Amount</th>
                                     <th class="align-middle text-center">Fund Transfer Date</th>
                                     <th class="align-middle text-left">Processing Status</th>
-                                    <th class="align-middle text-center">Fee Comparison</th>
+                                    <th class="align-middle text-left">Fee Comparison</th>
                                 </tr>
                             </thead><tbody>
                     ';
                     
                     foreach($xml->ListFinancialEventGroupsResult->FinancialEventGroupList->FinancialEventGroup as $event_group)
                     {   
-                        // Settlement period
-                        if($event_group->ProcessingStatus == "Open")
-                        {
-                            $settlement_period = date('m/d/Y', strtotime($event_group->FinancialEventGroupStart)).' - '.date('m/d/Y'); 
-                            $action_comp = "disabled"; 
-                            $pmt_status_badge = "";
-                        } 
-                        elseif($event_group->ProcessingStatus == "Closed") {
-                            $settlement_period = date('m/d/Y', strtotime($event_group->FinancialEventGroupStart)).' - '.date('m/d/Y', strtotime($event_group->FinancialEventGroupEnd)); 
-                            $action_comp = "";
-                            $pmt_status_badge = "";
-                        }
-                        else {
-                            $settlement_period = date('m/d/Y', strtotime($event_group->FinancialEventGroupStart)).' - '.date('m/d/Y', strtotime($event_group->FinancialEventGroupEnd)); 
-                            $action_comp = "disabled";
-                            $pmt_status_badge = "";
-                        }
-
                         // Fund transfer date
                         $fund_transfer_date = (isset($event_group->FundTransferDate)) ? date('M d, Y', strtotime($event_group->FundTransferDate)) : ""; 
 
-                        // Html table rows
-                        $html .= '
-                            <tr>
-                                <td class="align-middle text-center">
-                                    <a href="'.base_url('payments/amazon/payments/view_pmt_trans?fineventgrpid='.$event_group->FinancialEventGroupId.'&amzacctid='.$amz_acct_id).'" title="View payment transaction" target="_blank">
-                                    '.$settlement_period.'
-                                    </a>
-                                </td>
-                                <td class="align-middle text-center">'.$event_group->OriginalTotal->CurrencyCode.'</td>
-                                <td class="align-middle text-right">'.$event_group->OriginalTotal->CurrencyAmount.'</td>
-                                <td class="align-middle text-center">'.$fund_transfer_date.'</td>
-                                <td class="align-middle text-left">'.$event_group->ProcessingStatus.'</td>
-                                <td class="align-middle text-center">
+                        // Settlement period
+                        if($event_group->ProcessingStatus == "Closed") {
+                            $settlement_period = date('m/d/Y', strtotime($event_group->FinancialEventGroupStart)).' - '.date('m/d/Y', strtotime($event_group->FinancialEventGroupEnd)); 
+
+                            // Get download link if comparison data already in database
+                            $result = $this->payments_model->is_pmt_exist($event_group->FinancialEventGroupId); 
+
+                            if($result == 1)
+                            {
+                                // Dowloand button
+                                $comp_btn = '
+                                    <a href="'.base_url('payments/amazon/payments/down_fee_comp_rpt?fineventgrpid='.$event_group->FinancialEventGroupId.'&amzacctid='.$amz_acct_id).'"
+                                        class="btn btn-sm btn-success">Download Comparison Report</a>
+                                ';
+                            }
+                            else {
+                                // Comparison button
+                                $comp_btn = '
                                     <a href="#" 
-                                        class="btn btn-sm btn-light border-grey-300 btn-comp-pmt-fees '.$action_comp.'" 
+                                        class="btn btn-sm btn-light border-grey-300 btn-comp-pmt-fees" 
                                         fin-event-grp-start="'.date('M d, Y', strtotime($event_group->FinancialEventGroupStart)).'" 
                                         fin-event-grp-end="'.date('M d, Y', strtotime($event_group->FinancialEventGroupEnd)).'" 
                                         fin-event-grp-id="'.$event_group->FinancialEventGroupId.'" 
@@ -139,11 +126,32 @@ class Payments extends CI_Controller
                                         amz-acct-id="'.$amz_acct_id.'">
                                         <i class="far fa-balance-scale-left"></i> Compare Fees
                                     </a>
-                                    <!--
-                                    <a href="'.base_url('payments/amazon/payments/view_transactions?fineventgrpid='.$event_group->FinancialEventGroupId.'&amzacctid='.$amz_acct_id).'" target="_blank" class="btn btn-xs btn-warning shadow-sm">View Transactions</a>
-                                    
-                                    -->
+                                '; 
+                            }
+                        }
+                        elseif($event_group->ProcessingStatus == "Open")
+                        {
+                            $settlement_period = date('m/d/Y', strtotime($event_group->FinancialEventGroupStart)).' - '.date('m/d/Y'); 
+                            $comp_btn = "Not Available"; 
+                        } 
+                        else {
+                            $settlement_period = date('m/d/Y', strtotime($event_group->FinancialEventGroupStart)).' - '.date('m/d/Y', strtotime($event_group->FinancialEventGroupEnd)); 
+                            $comp_btn = "Not Available"; 
+                        }
+
+                        // Html table rows
+                        $html .= '
+                            <tr class="py1">
+                                <td class="align-middle text-center py-3">
+                                    <a href="'.base_url('payments/amazon/payments/view_pmt_trans?fineventgrpid='.$event_group->FinancialEventGroupId.'&amzacctid='.$amz_acct_id).'" title="View payment transaction" target="_blank">
+                                    '.$settlement_period.'
+                                    </a>
                                 </td>
+                                <td class="align-middle text-center">'.$event_group->OriginalTotal->CurrencyCode.'</td>
+                                <td class="align-middle text-right">'.$event_group->OriginalTotal->CurrencyAmount.'</td>
+                                <td class="align-middle text-center">'.$fund_transfer_date.'</td>
+                                <td class="align-middle text-left">'.$event_group->ProcessingStatus.'</td>
+                                <td class="align-middle text-left">'.$comp_btn.'</td>
                             </tr>
                         ';
                     }
@@ -656,6 +664,154 @@ class Payments extends CI_Controller
         }
 
         echo json_encode($json_data); 
+    }
+
+    /**
+     * Download fee comparison report 
+     *
+     * @return void
+     */
+    public function down_fee_comp_rpt()
+    {
+        // Finanicial event group id
+        $fin_event_grp_id = $this->input->get('fineventgrpid');
+        $amz_acct_id = $this->input->get('amzacctid');
+
+        // New spreadsheet object
+        $spreadsheet = new Spreadsheet(); 
+
+        // Get active sheet
+        $worksheet = $spreadsheet->getActiveSheet(); 
+
+        // Set default heading row
+        $hn = 1; 
+
+        // Set auto filter
+        $worksheet->setAutoFilter("A$hn:J$hn");
+
+        // Set heading row alignment
+        $worksheet->getStyle("A$hn:J$hn")->getAlignment()->setVertical(\PhpOffice\PhpSpreadsheet\Style\Alignment::VERTICAL_CENTER);
+        $worksheet->getStyle("A$hn:J$hn")->getAlignment()->setHorizontal(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER);
+        $worksheet->getStyle("A$hn:J$hn")->getAlignment()->setWrapText(true); 
+        $worksheet->getStyle("A$hn:J$hn")->getAlignment()->setShrinkToFit(true); 
+
+        // Set heading rows to bold
+        $worksheet->getStyle("A$hn:J$hn")->getFont()->setBold(true);
+
+        // Set auto column size
+        $worksheet->getColumnDimension('A')->setAutoSize(true);
+        $worksheet->getColumnDimension('B')->setAutoSize(true);
+        $worksheet->getColumnDimension('C')->setAutoSize(true);
+        $worksheet->getColumnDimension('D')->setWidth(15);
+        $worksheet->getColumnDimension('F')->setAutoSize(true);
+        //$worksheet->getRowDimension('1')->setAutoSize(true);
+        $worksheet->getColumnDimension('H')->setWidth(13);
+        $worksheet->getColumnDimension('I')->setWidth(13);
+        $worksheet->getColumnDimension('J')->setWidth(13);
+
+        // Cells color array
+        $cell_colors["A$hn:J$hn"] = 'F2F2F2'; 
+
+        // Loop through cells color array and set cells color
+        foreach($cell_colors as $key => $val)
+        {
+            $worksheet->getStyle($key)
+                    ->getFill()
+                    ->setFillType(\PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID)
+                    ->getStartColor()
+                    ->setARGB($val); 
+        }
+
+        // Set worksheet title
+        $worksheet->setTitle('Report');
+
+        // Set header cells
+        $worksheet->setCellValue("A$hn", "SKU") 
+                ->setCellValue("B$hn", "ASIN")
+                ->setCellValue("C$hn", "Amazon Order Id")
+                ->setCellValue("D$hn", "Order Date (YYYY-MM-DD)")
+                ->setCellValue("E$hn", "Qty Shp")
+                ->setCellValue("F$hn", "Fee Type")
+                ->setCellValue("G$hn", "Currency")
+                ->setCellValue("H$hn", "Fee Amount - Amazon")
+                ->setCellValue("I$hn", "Fee Amount - Calculated")
+                ->setCellValue("J$hn", "Fee Difference"); 
+
+        // Query to get fba fees comparison
+        $result = $this->payments_model->get_fba_fees_comp($fin_event_grp_id); 
+
+        if(!empty($result))
+        {  
+            $n = 2;
+
+            foreach($result as $row)
+            {   
+                // Fetch weight and dimentions of the product
+                $result = $this->products_model->get_fba_prod($amz_acct_id, $row->seller_sku); 
+
+                if(!empty($result)) 
+                {   
+                    $ls = $result[0]->longest_side; 
+                    $ms = $result[0]->median_side; 
+                    $ss = $result[0]->shortest_side; 
+                    $wt = $result[0]->pkgd_prod_wt/453.59237; // Gram to pound
+                    $dt = date('Y-m-d', strtotime($row->posted_date));
+
+                    $FBAPerUnitFulfillmentFeeCalculated = get_fba_ful_fees($ls, $ms, $ss, $wt, $dt); 
+                }
+                else $FBAPerUnitFulfillmentFeeCalculated = 0;
+
+                // FBA Fees Amazon vs Calculated
+                $fba_fees_amz = $row->amount * -1; 
+                $fba_fees_cal = $FBAPerUnitFulfillmentFeeCalculated * $row->qty_shp;
+
+                // Highlight row if excess fees charged by Amazon
+                if(($fba_fees_amz-$fba_fees_cal) > 0)
+                {
+                    $worksheet->getStyle("A$n:J$n")
+                        ->getFill()
+                        ->setFillType(\PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID)
+                        ->getStartColor()
+                        ->setARGB('ffc7ce'); 
+                }
+
+                // Set data rows heading alignment
+                $worksheet->getStyle("A$n:J$n")->getAlignment()->setVertical(\PhpOffice\PhpSpreadsheet\Style\Alignment::VERTICAL_CENTER);
+                $worksheet->getStyle("A$n:E$n")->getAlignment()->setHorizontal(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER);
+                $worksheet->getStyle("G$n")->getAlignment()->setHorizontal(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER);
+                $worksheet->getStyle("A1:J1")->getAlignment()->setWrapText(true); 
+                $worksheet->getStyle("A1:J1")->getAlignment()->setShrinkToFit(true); 
+
+                $worksheet->getStyle("H$n:J$n")->getNumberFormat()->setFormatCode('0.00');
+                
+                // Write data to worksheet
+                $worksheet->setCellValue("A$n", $row->seller_sku)
+                    ->setCellValue("B$n", $row->seller_sku)
+                    ->setCellValue("C$n", $row->amz_ord_id)
+                    ->setCellValue("D$n", date('Y-m-d', strtotime($row->posted_date)))
+                    ->setCellValue("E$n", $row->qty_shp)
+                    ->setCellValue("F$n", $row->amt_desc)
+                    ->setCellValue("G$n", $row->amt_curr)
+                    ->setCellValue("H$n", $fba_fees_amz)
+                    ->setCellValue("I$n", $fba_fees_cal)
+                    ->setCellValue("J$n", "=H$n-I$n");
+
+                $n++; 
+            }
+        }
+        else $worksheet->setCellValue('A2', "An error occurred");
+
+        // Write data to excel
+        $writer = new Xlsx($spreadsheet);
+
+        header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+        header('Content-Disposition: attachment;filename="FeeCompPmtReport.xlsx"');
+        header('Cache-Control: max-age=0');
+
+        $writer = \PhpOffice\PhpSpreadsheet\IOFactory::createWriter($spreadsheet, "Xlsx");
+        ob_end_clean();
+        $writer->save('php://output'); // download file
+        exit();
     }
 }
 ?>

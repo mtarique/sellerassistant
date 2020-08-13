@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: Aug 09, 2020 at 09:52 AM
+-- Generation Time: Aug 13, 2020 at 05:56 PM
 -- Server version: 10.4.13-MariaDB
 -- PHP Version: 7.4.8
 
@@ -77,10 +77,10 @@ INSERT INTO `amz_marketplaces` (`marketplace_id`, `marketplace_name`, `country_c
 -- --------------------------------------------------------
 
 --
--- Table structure for table `fba_fees_comp_details`
+-- Table structure for table `amz_pmt_details`
 --
 
-CREATE TABLE `fba_fees_comp_details` (
+CREATE TABLE `amz_pmt_details` (
   `fin_event_grp_id` varchar(255) NOT NULL,
   `amz_ord_id` varchar(19) NOT NULL,
   `posted_date` datetime NOT NULL,
@@ -88,23 +88,26 @@ CREATE TABLE `fba_fees_comp_details` (
   `ord_item_id` varchar(15) NOT NULL,
   `seller_sku` varchar(10) NOT NULL,
   `qty_shp` int(11) NOT NULL,
-  `fee_type` varchar(35) NOT NULL,
-  `fee_curr` varchar(3) NOT NULL,
-  `fee_amt` double NOT NULL,
-  `calc_fee_amt` double NOT NULL,
-  `calc_remarks` varchar(50) DEFAULT NULL
+  `amt_type` varchar(8) NOT NULL,
+  `amt_desc` varchar(35) NOT NULL COMMENT 'Amount description',
+  `amt_curr` varchar(3) NOT NULL,
+  `amount` double NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 
 -- --------------------------------------------------------
 
 --
--- Table structure for table `fba_fees_comp_header`
+-- Table structure for table `amz_pmt_header`
 --
 
-CREATE TABLE `fba_fees_comp_header` (
+CREATE TABLE `amz_pmt_header` (
   `fin_event_grp_id` varchar(255) NOT NULL,
   `fin_event_grp_start` date NOT NULL,
   `fin_event_grp_end` date NOT NULL,
+  `fin_event_curr` varchar(3) NOT NULL,
+  `beg_bal_amt` double NOT NULL COMMENT 'Beginning balance ',
+  `deposit_amt` double NOT NULL,
+  `fund_trf_date` date NOT NULL COMMENT 'Fund transfer date',
   `amz_acct_id` int(11) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 
@@ -339,17 +342,17 @@ ALTER TABLE `amz_marketplaces`
   ADD PRIMARY KEY (`marketplace_id`);
 
 --
--- Indexes for table `fba_fees_comp_details`
+-- Indexes for table `amz_pmt_details`
 --
-ALTER TABLE `fba_fees_comp_details`
-  ADD KEY `fk_fba_fees_comp_details_header` (`fin_event_grp_id`);
+ALTER TABLE `amz_pmt_details`
+  ADD KEY `fk_amz_pmt_details_header` (`fin_event_grp_id`);
 
 --
--- Indexes for table `fba_fees_comp_header`
+-- Indexes for table `amz_pmt_header`
 --
-ALTER TABLE `fba_fees_comp_header`
+ALTER TABLE `amz_pmt_header`
   ADD PRIMARY KEY (`fin_event_grp_id`),
-  ADD KEY `fk_fba_fees_comp_header_amz_account` (`amz_acct_id`);
+  ADD KEY `fk_amz_pmt_header_amz_acct` (`amz_acct_id`);
 
 --
 -- Indexes for table `fba_ful_fees_usa`
@@ -427,16 +430,16 @@ ALTER TABLE `amz_accounts`
   ADD CONSTRAINT `fk_amz_accts_users` FOREIGN KEY (`user_id`) REFERENCES `users` (`user_id`) ON DELETE CASCADE ON UPDATE CASCADE;
 
 --
--- Constraints for table `fba_fees_comp_details`
+-- Constraints for table `amz_pmt_details`
 --
-ALTER TABLE `fba_fees_comp_details`
-  ADD CONSTRAINT `fk_fba_fees_comp_details_header` FOREIGN KEY (`fin_event_grp_id`) REFERENCES `fba_fees_comp_header` (`fin_event_grp_id`) ON DELETE CASCADE ON UPDATE CASCADE;
+ALTER TABLE `amz_pmt_details`
+  ADD CONSTRAINT `fk_amz_pmt_details_header` FOREIGN KEY (`fin_event_grp_id`) REFERENCES `amz_pmt_header` (`fin_event_grp_id`) ON DELETE CASCADE ON UPDATE CASCADE;
 
 --
--- Constraints for table `fba_fees_comp_header`
+-- Constraints for table `amz_pmt_header`
 --
-ALTER TABLE `fba_fees_comp_header`
-  ADD CONSTRAINT `fk_fba_fees_comp_header_amz_account` FOREIGN KEY (`amz_acct_id`) REFERENCES `amz_accounts` (`amz_acct_id`) ON DELETE CASCADE ON UPDATE CASCADE;
+ALTER TABLE `amz_pmt_header`
+  ADD CONSTRAINT `fk_amz_pmt_header_amz_acct` FOREIGN KEY (`amz_acct_id`) REFERENCES `amz_accounts` (`amz_acct_id`) ON DELETE CASCADE ON UPDATE CASCADE;
 
 --
 -- Constraints for table `fba_products`
