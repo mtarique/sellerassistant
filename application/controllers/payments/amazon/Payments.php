@@ -681,10 +681,37 @@ class Payments extends CI_Controller
         $spreadsheet = new Spreadsheet(); 
 
         // Get active sheet
-        $worksheet = $spreadsheet->getActiveSheet(); 
+        $worksheet = $spreadsheet->getActiveSheet();  
+
+        $worksheet->setCellValue("A2", "Report Date")
+                  ->setCellValue("A3", "Account Name")
+                  ->setCellValue("A4", "Sales Channel")
+                  ->setCellValue("A5", "Deposit Amount")
+                  ->setCellValue("A6", "Settlement Period")
+                  ->setCellValue("A7", "Total Amazon Fees")
+                  ->setCellValue("A8", "Total Calculated Fees");
+        
+        // Formatting report headings
+        for ($i=2; $i < 9; $i++) { 
+            // Merge cells
+            $worksheet->mergeCells("A$i:B$i");
+
+            // Heading alignment
+            $worksheet->getStyle("A$i:C$i")->getAlignment()->setVertical(\PhpOffice\PhpSpreadsheet\Style\Alignment::VERTICAL_CENTER);
+            $worksheet->getStyle("A$i:C$i")->getAlignment()->setHorizontal(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_LEFT);
+            $worksheet->getStyle("A$i:C$i")->getAlignment()->setWrapText(true); 
+            $worksheet->getStyle("A$i:C$i")->getAlignment()->setShrinkToFit(true); 
+
+            // Style the heading
+            $worksheet->getStyle("A$i")
+                    ->getFill()
+                    ->setFillType(\PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID)
+                    ->getStartColor()
+                    ->setARGB("D9D9D9"); 
+        }
 
         // Set default heading row
-        $hn = 1; 
+        $hn = 10; 
 
         // Set auto filter
         $worksheet->setAutoFilter("A$hn:J$hn");
@@ -699,18 +726,18 @@ class Payments extends CI_Controller
         $worksheet->getStyle("A$hn:J$hn")->getFont()->setBold(true);
 
         // Set auto column size
-        $worksheet->getColumnDimension('A')->setAutoSize(true);
+        //$worksheet->getColumnDimension('A')->setAutoSize(true);
         $worksheet->getColumnDimension('B')->setAutoSize(true);
         $worksheet->getColumnDimension('C')->setAutoSize(true);
         $worksheet->getColumnDimension('D')->setWidth(15);
         $worksheet->getColumnDimension('F')->setAutoSize(true);
-        //$worksheet->getRowDimension('1')->setAutoSize(true);
         $worksheet->getColumnDimension('H')->setWidth(13);
         $worksheet->getColumnDimension('I')->setWidth(13);
         $worksheet->getColumnDimension('J')->setWidth(13);
 
         // Cells color array
-        $cell_colors["A$hn:J$hn"] = 'F2F2F2'; 
+        //$cell_colors["A$hn:J$hn"] = 'F2F2F2'; 
+        $cell_colors["A$hn:J$hn"] = 'D9D9D9'; 
 
         // Loop through cells color array and set cells color
         foreach($cell_colors as $key => $val)
@@ -741,8 +768,15 @@ class Payments extends CI_Controller
         $result = $this->payments_model->get_fba_fees_comp($fin_event_grp_id); 
 
         if(!empty($result))
-        {  
-            $n = 2;
+        {   
+            $n = 11;
+
+            $worksheet->setCellValue("A1", "Amazon Payment - Fee Comparison Report")
+                ->setCellValue("C2", date('m/d/Y'))
+                ->setCellValue("C3", $result[0]->amz_acct_name)
+                ->setCellValue("C4", $result[0]->sales_channel)
+                ->setCellValue("C5", date('m/d/Y', strtotime($result[0]->fin_event_grp_start))." - ".date('m/d/Y', strtotime($result[0]->fin_event_grp_end)))
+                ->setCellValue("C6", $result[0]->deposit_amt); 
 
             foreach($result as $row)
             {   
@@ -779,14 +813,14 @@ class Payments extends CI_Controller
                 $worksheet->getStyle("A$n:J$n")->getAlignment()->setVertical(\PhpOffice\PhpSpreadsheet\Style\Alignment::VERTICAL_CENTER);
                 $worksheet->getStyle("A$n:E$n")->getAlignment()->setHorizontal(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER);
                 $worksheet->getStyle("G$n")->getAlignment()->setHorizontal(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER);
-                $worksheet->getStyle("A1:J1")->getAlignment()->setWrapText(true); 
-                $worksheet->getStyle("A1:J1")->getAlignment()->setShrinkToFit(true); 
+                $worksheet->getStyle("A$hn:J$hn")->getAlignment()->setWrapText(true); 
+                $worksheet->getStyle("A$hn:J$hn")->getAlignment()->setShrinkToFit(true); 
 
                 $worksheet->getStyle("H$n:J$n")->getNumberFormat()->setFormatCode('0.00');
                 
                 // Write data to worksheet
                 $worksheet->setCellValue("A$n", $row->seller_sku)
-                    ->setCellValue("B$n", $row->seller_sku)
+                    ->setCellValue("B$n", $row->asin)
                     ->setCellValue("C$n", $row->amz_ord_id)
                     ->setCellValue("D$n", date('Y-m-d', strtotime($row->posted_date)))
                     ->setCellValue("E$n", $row->qty_shp)
@@ -798,6 +832,9 @@ class Payments extends CI_Controller
 
                 $n++; 
             }
+
+            $worksheet->setCellValue("C7", "=sum(H11:H$n)")
+                      ->setCellValue("C8", "=sum(I11:I$n)");
         }
         else $worksheet->setCellValue('A2', "An error occurred");
 
