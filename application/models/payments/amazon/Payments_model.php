@@ -83,11 +83,10 @@ class Payments_model extends CI_Model
     public function get_fba_fees_comp($fin_event_grp_id)
     {
         $query = $this->db
-                        ->select('amz_pmt_details.*, amz_pmt_header.*, fba_products.asin, amz_accounts.amz_acct_name, amz_marketplaces.sales_channel')
+                        ->select('amz_pmt_details.*, amz_pmt_header.*, amz_accounts.amz_acct_name, amz_marketplaces.sales_channel')
                         ->join('amz_pmt_header', 'amz_pmt_details.fin_event_grp_id = amz_pmt_header.fin_event_grp_id', 'left')
                         ->join('amz_accounts', 'amz_pmt_header.amz_acct_id = amz_accounts.amz_acct_id', 'left')
                         ->join('amz_marketplaces', 'amz_accounts.marketplace_id = amz_marketplaces.marketplace_id', 'left')
-                        ->join('fba_products', 'amz_pmt_details.seller_sku = fba_products.seller_sku AND amz_pmt_header.amz_acct_id = fba_products.amz_acct_id', 'left')
                         ->where('amz_pmt_details.fin_event_grp_id', $fin_event_grp_id)
                         ->get('amz_pmt_details'); 
 

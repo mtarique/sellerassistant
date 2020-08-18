@@ -54,21 +54,11 @@ $this->load->view('templates/loader');
 
                     // Jquery datatable
                     const dt_Pmts_trans = $('#tblPmtsTrans').DataTable({
-                        /* scrollY: "200px", 
-                        "scrollCollapse": true,  */
                         info: false, 
                         paging: false, 
                         fixedHeader: {
                             headerOffset: $('#topnav').outerHeight()
                         },
-                        /* rowGroup: {
-                            startRender: null, 
-                            endRender: function(rows, group) 
-                            {
-                                return 'Order Id: '+ group;
-                            }, 
-                            dataSrc: 0
-                        }, */ 
                         "drawCallback": function(settings, json)
                         {   
                             

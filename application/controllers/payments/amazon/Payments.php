@@ -107,8 +107,9 @@ class Payments extends CI_Controller
                             {
                                 // Dowloand button
                                 $comp_btn = '
+                                    Already compared <i class="fas fa-check-circle text-success"></i><br>
                                     <a href="'.base_url('payments/amazon/payments/down_fee_comp_rpt?fineventgrpid='.$event_group->FinancialEventGroupId.'&amzacctid='.$amz_acct_id).'"
-                                        class="btn btn-sm btn-success">Download Comparison Report</a>
+                                        class="btn-btn-sm-btn-success">Download Comparison Report</a>
                                 ';
                             }
                             else {
@@ -124,7 +125,7 @@ class Payments extends CI_Controller
                                         deposit-amt="'.$event_group->OriginalTotal->CurrencyAmount.'"
                                         fund-trf-date="'.$fund_transfer_date.'"
                                         amz-acct-id="'.$amz_acct_id.'">
-                                        <i class="far fa-balance-scale-left"></i> Compare Fees
+                                        Compare Fees <i class="far fa-balance-scale text-secondary"></i>
                                     </a>
                                 '; 
                             }
@@ -132,17 +133,17 @@ class Payments extends CI_Controller
                         elseif($event_group->ProcessingStatus == "Open")
                         {
                             $settlement_period = date('m/d/Y', strtotime($event_group->FinancialEventGroupStart)).' - '.date('m/d/Y'); 
-                            $comp_btn = "Not Available"; 
+                            $comp_btn = '<span class="text-muted">Not available for comparison</span>'; 
                         } 
                         else {
                             $settlement_period = date('m/d/Y', strtotime($event_group->FinancialEventGroupStart)).' - '.date('m/d/Y', strtotime($event_group->FinancialEventGroupEnd)); 
-                            $comp_btn = "Not Available"; 
+                            $comp_btn = '<span class="text-muted">Not available for comparison</span>'; 
                         }
 
                         // Html table rows
                         $html .= '
                             <tr class="py1">
-                                <td class="align-middle text-center py-3">
+                                <td class="align-middle text-center py-3" data-sort="'.date('Ymd', strtotime($event_group->FinancialEventGroupStart)).'">
                                     <a href="'.base_url('payments/amazon/payments/view_pmt_trans?fineventgrpid='.$event_group->FinancialEventGroupId.'&amzacctid='.$amz_acct_id).'" title="View payment transaction" target="_blank">
                                     '.$settlement_period.'
                                     </a>
@@ -686,8 +687,8 @@ class Payments extends CI_Controller
         $worksheet->setCellValue("A2", "Report Date")
                   ->setCellValue("A3", "Account Name")
                   ->setCellValue("A4", "Sales Channel")
-                  ->setCellValue("A5", "Deposit Amount")
-                  ->setCellValue("A6", "Settlement Period")
+                  ->setCellValue("A5", "Settlement Period")
+                  ->setCellValue("A6", "Deposit Amount")
                   ->setCellValue("A7", "Total Amazon Fees")
                   ->setCellValue("A8", "Total Calculated Fees");
         
@@ -771,6 +772,8 @@ class Payments extends CI_Controller
         {   
             $n = 11;
 
+            $worksheet->freezePane("D$n");
+
             $worksheet->setCellValue("A1", "Amazon Payment - Fee Comparison Report")
                 ->setCellValue("C2", date('m/d/Y'))
                 ->setCellValue("C3", $result[0]->amz_acct_name)
@@ -792,8 +795,12 @@ class Payments extends CI_Controller
                     $dt = date('Y-m-d', strtotime($row->posted_date));
 
                     $FBAPerUnitFulfillmentFeeCalculated = get_fba_ful_fees($ls, $ms, $ss, $wt, $dt); 
+                    $asin = $result[0]->asin; 
                 }
-                else $FBAPerUnitFulfillmentFeeCalculated = 0;
+                else {
+                    $FBAPerUnitFulfillmentFeeCalculated = 0;
+                    $asin = null; 
+                }
 
                 // FBA Fees Amazon vs Calculated
                 $fba_fees_amz = $row->amount * -1; 
@@ -820,7 +827,7 @@ class Payments extends CI_Controller
                 
                 // Write data to worksheet
                 $worksheet->setCellValue("A$n", $row->seller_sku)
-                    ->setCellValue("B$n", $row->asin)
+                    ->setCellValue("B$n", $asin)
                     ->setCellValue("C$n", $row->amz_ord_id)
                     ->setCellValue("D$n", date('Y-m-d', strtotime($row->posted_date)))
                     ->setCellValue("E$n", $row->qty_shp)

@@ -59,6 +59,62 @@ $this->load->view('templates/loader');
                         // Amazon payment table
                         $('#resGetPmts').html(res.message); 
 
+                        // Initialize Datatable
+                        const dt_amz_pmts = $('#tblAmzPmts').DataTable({
+                            /** WILL BE USED IN FUTURE **/
+                            /*
+                            language: {
+                                'search' : '' 
+                            },
+                            dom: 
+                                "<'row mb-0'<'col-md-2'f><'col-md-10'B>>" + 
+                                "<'row'<'col-sm-12'tr>>" +
+                                "<'row'<'col-sm-12 col-md-5'i><'col-sm-12 col-md-7'p>>",
+                            */
+                            buttons: {
+                                dom: {
+                                    button: {
+                                        className: 'btn'
+                                    }
+                                }, 
+                                buttons: [
+                                    {
+                                        extend: 'colvis', 
+                                        text: '<i class="fas fa-eye-slash"></i> Show/Hide Columns', 
+                                        className: 'btn btn-sm btn-light text-secondary border-grey-300', 
+                                    },
+                                    {
+                                        extend: 'excel', 
+                                        text: '<i class="fas fa-file-export"></i> Export to Excel', 
+                                        className: 'btn btn-sm btn-light text-secondary border-grey-300', 
+                                    },
+                                    {   
+                                        text: '<i class="fas fa-upload"></i> Update Dimensions', 
+                                        className: 'btn btn-sm btn-light text-secondary border-grey-300', 
+                                        action: function(e, dt, node, config) {
+                                            $('#mdl-upd-dim').modal({
+                                                show: true, 
+                                                backdrop: false, 
+                                                keyboard: false
+                                            });
+
+                                            $('#inputAmzAcctId').val(amz_acct_id);
+                                            $('#titleAmzActName').text(amz_acct_name); 
+                                        }
+
+                                    }
+                                ]
+                            }, 
+                            aaSorting: [], 
+						    order: [[ 0, "desc" ]],
+                            info: false, 
+                            paging: false, 
+                            lengthChange: false, 
+                            fixedHeader: {
+                                headerOffset: $('#topnav').outerHeight()
+                            }
+                        }); 
+
                         // Get payment fees on button comapre fees click
                         /**
                          * Compare payment fees
