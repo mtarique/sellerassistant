@@ -68,6 +68,7 @@ class Payments extends CI_Controller
                 $mws_auth_token    = $this->encryption->decrypt($result[0]->mws_auth_token); 
                 $aws_access_key_id = $this->encryption->decrypt($result[0]->aws_access_key_id); 
                 $secret_key        = $this->encryption->decrypt($result[0]->secret_key); 
+                $curr_code         = $result[0]->curr_code; 
                 
                 // MWS request to ListFinancialEventGroups
                 $response = $this->finances->ListFinancialEventGroups($seller_id, $mws_auth_token, $aws_access_key_id, $secret_key, $pmt_date_fm, $pmt_date_to);
@@ -93,68 +94,72 @@ class Payments extends CI_Controller
                     
                     foreach($xml->ListFinancialEventGroupsResult->FinancialEventGroupList->FinancialEventGroup as $event_group)
                     {   
-                        // Fund transfer date
-                        $fund_transfer_date = (isset($event_group->FundTransferDate)) ? date('M d, Y', strtotime($event_group->FundTransferDate)) : ""; 
-
-                        // Settlement period
-                        if($event_group->ProcessingStatus == "Closed") {
-                            $settlement_period = date('m/d/Y', strtotime($event_group->FinancialEventGroupStart)).' - '.date('m/d/Y', strtotime($event_group->FinancialEventGroupEnd)); 
-
-                            // Get download link if comparison data already in database
-                            $result = $this->payments_model->is_pmt_exist($event_group->FinancialEventGroupId); 
-
-                            if($result == 1)
-                            {
-                                // Dowloand button
-                                $comp_btn = '
-                                    Already compared <i class="fas fa-check-circle text-success"></i><br>
-                                    <a href="'.base_url('payments/amazon/payments/down_fee_comp_rpt?fineventgrpid='.$event_group->FinancialEventGroupId.'&amzacctid='.$amz_acct_id).'"
-                                        class="btn-btn-sm-btn-success">Download Comparison Report</a>
-                                ';
-                            }
-                            else {
-                                // Comparison button
-                                $comp_btn = '
-                                    <a href="#" 
-                                        class="btn btn-sm btn-light border-grey-300 btn-comp-pmt-fees" 
-                                        fin-event-grp-start="'.date('M d, Y', strtotime($event_group->FinancialEventGroupStart)).'" 
-                                        fin-event-grp-end="'.date('M d, Y', strtotime($event_group->FinancialEventGroupEnd)).'" 
-                                        fin-event-grp-id="'.$event_group->FinancialEventGroupId.'" 
-                                        fin-event-curr="'.$event_group->OriginalTotal->CurrencyCode.'" 
-                                        beg-bal-amt="'.$event_group->BeginningBalance->CurrencyAmount.'" 
-                                        deposit-amt="'.$event_group->OriginalTotal->CurrencyAmount.'"
-                                        fund-trf-date="'.$fund_transfer_date.'"
-                                        amz-acct-id="'.$amz_acct_id.'">
-                                        Compare Fees <i class="far fa-balance-scale text-secondary"></i>
-                                    </a>
-                                '; 
-                            }
-                        }
-                        elseif($event_group->ProcessingStatus == "Open")
+                        if($event_group->OriginalTotal->CurrencyCode == $curr_code)
                         {
-                            $settlement_period = date('m/d/Y', strtotime($event_group->FinancialEventGroupStart)).' - '.date('m/d/Y'); 
-                            $comp_btn = '<span class="text-muted">Not available for comparison</span>'; 
-                        } 
-                        else {
-                            $settlement_period = date('m/d/Y', strtotime($event_group->FinancialEventGroupStart)).' - '.date('m/d/Y', strtotime($event_group->FinancialEventGroupEnd)); 
-                            $comp_btn = '<span class="text-muted">Not available for comparison</span>'; 
-                        }
+                            // Fund transfer date
+                            $fund_transfer_date = (isset($event_group->FundTransferDate)) ? date('M d, Y', strtotime($event_group->FundTransferDate)) : ""; 
 
-                        // Html table rows
-                        $html .= '
-                            <tr class="py1">
-                                <td class="align-middle text-center py-3" data-sort="'.date('Ymd', strtotime($event_group->FinancialEventGroupStart)).'">
-                                    <a href="'.base_url('payments/amazon/payments/view_pmt_trans?fineventgrpid='.$event_group->FinancialEventGroupId.'&amzacctid='.$amz_acct_id).'" title="View payment transaction" target="_blank">
-                                    '.$settlement_period.'
-                                    </a>
-                                </td>
-                                <td class="align-middle text-center">'.$event_group->OriginalTotal->CurrencyCode.'</td>
-                                <td class="align-middle text-right">'.$event_group->OriginalTotal->CurrencyAmount.'</td>
-                                <td class="align-middle text-center">'.$fund_transfer_date.'</td>
-                                <td class="align-middle text-left">'.$event_group->ProcessingStatus.'</td>
-                                <td class="align-middle text-left">'.$comp_btn.'</td>
-                            </tr>
-                        ';
+                            // Settlement period
+                            if($event_group->ProcessingStatus == "Closed") 
+                            {
+                                $settlement_period = date('m/d/Y', strtotime($event_group->FinancialEventGroupStart)).' - '.date('m/d/Y', strtotime($event_group->FinancialEventGroupEnd)); 
+
+                                // Get download link if comparison data already in database
+                                $result = $this->payments_model->is_pmt_exist($event_group->FinancialEventGroupId); 
+
+                                if($result == 1)
+                                {
+                                    // Dowloand button
+                                    $comp_btn = '
+                                        Already compared <i class="fas fa-check-circle text-success"></i><br>
+                                        <a href="'.base_url('payments/amazon/payments/down_fee_comp_rpt?fineventgrpid='.$event_group->FinancialEventGroupId.'&amzacctid='.$amz_acct_id).'"
+                                            class="btn-btn-sm-btn-success">Download Comparison Report</a>
+                                    ';
+                                }
+                                else {
+                                    // Comparison button
+                                    $comp_btn = '
+                                        <a href="#" 
+                                            class="btn btn-sm btn-light border-grey-300 btn-comp-pmt-fees" 
+                                            fin-event-grp-start="'.date('M d, Y', strtotime($event_group->FinancialEventGroupStart)).'" 
+                                            fin-event-grp-end="'.date('M d, Y', strtotime($event_group->FinancialEventGroupEnd)).'" 
+                                            fin-event-grp-id="'.$event_group->FinancialEventGroupId.'" 
+                                            fin-event-curr="'.$event_group->OriginalTotal->CurrencyCode.'" 
+                                            beg-bal-amt="'.$event_group->BeginningBalance->CurrencyAmount.'" 
+                                            deposit-amt="'.$event_group->OriginalTotal->CurrencyAmount.'"
+                                            fund-trf-date="'.$fund_transfer_date.'"
+                                            amz-acct-id="'.$amz_acct_id.'">
+                                            Compare Fees <i class="far fa-balance-scale text-secondary"></i>
+                                        </a>
+                                    '; 
+                                }
+                            }
+                            elseif($event_group->ProcessingStatus == "Open")
+                            {
+                                $settlement_period = date('m/d/Y', strtotime($event_group->FinancialEventGroupStart)).' - '.date('m/d/Y'); 
+                                $comp_btn = '<span class="text-muted">Not available for comparison</span>'; 
+                            } 
+                            else {
+                                $settlement_period = date('m/d/Y', strtotime($event_group->FinancialEventGroupStart)).' - '.date('m/d/Y', strtotime($event_group->FinancialEventGroupEnd)); 
+                                $comp_btn = '<span class="text-muted">Not available for comparison</span>'; 
+                            }
+
+                            // Html table rows
+                            $html .= '
+                                <tr class="py1">
+                                    <td class="align-middle text-center py-3" data-sort="'.date('Ymd', strtotime($event_group->FinancialEventGroupStart)).'">
+                                        <a href="'.base_url('payments/amazon/payments/view_pmt_trans?fineventgrpid='.$event_group->FinancialEventGroupId.'&amzacctid='.$amz_acct_id).'" title="View payment transaction" target="_blank">
+                                        '.$settlement_period.'
+                                        </a>
+                                    </td>
+                                    <td class="align-middle text-center">'.$event_group->OriginalTotal->CurrencyCode.'</td>
+                                    <td class="align-middle text-right">'.$event_group->OriginalTotal->CurrencyAmount.'</td>
+                                    <td class="align-middle text-center">'.$fund_transfer_date.'</td>
+                                    <td class="align-middle text-left">'.$event_group->ProcessingStatus.'</td>
+                                    <td class="align-middle text-left">'.$comp_btn.'</td>
+                                </tr>
+                            ';
+                        }
                     }
 
                     $html .= '</tbody></table>';
