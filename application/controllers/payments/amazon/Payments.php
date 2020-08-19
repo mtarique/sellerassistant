@@ -525,16 +525,16 @@ class Payments extends CI_Controller
                             $json_data['next_token']= $xml->ListFinancialEventsResult->NextToken;
                         }                
                         
-                        $json_data['message'] = show_alert('success', "Comparison completed! Your report is ready to download."); 
+                        $json_data['message'] = show_alert('success', 'Comparison completed! <a href="'.base_url('payments/amazon/payments/down_fee_comp_rpt?fineventgrpid='.$fin_event_grp_id.'&amzacctid='.$amz_acct_id).'">Download Comparison Report</a>'); 
                     }
                     else {
                         $json_data['status'] = false;  
-                        $json_data['message'] = show_alert('danger', "FBA Fees data could not be saved.");
+                        $json_data['message'] = show_alert('danger', "Unable to save payments detail data, please try again.");
                     }
                 }
                 else {
                     $json_data['status'] = false;  
-                    $json_data['message'] = show_alert('danger', "FBA fees comparison data could not be saved.");
+                    $json_data['message'] = show_alert('danger', "Unable to save payments header data, please try again.");
                 }
             }
             else {
@@ -656,17 +656,16 @@ class Payments extends CI_Controller
                     $json_data['next_token']= $xml->ListFinancialEventsByNextTokenResult->NextToken; 
                 }
 
-                $json_data['message'] = show_alert('success', "Comparison completed! D."); 
+                $json_data['message'] = show_alert('success', 'Comparison completed! <a href="'.base_url('payments/amazon/payments/down_fee_comp_rpt?fineventgrpid='.$fin_event_grp_id.'&amzacctid='.$amz_acct_id).'">Download Comparison Report</a>'); 
             }
             else {
                 $json_data['status'] = false;  
-                $json_data['message'] = show_alert('danger', "FBA Fees data by Next Token could not be saved.");
+                $json_data['message'] = show_alert('danger', "Unable to save payments detail data, please try again.");
             }
         }
         else {
             $json_data['status'] = false; 
-            //$json_data['message'] = show_alert('danger', $xml->Error->Message);
-            $json_data['message'] = show_alert('danger', "XML Response error");
+            $json_data['message'] = show_alert('danger', $xml->Error->Message);
         }
 
         echo json_encode($json_data); 
