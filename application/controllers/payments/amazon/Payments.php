@@ -719,16 +719,16 @@ class Payments extends CI_Controller
         $hn = 10; 
 
         // Set auto filter
-        $worksheet->setAutoFilter("A$hn:J$hn");
+        $worksheet->setAutoFilter("A$hn:O$hn");
 
         // Set heading row alignment
-        $worksheet->getStyle("A$hn:J$hn")->getAlignment()->setVertical(\PhpOffice\PhpSpreadsheet\Style\Alignment::VERTICAL_CENTER);
-        $worksheet->getStyle("A$hn:J$hn")->getAlignment()->setHorizontal(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER);
-        $worksheet->getStyle("A$hn:J$hn")->getAlignment()->setWrapText(true); 
-        $worksheet->getStyle("A$hn:J$hn")->getAlignment()->setShrinkToFit(true); 
+        $worksheet->getStyle("A$hn:O$hn")->getAlignment()->setVertical(\PhpOffice\PhpSpreadsheet\Style\Alignment::VERTICAL_CENTER);
+        $worksheet->getStyle("A$hn:O$hn")->getAlignment()->setHorizontal(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER);
+        $worksheet->getStyle("A$hn:O$hn")->getAlignment()->setWrapText(true); 
+        $worksheet->getStyle("A$hn:O$hn")->getAlignment()->setShrinkToFit(true); 
 
         // Set heading rows to bold
-        $worksheet->getStyle("A$hn:J$hn")->getFont()->setBold(true);
+        $worksheet->getStyle("A$hn:O$hn")->getFont()->setBold(true);
 
         // Set auto column size
         //$worksheet->getColumnDimension('A')->setAutoSize(true);
@@ -737,12 +737,17 @@ class Payments extends CI_Controller
         $worksheet->getColumnDimension('D')->setWidth(15);
         $worksheet->getColumnDimension('F')->setAutoSize(true);
         $worksheet->getColumnDimension('H')->setWidth(13);
-        $worksheet->getColumnDimension('I')->setWidth(13);
-        $worksheet->getColumnDimension('J')->setWidth(13);
+        $worksheet->getColumnDimension('I')->setAutoSize(true);
+        $worksheet->getColumnDimension('J')->setAutoSize(true);
+        $worksheet->getColumnDimension('K')->setAutoSize(true);
+        $worksheet->getColumnDimension('L')->setAutoSize(true);
+        $worksheet->getColumnDimension('M')->setAutoSize(true);
+        $worksheet->getColumnDimension('N')->setWidth(13);
+        $worksheet->getColumnDimension('O')->setWidth(13);
 
         // Cells color array
         //$cell_colors["A$hn:J$hn"] = 'F2F2F2'; 
-        $cell_colors["A$hn:J$hn"] = 'D9D9D9'; 
+        $cell_colors["A$hn:O$hn"] = 'D9D9D9'; 
 
         // Loop through cells color array and set cells color
         foreach($cell_colors as $key => $val)
@@ -766,8 +771,13 @@ class Payments extends CI_Controller
                 ->setCellValue("F$hn", "Fee Type")
                 ->setCellValue("G$hn", "Currency")
                 ->setCellValue("H$hn", "Fee Amount - Amazon")
-                ->setCellValue("I$hn", "Fee Amount - Calculated")
-                ->setCellValue("J$hn", "Fee Difference"); 
+                ->setCellValue("I$hn", "LS")
+                ->setCellValue("J$hn", "MS")
+                ->setCellValue("K$hn", "SS")
+                ->setCellValue("L$hn", "WT")
+                ->setCellValue("M$hn", "Size-Tier")
+                ->setCellValue("N$hn", "Fee Amount - Calculated")
+                ->setCellValue("O$hn", "Fee Difference"); 
 
         // Query to get fba fees comparison
         $result = $this->payments_model->get_fba_fees_comp($fin_event_grp_id); 
@@ -798,11 +808,18 @@ class Payments extends CI_Controller
                     $wt = $result[0]->pkgd_prod_wt/453.59237; // Gram to pound
                     $dt = date('Y-m-d', strtotime($row->posted_date));
 
-                    $FBAPerUnitFulfillmentFeeCalculated = get_fba_ful_fees($ls, $ms, $ss, $wt, $dt); 
+                    $FBAPerUnitFulfillmentFeeCalculated = get_fba_ful_fees($ls, $ms, $ss, $wt, $dt);
+                    $size_tier = get_size_tier(get_size_code($ls, $ms, $ss, $wt, $dt), $dt); 
                     $asin = $result[0]->asin; 
                 }
                 else {
+                    $ls = 0; 
+                    $ms = 0; 
+                    $ss = 0;
+                    $wt = 0; 
+
                     $FBAPerUnitFulfillmentFeeCalculated = 0;
+                    $size_tier = ""; 
                     $asin = null; 
                 }
 
@@ -813,7 +830,7 @@ class Payments extends CI_Controller
                 // Highlight row if excess fees charged by Amazon
                 if(($fba_fees_amz-$fba_fees_cal) > 0)
                 {
-                    $worksheet->getStyle("A$n:J$n")
+                    $worksheet->getStyle("A$n:O$n")
                         ->getFill()
                         ->setFillType(\PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID)
                         ->getStartColor()
@@ -821,13 +838,13 @@ class Payments extends CI_Controller
                 }
 
                 // Set data rows heading alignment
-                $worksheet->getStyle("A$n:J$n")->getAlignment()->setVertical(\PhpOffice\PhpSpreadsheet\Style\Alignment::VERTICAL_CENTER);
+                $worksheet->getStyle("A$n:O$n")->getAlignment()->setVertical(\PhpOffice\PhpSpreadsheet\Style\Alignment::VERTICAL_CENTER);
                 $worksheet->getStyle("A$n:E$n")->getAlignment()->setHorizontal(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER);
                 $worksheet->getStyle("G$n")->getAlignment()->setHorizontal(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER);
-                $worksheet->getStyle("A$hn:J$hn")->getAlignment()->setWrapText(true); 
-                $worksheet->getStyle("A$hn:J$hn")->getAlignment()->setShrinkToFit(true); 
+                $worksheet->getStyle("A$hn:O$hn")->getAlignment()->setWrapText(true); 
+                $worksheet->getStyle("A$hn:O$hn")->getAlignment()->setShrinkToFit(true); 
 
-                $worksheet->getStyle("H$n:J$n")->getNumberFormat()->setFormatCode('0.00');
+                $worksheet->getStyle("H$n:N$n")->getNumberFormat()->setFormatCode('0.00');
                 
                 // Write data to worksheet
                 $worksheet->setCellValue("A$n", $row->seller_sku)
@@ -838,14 +855,19 @@ class Payments extends CI_Controller
                     ->setCellValue("F$n", $row->amt_desc)
                     ->setCellValue("G$n", $row->amt_curr)
                     ->setCellValue("H$n", $fba_fees_amz)
-                    ->setCellValue("I$n", $fba_fees_cal)
-                    ->setCellValue("J$n", "=H$n-I$n");
+                    ->setCellValue("I$n", $ls)
+                    ->setCellValue("J$n", $ms)
+                    ->setCellValue("K$n", $ss)
+                    ->setCellValue("L$n", $wt)
+                    ->setCellValue("M$n", $size_tier)
+                    ->setCellValue("N$n", $fba_fees_cal)
+                    ->setCellValue("O$n", "=H$n-N$n");
 
                 $n++; 
             }
 
             $worksheet->setCellValue("C7", "=sum(H11:H$n)")
-                      ->setCellValue("C8", "=sum(I11:I$n)");
+                      ->setCellValue("C8", "=sum(N11:N$n)");
         }
         else $worksheet->setCellValue('A2', "An error occurred");
 
