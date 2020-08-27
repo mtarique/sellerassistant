@@ -688,6 +688,12 @@ class Payments extends CI_Controller
         // Get active sheet
         $worksheet = $spreadsheet->getActiveSheet();  
 
+        $worksheet->getColumnDimension('I')->setVisible(false); 
+        $worksheet->getColumnDimension('J')->setVisible(false); 
+        $worksheet->getColumnDimension('K')->setVisible(false); 
+        $worksheet->getColumnDimension('L')->setVisible(false); 
+        $worksheet->getColumnDimension('M')->setVisible(false); 
+
         $worksheet->setCellValue("A2", "Report Date")
                   ->setCellValue("A3", "Account Name")
                   ->setCellValue("A4", "Sales Channel")
