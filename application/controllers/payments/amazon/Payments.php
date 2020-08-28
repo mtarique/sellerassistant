@@ -830,11 +830,11 @@ class Payments extends CI_Controller
                 }
 
                 // FBA Fees Amazon vs Calculated
-                $fba_fees_amz = $row->amount * -1; 
-                $fba_fees_cal = $FBAPerUnitFulfillmentFeeCalculated * $row->qty_shp;
+                $fba_fees_amz = number_format($row->amount * -1, 9); 
+                $fba_fees_cal = number_format($FBAPerUnitFulfillmentFeeCalculated * $row->qty_shp, 9);
 
                 // Highlight row if excess fees charged by Amazon
-                if(($fba_fees_amz-$fba_fees_cal) > 0)
+                if($fba_fees_amz > $fba_fees_cal)
                 {
                     $worksheet->getStyle("A$n:O$n")
                         ->getFill()
